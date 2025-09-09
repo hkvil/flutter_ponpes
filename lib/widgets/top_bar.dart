@@ -1,5 +1,4 @@
 import 'package:flutter/material.dart';
-
 import '../core/theme/app_colors.dart';
 import '../core/utils/date_text.dart';
 
@@ -35,7 +34,7 @@ class TopBar extends StatelessWidget implements PreferredSizeWidget {
               children: [
                 Text(
                   title,
-                  style: const TextStyle(fontSize: 16, fontWeight: FontWeight.w600),
+                  style: const TextStyle(fontSize: 14, fontWeight: FontWeight.w600),
                 ),
                 if (subtitle != null)
                   Text(
@@ -45,11 +44,23 @@ class TopBar extends StatelessWidget implements PreferredSizeWidget {
               ],
             ),
           ),
-          Text(
-            DateText.nowId(),
-            style: const TextStyle(fontSize: 11),
-            textAlign: TextAlign.right,
+          Column(
+            mainAxisAlignment: MainAxisAlignment.center,
+            crossAxisAlignment: CrossAxisAlignment.end,
+            children: [
+              Text(
+                DateText.currentTime(),
+                style: const TextStyle(fontSize: 18, fontWeight: FontWeight.w600),
+                textAlign: TextAlign.right,
+              ),
+              Text(
+                DateText.currentDay(),
+                style: const TextStyle(fontSize: 11),
+                textAlign: TextAlign.right,
+              ),
+            ],
           ),
+
           const SizedBox(width: 8),
         ],
       ),

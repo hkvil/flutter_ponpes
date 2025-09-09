@@ -1,14 +1,37 @@
 import 'package:intl/intl.dart';
 
-/// Utility for formatting dates into Indonesian locale strings.
+/// Kelas utilitas untuk memformat waktu dan tanggal.
 ///
-/// The [nowId] method returns the current date and time formatted
-/// according to the pattern used in the provided UI design, e.g.
-/// `15:00, Selasa, 29 Agustus 2025`.
+/// `currentTime()` mengembalikan jam dan menit saja (format "HH:mm"),
+/// sedangkan `currentDay()` mengembalikan nama hari dan tanggal lengkap,
+/// dengan penamaan hari Minggu sebagai "Ahad".
 class DateText {
-  /// Returns the current date and time formatted for Indonesian locale.
-  static String nowId() {
+  // Constructor privat agar kelas ini tidak diinstansiasi.
+  DateText._();
+
+  /// Mengembalikan waktu saat ini dalam format "HH:mm".
+  static String currentTime() {
     final now = DateTime.now();
-    return DateFormat('HH:mm, EEEE, d MMMM yyyy', 'id_ID').format(now);
+    return DateFormat('HH:mm', 'id_ID').format(now);
+    // Pastikan Anda sudah memanggil initializeDateFormatting('id_ID') di main().
+  }
+
+  /// Mengembalikan hari dan tanggal saat ini.
+  ///
+  /// Hari Minggu diterjemahkan menjadi "Ahad", sesuai standar penamaan pesantren.
+  static String currentDay() {
+    final now = DateTime.now();
+    final Map<int, String> dayNames = {
+      1: 'Senin',
+      2: 'Selasa',
+      3: 'Rabu',
+      4: 'Kamis',
+      5: 'Jumat',
+      6: 'Sabtu',
+      7: 'Ahad',
+    };
+    final dayName = dayNames[now.weekday] ?? '';
+    final datePart = DateFormat('d MMMM yyyy', 'id_ID').format(now);
+    return '$dayName, $datePart';
   }
 }

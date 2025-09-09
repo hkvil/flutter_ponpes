@@ -26,14 +26,14 @@ class HomeScreen extends StatelessWidget {
     ('KOPERASI', 'assets/icons/koperasi.png'),
     ('PPDB', 'assets/icons/ppdb.png'),
     ('DONASI', 'assets/icons/donasi.png'),
-    ('LAINNYA', 'assets/icons/lainnya.png'),
+    ('INFORMASI', 'assets/icons/informasi.png'),
   ];
 
   @override
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: const TopBar(
-        title: 'Pondok Pesantren Al-Ittifaqiah',
+        title: 'PONDOK PESANTREN\nAl-ITTIFAQIAH INDRALAYA',
         subtitle: 'Ogan Ilir, Sumatera Selatan',
       ),
       body: Column(

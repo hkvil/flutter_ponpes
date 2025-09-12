@@ -16,21 +16,25 @@ class BannerContainer extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return Container(
-      height: height,
-      margin: const EdgeInsets.fromLTRB(12, 12, 12, 8),
-      decoration: BoxDecoration(
-        color: AppColors.bannerBg,
-        borderRadius: BorderRadius.circular(16),
+    return Material(
+      elevation: 8,
+      child: Container(
+        height: height,
+        width: double.infinity,
+        // margin: const EdgeInsets.fromLTRB(12, 12, 12, 8),
+        decoration: BoxDecoration(
+          color: AppColors.bannerBg,
+          // borderRadius: BorderRadius.circular(16),
+        ),
+        clipBehavior: Clip.antiAlias,
+        child: assetPath != null
+            ? Image.asset(
+                assetPath!,
+                fit: BoxFit.fill,
+                errorBuilder: (_, __, ___) => const _Fallback(),
+              )
+            : const _Fallback(),
       ),
-      clipBehavior: Clip.antiAlias,
-      child: assetPath != null
-          ? Image.asset(
-              assetPath!,
-              fit: BoxFit.cover,
-              errorBuilder: (_, __, ___) => const _Fallback(),
-            )
-          : const _Fallback(),
     );
   }
 }

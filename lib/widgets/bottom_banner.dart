@@ -12,7 +12,10 @@ class BottomBanner extends StatelessWidget {
   final String? assetPath;
   final String fallbackText;
 
-  const BottomBanner({super.key, this.assetPath, this.fallbackText = 'Dirgahayu Indonesia – Banner Placeholder'});
+  const BottomBanner(
+      {super.key,
+      this.assetPath,
+      this.fallbackText = 'Dirgahayu Indonesia – Banner Placeholder'});
 
   @override
   Widget build(BuildContext context) {
@@ -23,9 +26,11 @@ class BottomBanner extends StatelessWidget {
           ? Center(
               child: Image.asset(
                 assetPath!,
-                fit: BoxFit.fitWidth,
-                height: double.infinity,
-                errorBuilder: (_, __, ___) => _FallbackText(fallbackText: fallbackText),
+                fit: BoxFit.fill,
+                height: 100,
+                width: double.infinity,
+                errorBuilder: (_, __, ___) =>
+                    _FallbackText(fallbackText: fallbackText),
               ),
             )
           : _FallbackText(fallbackText: fallbackText),

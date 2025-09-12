@@ -44,41 +44,83 @@ class HomeScreen extends StatelessWidget {
               padding: EdgeInsets.zero,
               children: [
                 Padding(
-                  padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 8),
-                  child: _ResponsiveGrid(
+                  padding:
+                      const EdgeInsets.symmetric(horizontal: 12, vertical: 20),
+                  child: Material(
+                    elevation: 12,
+                    borderRadius: BorderRadius.circular(12),
+                    child: _ResponsiveGrid(
+                      children: [
+                        for (final (title, icon) in _menuItems)
+                          MenuButton(
+                            title: title,
+                            iconPath: icon,
+                            onTap: () {
+                              Navigator.pushNamed(
+                                context,
+                                AppRouter.menu,
+                                arguments: MenuScreenArgs(title: title),
+                              );
+                            },
+                          ),
+                      ],
+                    ),
+                  ),
+                ),
+                Padding(
+                  padding: const EdgeInsets.fromLTRB(16, 8, 16, 6),
+                  child: Row(
+                    mainAxisSize: MainAxisSize.min,
                     children: [
-                      for (final (title, icon) in _menuItems)
-                        MenuButton(
-                          title: title,
-                          iconPath: icon,
-                          onTap: () {
-                            Navigator.pushNamed(
-                              context,
-                              AppRouter.menu,
-                              arguments: MenuScreenArgs(title: title),
-                            );
-                          },
+                      Container(
+                        width: 2,
+                        height: 24,
+                        decoration: BoxDecoration(
+                          color: Colors.green.shade700,
+                          borderRadius: BorderRadius.circular(1),
                         ),
+                      ),
+                      const SizedBox(width: 8),
+                      IntrinsicWidth(
+                        child: Stack(
+                          alignment: Alignment.centerLeft,
+                          children: [
+                            Container(
+                              height: 24,
+                              decoration: BoxDecoration(
+                                color: Colors.green.shade700,
+                              ),
+                            ),
+                            const Padding(
+                              padding: EdgeInsets.symmetric(horizontal: 6),
+                              child: Text(
+                                'Prestasi & Penghargaan',
+                                style: TextStyle(
+                                    fontSize: 14,
+                                    fontWeight: FontWeight.w600,
+                                    color: Colors.white),
+                              ),
+                            ),
+                          ],
+                        ),
+                      ),
                     ],
                   ),
                 ),
-                const Padding(
-                  padding: EdgeInsets.fromLTRB(16, 8, 16, 6),
-                  child: Text(
-                    'Prestasi & Penghargaan',
-                    style: TextStyle(fontSize: 16, fontWeight: FontWeight.w700),
-                  ),
-                ),
                 const _AchievementItem(title: 'Go Internasional Sejak 1997'),
-                const _AchievementItem(title: 'Pesantren Unggulan Nasional Sejak 1999'),
-                const _AchievementItem(title: 'Masuk 20 Pesantren Berpengaruh di Indonesia Sejak 2005'),
+                const _AchievementItem(
+                    title: 'Pesantren Unggulan Nasional Sejak 1999'),
+                const _AchievementItem(
+                    title:
+                        'Masuk 20 Pesantren Berpengaruh di Indonesia Sejak 2005'),
                 const SizedBox(height: 72),
               ],
             ),
           ),
         ],
       ),
-      bottomNavigationBar: const BottomBanner(assetPath: 'assets/banners/bottom.png'),
+      bottomNavigationBar:
+          const BottomBanner(assetPath: 'assets/banners/bottom.png'),
     );
   }
 }

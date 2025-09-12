@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:pesantren_app/screens/madrasah/detail_madrasah_screen.dart';
 import '../core/theme/app_colors.dart';
 
 /// Data model untuk setiap menu, dengan opsi sub-item (children).
@@ -30,8 +31,8 @@ class _OptionTileState extends State<OptionTile> {
 
   @override
   Widget build(BuildContext context) {
-    final hasChildren = widget.node.children != null &&
-        widget.node.children!.isNotEmpty;
+    final hasChildren =
+        widget.node.children != null && widget.node.children!.isNotEmpty;
     return Padding(
       padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 6),
       child: Column(
@@ -94,8 +95,8 @@ class _OptionTileState extends State<OptionTile> {
                         Icon(
                           hasChildren
                               ? (_expanded
-                              ? Icons.keyboard_arrow_down
-                              : Icons.keyboard_arrow_right)
+                                  ? Icons.keyboard_arrow_down
+                                  : Icons.keyboard_arrow_right)
                               : Icons.keyboard_arrow_right,
                           color: Colors.white,
                         ),
@@ -118,20 +119,38 @@ class _OptionTileState extends State<OptionTile> {
                       right: 12,
                       bottom: 4,
                     ),
-                    child: Container(
-                      padding: const EdgeInsets.symmetric(
-                        vertical: 8,
-                        horizontal: 16,
-                      ),
-                      decoration: BoxDecoration(
-                        color: AppColors.lightGreen,
-                        borderRadius: BorderRadius.circular(8),
-                      ),
-                      child: Text(
-                        child,
-                        style: const TextStyle(
-                          color: AppColors.primaryGreen,
-                          fontWeight: FontWeight.w500,
+                    child: InkWell(
+                      onTap: () {
+                        // tindakan saat sub-item ditekan
+                        SnackBar snackBar = SnackBar(
+                          content: Text('Anda memilih: $child'),
+                        );
+                        ScaffoldMessenger.of(context).showSnackBar(snackBar);
+                        Navigator.push(
+                          context,
+                          MaterialPageRoute(
+                            builder: (context) => DetailMadrasahScreen(
+                              madrasahName:
+                                  child, // atau data lain sesuai kebutuhan
+                            ),
+                          ),
+                        );
+                      },
+                      child: Container(
+                        padding: const EdgeInsets.symmetric(
+                          vertical: 8,
+                          horizontal: 16,
+                        ),
+                        decoration: BoxDecoration(
+                          color: AppColors.lightGreen,
+                          borderRadius: BorderRadius.circular(8),
+                        ),
+                        child: Text(
+                          child,
+                          style: const TextStyle(
+                            color: AppColors.primaryGreen,
+                            fontWeight: FontWeight.w500,
+                          ),
                         ),
                       ),
                     ),

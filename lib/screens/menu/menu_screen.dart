@@ -1,54 +1,51 @@
 import 'package:flutter/material.dart';
-
 import '../../widgets/top_bar.dart';
 import '../../widgets/bottom_banner.dart';
 import '../../widgets/option_tile.dart';
 
-/// Arguments required by [MenuScreen].
+/// Class argumen tetap.
 class MenuScreenArgs {
   final String title;
   const MenuScreenArgs({required this.title});
 }
 
-/// Screen displayed after selecting a menu item from the home screen.
-///
-/// It retains the same top and bottom banners as the home screen and
-/// lists a series of selectable options. Each [OptionTile] can be
-/// configured to navigate further or perform actions when tapped.
 class MenuScreen extends StatelessWidget {
   final MenuScreenArgs args;
   const MenuScreen({super.key, required this.args});
 
+  /// Daftar menu beserta sub-itemnya.
+  static const List<Node> menu = [
+    Node('Pusat', ['Struktur', 'Program', 'Kontak']),
+    Node('Madrasah', ['Taman Kanak-Kanak','Taman Pendidikan Al-Qur\'an', 'Madrasah Diniyah','Madrasah Ibtidaiyah', 'Madrasah Tsanawiyah 1', 'Madrasah Tsanawiyah 2', 'Madrasah Aliyah1','Madrasah Aliyah 2','Madrasah Tahfidz Lil Ath Fal','Mujahadah & Pembibitan','Haromain','Al-Ittifaqiah Language Center']),
+    Node('Lembaga', ['Litbang', 'Dakwah']),
+    Node('Biro', ['Keuangan', 'SDM', 'Humas']),
+    Node('Bidang', ['Tarbiyah', 'Sosial']),
+    Node('Ikappi'),
+    Node('Iwappi'),
+    Node('Perwappi'),
+    Node('NGO'),
+    Node('Pondok Cabang'),
+  ];
+
   @override
   Widget build(BuildContext context) {
-    final options = [
-      'Pusat',
-      'Madrasah',
-      'Lembaga',
-      'Biro',
-      'Bidang',
-      'Ikappi',
-      'Iwappi',
-      'Perwappi',
-      'NGO',
-      'Pondok Cabang',
-    ];
-
     return Scaffold(
       appBar: TopBar(title: args.title, subtitle: 'Daftar Kategori'),
       body: ListView.builder(
-        itemCount: options.length,
+        itemCount: menu.length,
         itemBuilder: (context, index) {
+          final node = menu[index];
           return OptionTile(
-            leftValue: (index + 1).toString(),
-            title: options[index],
+            index: index + 1,
+            node: node,
             onTap: () {
-              // Navigate or handle taps here
+              // tindakan khusus untuk item tanpa sub-item, jika diperlukan
             },
           );
         },
       ),
-      bottomNavigationBar: const BottomBanner(assetPath: 'assets/banners/bottom.png'),
+      bottomNavigationBar:
+      const BottomBanner(assetPath: 'assets/banners/bottom.png'),
     );
   }
 }

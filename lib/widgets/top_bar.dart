@@ -43,23 +43,23 @@ class TopBar extends StatelessWidget implements PreferredSizeWidget {
                   ),
               ],
             ),
-          ),
-          Column(
-            mainAxisAlignment: MainAxisAlignment.center,
-            crossAxisAlignment: CrossAxisAlignment.end,
-            children: [
-              Text(
-                DateText.currentTime(),
-                style: const TextStyle(fontSize: 18, fontWeight: FontWeight.w600),
-                textAlign: TextAlign.right,
-              ),
-              Text(
-                DateText.currentDay(),
-                style: const TextStyle(fontSize: 11),
-                textAlign: TextAlign.right,
-              ),
-            ],
-          ),
+          ),_Clock(),
+          // Column(
+          //   mainAxisAlignment: MainAxisAlignment.center,
+          //   crossAxisAlignment: CrossAxisAlignment.end,
+          //   children: [
+          //     Text(
+          //       DateText.currentTime(),
+          //       style: const TextStyle(fontSize: 18, fontWeight: FontWeight.w600),
+          //       textAlign: TextAlign.right,
+          //     ),
+          //     Text(
+          //       DateText.currentDay(),
+          //       style: const TextStyle(fontSize: 11),
+          //       textAlign: TextAlign.right,
+          //     ),
+          //   ],
+          // ),
 
           const SizedBox(width: 8),
         ],
@@ -83,6 +83,35 @@ class _Logo extends StatelessWidget {
         backgroundColor: Colors.white,
         child: Icon(Icons.image_not_supported, size: 16, color: Colors.black45),
       ),
+    );
+  }
+}
+
+class _Clock extends StatelessWidget {
+  const _Clock({super.key});
+
+  @override
+  Widget build(BuildContext context) {
+    return StreamBuilder<DateTime>(
+      stream: Stream.periodic(const Duration(seconds: 1), (_) => DateTime.now()),
+      builder: (context, snapshot) {
+        return Column(
+          mainAxisAlignment: MainAxisAlignment.center,
+          crossAxisAlignment: CrossAxisAlignment.end,
+          children: [
+            Text(
+              DateText.currentTime(),
+              style: const TextStyle(fontSize: 18, fontWeight: FontWeight.w600),
+              textAlign: TextAlign.right,
+            ),
+            Text(
+              DateText.currentDay(),
+              style: const TextStyle(fontSize: 11),
+              textAlign: TextAlign.right,
+            ),
+          ],
+        );
+      },
     );
   }
 }

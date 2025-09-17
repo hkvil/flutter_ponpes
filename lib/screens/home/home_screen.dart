@@ -88,8 +88,11 @@ class HomeScreen extends StatelessWidget {
                             children: [
                               for (int i = 1; i <= 3; i++)
                                 Padding(
-                                  padding: const EdgeInsets.symmetric(
-                                      horizontal: 35.0),
+                                  padding: EdgeInsets.symmetric(
+                                    horizontal:
+                                        MediaQuery.of(context).size.width *
+                                            0.06,
+                                  ),
                                   child: MenuButton(
                                     title: _menuItems[i].$1,
                                     iconPath: _menuItems[i].$2,
@@ -112,8 +115,11 @@ class HomeScreen extends StatelessWidget {
                             children: [
                               for (int i = 4; i <= 6; i++)
                                 Padding(
-                                  padding: const EdgeInsets.symmetric(
-                                      horizontal: 35.0),
+                                  padding: EdgeInsets.symmetric(
+                                    horizontal:
+                                        MediaQuery.of(context).size.width *
+                                            0.06,
+                                  ),
                                   child: MenuButton(
                                     title: _menuItems[i].$1,
                                     iconPath: _menuItems[i].$2,
@@ -130,14 +136,17 @@ class HomeScreen extends StatelessWidget {
                             ],
                           ),
                           const SizedBox(height: 16),
-                          // 2 di bawah tengah
+                          // 3 di bawah tengah
                           Row(
                             mainAxisAlignment: MainAxisAlignment.center,
                             children: [
                               for (int i = 7; i <= 9; i++)
                                 Padding(
-                                  padding: const EdgeInsets.symmetric(
-                                      horizontal: 35.0),
+                                  padding: EdgeInsets.symmetric(
+                                    horizontal:
+                                        MediaQuery.of(context).size.width *
+                                            0.06,
+                                  ),
                                   child: MenuButton(
                                     title: _menuItems[i].$1,
                                     iconPath: _menuItems[i].$2,

@@ -1,4 +1,7 @@
 import 'package:flutter/material.dart';
+import 'package:pesantren_app/screens/detail/profile_screen.dart';
+
+import '../core/constants/profil_ppi.dart';
 
 class DetailLayout extends StatelessWidget {
   final String title;
@@ -62,6 +65,15 @@ class DetailLayout extends StatelessWidget {
                             child: InkWell(
                               borderRadius: BorderRadius.circular(12),
                               onTap: () {
+                                Navigator.push(
+                                  context,
+                                  MaterialPageRoute(
+                                    builder: (context) => ProfileScreen(
+                                      title: 'Profil PPI',
+                                      sections: profilPPI,
+                                    ),
+                                  ),
+                                );
                                 ScaffoldMessenger.of(context).showSnackBar(
                                   SnackBar(
                                     content:

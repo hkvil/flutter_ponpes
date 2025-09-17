@@ -34,7 +34,8 @@ class TopBar extends StatelessWidget implements PreferredSizeWidget {
               children: [
                 Text(
                   title,
-                  style: const TextStyle(fontSize: 14, fontWeight: FontWeight.w600),
+                  style: const TextStyle(
+                      fontSize: 14, fontWeight: FontWeight.w600),
                 ),
                 if (subtitle != null)
                   Text(
@@ -43,7 +44,8 @@ class TopBar extends StatelessWidget implements PreferredSizeWidget {
                   ),
               ],
             ),
-          ),_Clock(),
+          ),
+          _Clock(),
           // Column(
           //   mainAxisAlignment: MainAxisAlignment.center,
           //   crossAxisAlignment: CrossAxisAlignment.end,
@@ -88,12 +90,13 @@ class _Logo extends StatelessWidget {
 }
 
 class _Clock extends StatelessWidget {
-  const _Clock({super.key});
+  const _Clock();
 
   @override
   Widget build(BuildContext context) {
     return StreamBuilder<DateTime>(
-      stream: Stream.periodic(const Duration(seconds: 1), (_) => DateTime.now()),
+      stream:
+          Stream.periodic(const Duration(seconds: 1), (_) => DateTime.now()),
       builder: (context, snapshot) {
         return Column(
           mainAxisAlignment: MainAxisAlignment.center,

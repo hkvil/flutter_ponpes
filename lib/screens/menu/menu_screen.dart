@@ -140,10 +140,10 @@ class MenuScreen extends StatelessWidget {
                       },
                     );
                   } else {
-                    return const Center(child: Text('Tidak ada data.'));
+                    return const Center(child: Text('Belum ada data.'));
                   }
                 } else {
-                  return const Center(child: Text('Tidak ada data.'));
+                  return const Center(child: Text('Belum ada data.'));
                 }
               },
             ),

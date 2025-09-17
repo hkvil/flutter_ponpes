@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 
+import '../../widgets/section_header.dart';
 import '../../widgets/top_bar.dart';
 import '../../widgets/bottom_banner.dart';
 import '../../widgets/banner_container.dart';
@@ -169,45 +170,15 @@ class HomeScreen extends StatelessWidget {
                 ),
                 Padding(
                   padding: const EdgeInsets.fromLTRB(16, 8, 16, 6),
-                  child: Row(
-                    mainAxisSize: MainAxisSize.min,
-                    children: [
-                      Container(
-                        width: 2,
-                        height: 24,
-                        decoration: BoxDecoration(
-                          color: Colors.green.shade700,
-                          borderRadius: BorderRadius.circular(1),
-                        ),
-                      ),
-                      const SizedBox(width: 8),
-                      IntrinsicWidth(
-                        child: Stack(
-                          alignment: Alignment.centerLeft,
-                          children: [
-                            Container(
-                              height: 24,
-                              decoration: BoxDecoration(
-                                color: Colors.green.shade700,
-                              ),
-                            ),
-                            const Padding(
-                              padding: EdgeInsets.symmetric(horizontal: 6),
-                              child: Text(
-                                'Prestasi & Penghargaan',
-                                style: TextStyle(
-                                    fontSize: 14,
-                                    fontWeight: FontWeight.w600,
-                                    color: Colors.white),
-                              ),
-                            ),
-                          ],
-                        ),
-                      ),
-                    ],
+                  child: SectionHeader(
+                    title: 'Prestasi dan Penghargaan',
+                    backgroundColor: Colors.green.shade700,
+                    textColor: Colors.white,
                   ),
                 ),
-                const _AchievementItem(title: 'Go Internasional Sejak 1997'),
+                const _AchievementItem(
+                    title:
+                        'Go Internasional Sejak 1997'), // INI masih data dummy
                 const _AchievementItem(
                     title: 'Pesantren Unggulan Nasional Sejak 1999'),
                 const _AchievementItem(

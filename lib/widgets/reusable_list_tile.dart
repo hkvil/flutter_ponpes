@@ -4,16 +4,18 @@ import '../core/theme/app_colors.dart';
 class ReusableListTileWidget extends StatelessWidget {
   final int? value;
   final String titleText;
-  final Color? indexColor;
+  final Color? indexBackgroundColor;
   final Color? titleColor;
+  final Color? titleTextBackgroundColor;
   final VoidCallback? onTap;
 
   const ReusableListTileWidget({
     Key? key,
     this.value,
     required this.titleText,
-    this.indexColor,
+    this.indexBackgroundColor,
     this.titleColor,
+    this.titleTextBackgroundColor,
     this.onTap,
   }) : super(key: key);
 
@@ -36,7 +38,7 @@ class ReusableListTileWidget extends StatelessWidget {
                 width: 52,
                 alignment: Alignment.center,
                 decoration: BoxDecoration(
-                  color: indexColor ?? Colors.white,
+                  color: indexBackgroundColor ?? Colors.white,
                   boxShadow: [
                     BoxShadow(
                       color: Colors.black.withOpacity(0.05),
@@ -50,15 +52,17 @@ class ReusableListTileWidget extends StatelessWidget {
                   style: const TextStyle(fontWeight: FontWeight.w600),
                 ),
               ),
-              const SizedBox(width: 10),
               // panel hijau dengan judul
               Expanded(
                 child: Container(
                   height: 44,
                   padding: const EdgeInsets.symmetric(horizontal: 14),
                   decoration: BoxDecoration(
-                    color: AppColors.primaryGreen,
-                    borderRadius: BorderRadius.circular(12),
+                    color: titleTextBackgroundColor ?? AppColors.primaryGreen,
+                    borderRadius: const BorderRadius.only(
+                      topRight: Radius.circular(12),
+                      bottomRight: Radius.circular(12),
+                    ),
                   ),
                   alignment: Alignment.centerLeft,
                   child: Text(

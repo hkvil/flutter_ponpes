@@ -7,20 +7,62 @@ const Map<String, dynamic> menuTree = {
       'Pusat Penjaminan Mutu Pendidikan & Pengajaran',
     ],
     'Organ Penyelenggara Pendidikan': [
-      'Formal',
-      'Taman Kanak-Kanak',
-      'Taman Pendidikan Al-Qur\'an',
-      'Madrasah Diniyah',
-      'Madrasah Ibtidaiyah',
-      'Madrasah Tsanawiyah Putra',
-      'Madrasah Tsanawiyah Putri',
-      'Madrasah Aliyah Putra',
-      'Madrasah Aliyah Putri',
-      'Non Formal',
-      'Madrasah Tahfizh Lil Ath Fal',
-      'Institut Mujahadah & Pembibitan',
-      'Haromain',
-      'Al Ittifaqiah Language Center',
+      {
+        'title': 'Formal',
+        'indexBackgroundColor': 0xFF1976D2,
+      },
+      {
+        'title': 'Taman Kanak-Kanak',
+        'indexBackgroundColor': 0xFF43A047,
+      },
+      {
+        'title': 'Taman Pendidikan Al-Qur\'an',
+        'indexBackgroundColor': 0xFF43A047,
+      },
+      {
+        'title': 'Madrasah Diniyah',
+        'indexBackgroundColor': 0xFF43A047,
+      },
+      {
+        'title': 'Madrasah Ibtidaiyah',
+        'indexBackgroundColor': 0xFF43A047,
+      },
+      {
+        'title': 'Madrasah Tsanawiyah Putra',
+        'indexBackgroundColor': 0xFF43A047,
+      },
+      {
+        'title': 'Madrasah Tsanawiyah Putri',
+        'indexBackgroundColor': 0xFF43A047,
+      },
+      {
+        'title': 'Madrasah Aliyah Putra',
+        'indexBackgroundColor': 0xFF43A047,
+      },
+      {
+        'title': 'Madrasah Aliyah Putri',
+        'indexBackgroundColor': 0xFF43A047,
+      },
+      {
+        'title': 'Non Formal',
+        'indexBackgroundColor': 0xFFD32F2F,
+      },
+      {
+        'title': 'Madrasah Tahfizh Lil Ath Fal',
+        'indexBackgroundColor': 0xFFD32F2F,
+      },
+      {
+        'title': 'Institut Mujahadah & Pembibitan',
+        'indexBackgroundColor': 0xFFD32F2F,
+      },
+      {
+        'title': 'Haromain',
+        'indexBackgroundColor': 0xFFD32F2F,
+      },
+      {
+        'title': 'Al Ittifaqiah Language Center',
+        'indexBackgroundColor': 0xFFD32F2F,
+      },
     ],
     'Organ Penyelenggara Pendidikan Informal': [],
     'Organ Pengasuhan & Pengkaderan': [],

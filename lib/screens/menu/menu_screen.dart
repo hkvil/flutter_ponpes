@@ -52,27 +52,75 @@ class MenuScreen extends StatelessWidget {
                       );
                     },
                   );
-                } else if (menuData is List<String>) {
-                  return ListView.builder(
-                    itemCount: menuData.length,
-                    itemBuilder: (context, index) {
-                      final item = menuData[index];
-                      return ReusableListTileWidget(
-                        value: null,
-                        titleText: item,
-                        onTap: () {
-                          Navigator.push(
-                            context,
-                            MaterialPageRoute(
-                              builder: (context) => DetailMadrasahScreen(
-                                madrasahName: item,
+                } else if (menuData is List) {
+                  // Cek apakah List berisi Map (menu dengan warna)
+                  if (menuData.isNotEmpty && menuData.first is Map) {
+                    return ListView.builder(
+                      itemCount: menuData.length,
+                      itemBuilder: (context, index) {
+                        final item = menuData[index] as Map<String, dynamic>;
+                        final title = item['title'] ?? '';
+                        final indexBackgroundColor =
+                            item['indexBackgroundColor'] != null
+                                ? Color(item['indexBackgroundColor'])
+                                : null;
+                        final titleTextBackgroundColor =
+                            item['titleTextBackgroundColor'] != null
+                                ? Color(item['titleTextBackgroundColor'])
+                                : null;
+                        Widget tile = ReusableListTileWidget(
+                          value: null,
+                          titleText: title,
+                          indexBackgroundColor: indexBackgroundColor,
+                          titleTextBackgroundColor: titleTextBackgroundColor,
+                          onTap: () {
+                            // Jika item adalah label (Formal/Non Formal), tidak navigasi
+                            if (title == 'Formal' || title == 'Non Formal')
+                              return;
+                            Navigator.push(
+                              context,
+                              MaterialPageRoute(
+                                builder: (context) => DetailMadrasahScreen(
+                                  madrasahName: title,
+                                ),
                               ),
-                            ),
+                            );
+                          },
+                        );
+                        if (title != 'Formal' && title != 'Non Formal') {
+                          tile = Padding(
+                            padding: const EdgeInsets.only(left: 60.0),
+                            child: tile,
                           );
-                        },
-                      );
-                    },
-                  );
+                        }
+                        return tile;
+                      },
+                    );
+                  } else if (menuData.isNotEmpty && menuData.first is String) {
+                    // Fallback jika masih List<String>
+                    return ListView.builder(
+                      itemCount: menuData.length,
+                      itemBuilder: (context, index) {
+                        final item = menuData[index];
+                        return ReusableListTileWidget(
+                          value: null,
+                          titleText: item,
+                          onTap: () {
+                            Navigator.push(
+                              context,
+                              MaterialPageRoute(
+                                builder: (context) => DetailMadrasahScreen(
+                                  madrasahName: item,
+                                ),
+                              ),
+                            );
+                          },
+                        );
+                      },
+                    );
+                  } else {
+                    return const Center(child: Text('Tidak ada data.'));
+                  }
                 } else {
                   return const Center(child: Text('Tidak ada data.'));
                 }

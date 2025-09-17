@@ -3,6 +3,7 @@ import 'package:flutter/material.dart';
 import '../../screens/splash/splash_screen.dart';
 import '../../screens/home/home_screen.dart';
 import '../../screens/menu/menu_screen.dart';
+import '../../core/constants/menu_lists.dart';
 
 /// Defines all named routes and handles route generation for the app.
 ///
@@ -23,7 +24,9 @@ class AppRouter {
         return MaterialPageRoute(builder: (_) => const HomeScreen());
       case menu:
         final MenuScreenArgs args = settings.arguments as MenuScreenArgs;
-        return MaterialPageRoute(builder: (_) => MenuScreen(args: args));
+        final menuData = menuTree[args.title];
+        return MaterialPageRoute(
+            builder: (_) => MenuScreen(args: args, menuData: menuData));
       default:
         return MaterialPageRoute(
           builder: (_) => const Scaffold(

@@ -6,6 +6,7 @@ import '../../widgets/banner_container.dart';
 import '../../widgets/menu_button.dart';
 import '../../core/router/app_router.dart';
 import '../menu/menu_screen.dart';
+import '../../core/constants/menu_lists.dart';
 
 /// The home screen shows the main menu grid and achievements.
 ///
@@ -49,21 +50,111 @@ class HomeScreen extends StatelessWidget {
                   child: Material(
                     elevation: 12,
                     borderRadius: BorderRadius.circular(12),
-                    child: _ResponsiveGrid(
-                      children: [
-                        for (final (title, icon) in _menuItems)
-                          MenuButton(
-                            title: title,
-                            iconPath: icon,
-                            onTap: () {
-                              Navigator.pushNamed(
-                                context,
-                                AppRouter.menu,
-                                arguments: MenuScreenArgs(title: title),
-                              );
-                            },
+                    child: Padding(
+                      padding: const EdgeInsets.symmetric(vertical: 24),
+                      child: Column(
+                        children: [
+                          // 1 di atas tengah
+                          Row(
+                            mainAxisAlignment: MainAxisAlignment.center,
+                            children: [
+                              Padding(
+                                padding: const EdgeInsets.symmetric(
+                                    horizontal: 12.0),
+                                child: MenuButton(
+                                  title: _menuItems[0].$1,
+                                  iconPath: _menuItems[0].$2,
+                                  onTap: () {
+                                    final menuData = menuTree[_menuItems[0].$1];
+                                    Navigator.push(
+                                      context,
+                                      MaterialPageRoute(
+                                        builder: (context) => MenuScreen(
+                                          args: MenuScreenArgs(
+                                              title: _menuItems[0].$1),
+                                          menuData: menuData,
+                                        ),
+                                      ),
+                                    );
+                                  },
+                                ),
+                              ),
+                            ],
                           ),
-                      ],
+                          const SizedBox(height: 16),
+                          // 3 di baris kedua
+                          Row(
+                            mainAxisAlignment: MainAxisAlignment.center,
+                            children: [
+                              for (int i = 1; i <= 3; i++)
+                                Padding(
+                                  padding: const EdgeInsets.symmetric(
+                                      horizontal: 35.0),
+                                  child: MenuButton(
+                                    title: _menuItems[i].$1,
+                                    iconPath: _menuItems[i].$2,
+                                    onTap: () {
+                                      Navigator.pushNamed(
+                                        context,
+                                        AppRouter.menu,
+                                        arguments: MenuScreenArgs(
+                                            title: _menuItems[i].$1),
+                                      );
+                                    },
+                                  ),
+                                ),
+                            ],
+                          ),
+                          const SizedBox(height: 16),
+                          // 3 di baris ketiga
+                          Row(
+                            mainAxisAlignment: MainAxisAlignment.center,
+                            children: [
+                              for (int i = 4; i <= 6; i++)
+                                Padding(
+                                  padding: const EdgeInsets.symmetric(
+                                      horizontal: 35.0),
+                                  child: MenuButton(
+                                    title: _menuItems[i].$1,
+                                    iconPath: _menuItems[i].$2,
+                                    onTap: () {
+                                      Navigator.pushNamed(
+                                        context,
+                                        AppRouter.menu,
+                                        arguments: MenuScreenArgs(
+                                            title: _menuItems[i].$1),
+                                      );
+                                    },
+                                  ),
+                                ),
+                            ],
+                          ),
+                          const SizedBox(height: 16),
+                          // 2 di bawah tengah
+                          Row(
+                            mainAxisAlignment: MainAxisAlignment.center,
+                            children: [
+                              for (int i = 7; i <= 8; i++)
+                                Padding(
+                                  padding: const EdgeInsets.symmetric(
+                                      horizontal: 35.0),
+                                  child: MenuButton(
+                                    title: _menuItems[i].$1,
+                                    iconPath: _menuItems[i].$2,
+                                    onTap: () {
+                                      Navigator.pushNamed(
+                                        context,
+                                        AppRouter.menu,
+                                        arguments: MenuScreenArgs(
+                                            title: _menuItems[i].$1),
+                                      );
+                                    },
+                                  ),
+                                ),
+                            ],
+                          ),
+                        ],
+                      ),
                     ),
                   ),
                 ),
@@ -136,35 +227,6 @@ class _AchievementItem extends StatelessWidget {
       title: Text(title),
       contentPadding: const EdgeInsets.symmetric(horizontal: 12),
       dense: true,
-    );
-  }
-}
-
-/// Builds a responsive grid that adapts the number of columns based on screen width.
-class _ResponsiveGrid extends StatelessWidget {
-  final List<Widget> children;
-  const _ResponsiveGrid({required this.children});
-  @override
-  Widget build(BuildContext context) {
-    return LayoutBuilder(
-      builder: (context, constraints) {
-        int crossAxisCount = 5;
-        final w = constraints.maxWidth;
-        if (w < 340) {
-          crossAxisCount = 3;
-        } else if (w < 520) {
-          crossAxisCount = 4;
-        }
-        return GridView.count(
-          physics: const NeverScrollableScrollPhysics(),
-          shrinkWrap: true,
-          crossAxisCount: crossAxisCount,
-          mainAxisSpacing: 12,
-          crossAxisSpacing: 12,
-          childAspectRatio: .82,
-          children: children,
-        );
-      },
     );
   }
 }

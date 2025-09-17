@@ -53,9 +53,56 @@ class DetailLayout extends StatelessWidget {
                         )
                     else
                       for (final item in menuItems)
-                        ListTile(
-                          title: Text(item),
-                          trailing: const Icon(Icons.arrow_right),
+                        Padding(
+                          padding: const EdgeInsets.symmetric(vertical: 6.0),
+                          child: Material(
+                            color: Colors.green.shade50,
+                            elevation: 3,
+                            borderRadius: BorderRadius.circular(12),
+                            child: InkWell(
+                              borderRadius: BorderRadius.circular(12),
+                              onTap: () {
+                                ScaffoldMessenger.of(context).showSnackBar(
+                                  SnackBar(
+                                    content:
+                                        Text('Kamu memilih "$title dan $item"'),
+                                    duration: const Duration(seconds: 1),
+                                  ),
+                                );
+                              },
+                              child: Row(
+                                children: [
+                                  Expanded(
+                                    child: Padding(
+                                      padding: const EdgeInsets.symmetric(
+                                          horizontal: 16.0),
+                                      child: Text(
+                                        item,
+                                        style: const TextStyle(
+                                          fontSize: 16,
+                                          fontWeight: FontWeight.w600,
+                                          color: Colors.green,
+                                        ),
+                                      ),
+                                    ),
+                                  ),
+                                  Container(
+                                    height: 44,
+                                    width: 52,
+                                    decoration: BoxDecoration(
+                                      color: Colors.green.shade700,
+                                      borderRadius: const BorderRadius.only(
+                                        topRight: Radius.circular(12),
+                                        bottomRight: Radius.circular(12),
+                                      ),
+                                    ),
+                                    child: const Icon(Icons.arrow_right,
+                                        color: Colors.white),
+                                  ),
+                                ],
+                              ),
+                            ),
+                          ),
                         ),
                   ],
                 ),

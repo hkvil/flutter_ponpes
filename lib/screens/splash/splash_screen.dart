@@ -36,8 +36,16 @@ class _SplashScreenState extends State<SplashScreen> {
             _Logo(),
             SizedBox(height: 16),
             Text(
-              'Nama Lembaga Placeholder',
-              style: TextStyle(fontWeight: FontWeight.w700),
+              'SISTEM INFORMASI - DATABASE',
+              style: TextStyle(fontWeight: FontWeight.bold),
+            ),
+            Text(
+              'PONDOK PESANTREN AL-ITTIFAQIAH INDRALAYA',
+              style: TextStyle(fontWeight: FontWeight.w500),
+            ),
+            Text(
+              'ORGAN ILIR SUMATERA SELATAN INDONESIA',
+              style: TextStyle(fontWeight: FontWeight.w500),
             ),
           ],
         ),

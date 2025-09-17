@@ -6,10 +6,10 @@ const Map<String, dynamic> menuTree = {
       'Pusat Pengawasan & Pembinaan SDM Putri',
       'Pusat Penjaminan Mutu Pendidikan & Pengajaran',
     ],
-    'Organ Penyelenggara Pendidikan': [
+    'Organ Penyelenggara Pendidikan Formal': [
       {
         'title': 'Formal',
-        'indexBackgroundColor': 0xFF1976D2,
+        'indexBackgroundColor': 0xFFFFFFFF,
       },
       {
         'title': 'Taman Kanak-Kanak',
@@ -45,23 +45,23 @@ const Map<String, dynamic> menuTree = {
       },
       {
         'title': 'Non Formal',
-        'indexBackgroundColor': 0xFFD32F2F,
+        'indexBackgroundColor': 0xFFFFFFFF,
       },
       {
         'title': 'Madrasah Tahfizh Lil Ath Fal',
-        'indexBackgroundColor': 0xFFD32F2F,
+        'indexBackgroundColor': 0xFF43A047,
       },
       {
         'title': 'Institut Mujahadah & Pembibitan',
-        'indexBackgroundColor': 0xFFD32F2F,
+        'indexBackgroundColor': 0xFF43A047,
       },
       {
         'title': 'Haromain',
-        'indexBackgroundColor': 0xFFD32F2F,
+        'indexBackgroundColor': 0xFF43A047,
       },
       {
         'title': 'Al Ittifaqiah Language Center',
-        'indexBackgroundColor': 0xFFD32F2F,
+        'indexBackgroundColor': 0xFF43A047,
       },
     ],
     'Organ Penyelenggara Pendidikan Informal': [],

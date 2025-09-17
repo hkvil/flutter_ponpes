@@ -19,22 +19,18 @@ class DetailLayout extends StatelessWidget {
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          Text(
-            title,
-            style: const TextStyle(fontSize: 24, fontWeight: FontWeight.bold),
-          ),
           Row(
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
               Column(
                 children: [
                   if (imagePaths.isEmpty)
-                    for (int i = 0; i < 4; i++)
+                    for (int i = 0; i < 6; i++)
                       Padding(
                         padding: const EdgeInsets.only(bottom: 8.0),
                         child: const Placeholder(
-                          fallbackHeight: 80,
-                          fallbackWidth: 80,
+                          fallbackHeight: 65,
+                          fallbackWidth: 131,
                         ),
                       )
                   else

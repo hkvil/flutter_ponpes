@@ -134,7 +134,7 @@ class HomeScreen extends StatelessWidget {
                           Row(
                             mainAxisAlignment: MainAxisAlignment.center,
                             children: [
-                              for (int i = 7; i <= 8; i++)
+                              for (int i = 7; i <= 9; i++)
                                 Padding(
                                   padding: const EdgeInsets.symmetric(
                                       horizontal: 35.0),

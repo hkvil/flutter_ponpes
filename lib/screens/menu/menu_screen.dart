@@ -1,9 +1,10 @@
 import 'package:flutter/material.dart';
-import 'package:pesantren_app/screens/madrasah/detail_madrasah_screen.dart';
+import 'package:pesantren_app/screens/madrasah/detail_screen.dart';
 import '../../widgets/top_bar.dart';
 import '../../widgets/bottom_banner.dart';
 import '../../widgets/reusable_list_tile.dart';
 import '../../widgets/banner_container.dart';
+import '../../core/constants/detail_lists.dart';
 
 /// Class argumen tetap.
 class MenuScreenArgs {
@@ -20,6 +21,7 @@ class MenuScreen extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    print(args.title);
     return Scaffold(
       appBar: TopBar(title: args.title),
       body: Column(
@@ -77,11 +79,16 @@ class MenuScreen extends StatelessWidget {
                             // Jika item adalah label (Formal/Non Formal), tidak navigasi
                             if (title == 'Formal' || title == 'Non Formal')
                               return;
+                            final isPenyelenggara = args.title ==
+                                'Organ Penyelenggara Pendidikan Formal';
                             Navigator.push(
                               context,
                               MaterialPageRoute(
-                                builder: (context) => DetailMadrasahScreen(
-                                  madrasahName: title,
+                                builder: (context) => DetailScreen(
+                                  title: title,
+                                  menuItems: isPenyelenggara
+                                      ? menuItemsJenis2
+                                      : menuItemsJenis1,
                                 ),
                               ),
                             );
@@ -97,23 +104,37 @@ class MenuScreen extends StatelessWidget {
                       },
                     );
                   } else if (menuData.isNotEmpty && menuData.first is String) {
-                    // Fallback jika masih List<String>
+                    // Fallback jika masih List<String> atau List menu bercabang
                     return ListView.builder(
                       itemCount: menuData.length,
                       itemBuilder: (context, index) {
                         final item = menuData[index];
                         return ReusableListTileWidget(
                           value: null,
-                          titleText: item,
+                          titleText: item.toString(),
                           onTap: () {
-                            Navigator.push(
-                              context,
-                              MaterialPageRoute(
-                                builder: (context) => DetailMadrasahScreen(
-                                  madrasahName: item,
+                            if (item is List) {
+                              Navigator.push(
+                                context,
+                                MaterialPageRoute(
+                                  builder: (context) => MenuScreen(
+                                    args:
+                                        MenuScreenArgs(title: item.toString()),
+                                    menuData: item,
+                                  ),
                                 ),
-                              ),
-                            );
+                              );
+                            } else {
+                              Navigator.push(
+                                context,
+                                MaterialPageRoute(
+                                  builder: (context) => DetailScreen(
+                                    title: item.toString(),
+                                    menuItems: menuItemsJenis1,
+                                  ),
+                                ),
+                              );
+                            }
                           },
                         );
                       },

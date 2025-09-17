@@ -3,19 +3,21 @@ import 'package:pesantren_app/widgets/banner_container.dart';
 import 'package:pesantren_app/widgets/bottom_banner.dart';
 import 'package:pesantren_app/widgets/detail_layout.dart';
 
-class DetailMadrasahScreen extends StatelessWidget {
-  final String madrasahName;
+class DetailScreen extends StatelessWidget {
+  final String title;
+  final List<String> menuItems;
 
-  const DetailMadrasahScreen({
+  const DetailScreen({
     Key? key,
-    required this.madrasahName,
+    required this.title,
+    required this.menuItems,
   }) : super(key: key);
 
   @override
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
-        title: Text('Detail Madrasah'),
+        title: Text(title),
       ),
       body: Column(
         children: [
@@ -26,7 +28,8 @@ class DetailMadrasahScreen extends StatelessWidget {
           Padding(
             padding: const EdgeInsets.all(16.0),
             child: DetailLayout(
-              title: madrasahName,
+              title: title,
+              menuItems: menuItems,
             ),
           ),
         ],

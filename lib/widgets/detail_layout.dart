@@ -1,7 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:pesantren_app/screens/detail/profile_screen.dart';
 
-import '../core/constants/profil_ppi.dart';
+import '../core/constants/profil.dart';
 
 class DetailLayout extends StatelessWidget {
   final String title;
@@ -69,8 +69,8 @@ class DetailLayout extends StatelessWidget {
                                   context,
                                   MaterialPageRoute(
                                     builder: (context) => ProfileScreen(
-                                      title: 'Profil PPI',
-                                      sections: profilPPI,
+                                      title: title,
+                                      sections: profilPKP, //Ganti nanti
                                     ),
                                   ),
                                 );

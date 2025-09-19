@@ -1,6 +1,6 @@
 import 'package:pesantren_app/models/profile_section.dart';
 
-final List<ProfileSection> profilPPI = [
+final List<ProfileSection> profilPKP = [
   ProfileSection(
     title: '1.Nama Lembaga',
     content: 'Pondok Pesantren Al-Ittifaqiah Indralaya',

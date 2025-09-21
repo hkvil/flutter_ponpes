@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:intl/date_symbol_data_local.dart';
 import 'package:intl/intl.dart';
+import 'package:flutter_dotenv/flutter_dotenv.dart';
 import 'core/theme/app_colors.dart';
 import 'core/router/app_router.dart';
 
@@ -13,6 +14,7 @@ import 'core/router/app_router.dart';
 /// [AppRouter], which maps route names to pages.
 Future<void> main() async {
   WidgetsFlutterBinding.ensureInitialized();
+  await dotenv.load();
   await initializeDateFormatting('id_ID');
   Intl.defaultLocale = 'id_ID';
   runApp(const PesantrenApp());

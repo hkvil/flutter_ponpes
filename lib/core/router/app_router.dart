@@ -3,6 +3,7 @@ import 'package:flutter/material.dart';
 import '../../screens/splash/splash_screen.dart';
 import '../../screens/home/home_screen.dart';
 import '../../screens/menu/menu_screen.dart';
+import '../../screens/login_screen.dart';
 import '../../core/constants/menu_lists.dart';
 
 /// Defines all named routes and handles route generation for the app.
@@ -12,6 +13,7 @@ import '../../core/constants/menu_lists.dart';
 /// passed along to the corresponding screen's constructor.
 class AppRouter {
   static const String splash = '/';
+  static const String login = '/login';
   static const String home = '/home';
   static const String menu = '/menu';
 
@@ -20,6 +22,8 @@ class AppRouter {
     switch (settings.name) {
       case splash:
         return MaterialPageRoute(builder: (_) => const SplashScreen());
+      case login:
+        return MaterialPageRoute(builder: (_) => const LoginScreen());
       case home:
         return MaterialPageRoute(builder: (_) => const HomeScreen());
       case menu:

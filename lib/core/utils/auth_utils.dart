@@ -1,5 +1,4 @@
 import 'package:flutter_secure_storage/flutter_secure_storage.dart';
-import '../constants/menu_lists.dart';
 import '../constants/detail_lists.dart';
 
 /// Returns the correct detail menu items for a given title and item.

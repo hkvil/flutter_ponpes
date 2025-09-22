@@ -20,14 +20,13 @@ class BottomBanner extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return Container(
-      height: 110,
+      height: 120,
       decoration: const BoxDecoration(color: AppColors.bannerBg),
       child: assetPath != null
           ? Center(
               child: Image.asset(
                 assetPath!,
-                fit: BoxFit.fill,
-                height: 100,
+                fit: BoxFit.cover,
                 width: double.infinity,
                 errorBuilder: (_, __, ___) =>
                     _FallbackText(fallbackText: fallbackText),

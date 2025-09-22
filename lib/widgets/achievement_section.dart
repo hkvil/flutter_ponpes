@@ -1,5 +1,4 @@
 import 'package:flutter/material.dart';
-import '../widgets/section_header.dart';
 import 'achievement_item.dart';
 
 class AchievementSection extends StatelessWidget {

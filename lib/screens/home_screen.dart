@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 
 import '../widgets/section_header.dart';
+import '../widgets/achievement_section.dart';
 import '../widgets/top_bar.dart';
 import '../widgets/bottom_banner.dart';
 import '../widgets/image_carousel.dart';
@@ -53,8 +54,7 @@ class HomeScreen extends StatelessWidget {
             autoPlayInterval: const Duration(seconds: 5),
           ),
           Expanded(
-            child: ListView(
-              padding: EdgeInsets.zero,
+            child: Column(
               children: [
                 Padding(
                   padding:
@@ -181,19 +181,22 @@ class HomeScreen extends StatelessWidget {
                 ),
                 Padding(
                   padding: const EdgeInsets.fromLTRB(16, 8, 16, 6),
-                  child: SectionHeader(
-                    title: 'Prestasi dan Penghargaan',
-                    backgroundColor: Colors.green.shade700,
-                    textColor: Colors.black,
+                  child: Align(
+                    alignment: Alignment.centerLeft,
+                    child: SectionHeader(
+                      title: 'Prestasi dan Penghargaan',
+                      backgroundColor: Colors.green.shade700,
+                      textColor: Colors.white,
+                    ),
                   ),
                 ),
-                const _AchievementItem(title: 'Go Internasional Sejak 1997'),
-                const _AchievementItem(
-                    title: 'Pesantren Unggulan Nasional Sejak 1999'),
-                const _AchievementItem(
-                    title:
-                        'Masuk 20 Pesantren Berpengaruh di Indonesia Sejak 2005'),
-                const SizedBox(height: 72),
+                Expanded(
+                  child: SingleChildScrollView(
+                    child: AchievementSection(
+                      achievementTitles: const [],
+                    ),
+                  ),
+                ),
               ],
             ),
           ),
@@ -205,10 +208,9 @@ class HomeScreen extends StatelessWidget {
   }
 }
 
-/// Single line achievement entry with icon.
-class _AchievementItem extends StatelessWidget {
+class AchievementItem extends StatelessWidget {
   final String title;
-  const _AchievementItem({required this.title});
+  const AchievementItem({required this.title});
   @override
   Widget build(BuildContext context) {
     return ListTile(

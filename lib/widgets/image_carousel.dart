@@ -11,6 +11,7 @@ class ImageCarousel extends StatelessWidget {
     this.autoPlayInterval = const Duration(seconds: 5),
     this.autoPlayAnimationDuration = const Duration(milliseconds: 800),
     this.viewportFraction = 1.0,
+    this.boxFit = BoxFit.cover,
   });
 
   /// List of image URLs (can be assets or network URLs)
@@ -27,6 +28,9 @@ class ImageCarousel extends StatelessWidget {
 
   /// Fraction of the viewport that each page should occupy
   final double viewportFraction;
+
+  /// How the image should be fitted within the container
+  final BoxFit boxFit;
 
   /// Default images if no URLs provided
   static const List<String> _defaultImages = [
@@ -81,7 +85,7 @@ class ImageCarousel extends StatelessWidget {
     if (imageUrl.startsWith('http://') || imageUrl.startsWith('https://')) {
       return Image.network(
         imageUrl,
-        fit: BoxFit.cover,
+        fit: boxFit,
         loadingBuilder: (context, child, loadingProgress) {
           if (loadingProgress == null) return child;
           return const Center(
@@ -102,7 +106,7 @@ class ImageCarousel extends StatelessWidget {
       // Local asset
       return Image.asset(
         imageUrl,
-        fit: BoxFit.cover,
+        fit: boxFit,
         errorBuilder: (context, error, stackTrace) {
           return const Center(
             child: Icon(

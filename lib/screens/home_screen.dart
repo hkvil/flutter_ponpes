@@ -71,27 +71,23 @@ class HomeScreen extends StatelessWidget {
                               Row(
                                 mainAxisAlignment: MainAxisAlignment.center,
                                 children: [
-                                  Padding(
-                                    padding: const EdgeInsets.symmetric(
-                                        horizontal: 12.0),
-                                    child: MenuButton(
-                                      title: _menuItems[0].$1,
-                                      iconPath: _menuItems[0].$2,
-                                      onTap: () {
-                                        final menuData =
-                                            menuTree[_menuItems[0].$1];
-                                        Navigator.push(
-                                          context,
-                                          MaterialPageRoute(
-                                            builder: (context) => MenuScreen(
-                                              args: MenuScreenArgs(
-                                                  title: _menuItems[0].$1),
-                                              menuData: menuData,
-                                            ),
+                                  MenuButton(
+                                    title: _menuItems[0].$1,
+                                    iconPath: _menuItems[0].$2,
+                                    onTap: () {
+                                      final menuData =
+                                          menuTree[_menuItems[0].$1];
+                                      Navigator.push(
+                                        context,
+                                        MaterialPageRoute(
+                                          builder: (context) => MenuScreen(
+                                            args: MenuScreenArgs(
+                                                title: _menuItems[0].$1),
+                                            menuData: menuData,
                                           ),
-                                        );
-                                      },
-                                    ),
+                                        ),
+                                      );
+                                    },
                                   ),
                                 ],
                               ),

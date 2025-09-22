@@ -1,5 +1,5 @@
 import 'package:flutter/material.dart';
-import 'package:pesantren_app/screens/detail/profile_screen.dart';
+import 'package:pesantren_app/screens/profile_screen.dart';
 
 import '../core/constants/profil.dart';
 

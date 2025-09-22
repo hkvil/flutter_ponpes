@@ -36,54 +36,30 @@ class SectionHeader extends StatelessWidget {
           ),
         ),
         const SizedBox(width: 8),
-        (width == null
-            ? IntrinsicWidth(
-                child: Stack(
-                  alignment: Alignment.centerLeft,
-                  children: [
-                    Container(
-                      height: height,
-                      decoration: BoxDecoration(
-                        color: backgroundColor,
-                      ),
-                    ),
-                    Padding(
-                      padding: padding,
-                      child: Text(
-                        title,
-                        style: TextStyle(
-                          fontSize: fontSize,
-                          fontWeight: fontWeight,
-                          color: textColor,
-                        ),
-                      ),
-                    ),
-                  ],
+        IntrinsicWidth(
+          child: Stack(
+            alignment: Alignment.centerLeft,
+            children: [
+              Container(
+                height: height,
+                decoration: BoxDecoration(
+                  color: backgroundColor,
                 ),
-              )
-            : Stack(
-                alignment: Alignment.centerLeft,
-                children: [
-                  Container(
-                    height: height,
-                    width: width,
-                    decoration: BoxDecoration(
-                      color: backgroundColor,
-                    ),
+              ),
+              Padding(
+                padding: padding,
+                child: Text(
+                  title,
+                  style: TextStyle(
+                    fontSize: fontSize,
+                    fontWeight: fontWeight,
+                    color: textColor,
                   ),
-                  Padding(
-                    padding: padding,
-                    child: Text(
-                      title,
-                      style: TextStyle(
-                        fontSize: fontSize,
-                        fontWeight: fontWeight,
-                        color: textColor,
-                      ),
-                    ),
-                  ),
-                ],
-              )),
+                ),
+              ),
+            ],
+          ),
+        ),
       ],
     );
   }

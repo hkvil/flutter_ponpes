@@ -2,6 +2,8 @@ import 'package:flutter/material.dart';
 import 'package:intl/date_symbol_data_local.dart';
 import 'package:intl/intl.dart';
 import 'package:flutter_dotenv/flutter_dotenv.dart';
+import 'package:flutter_secure_storage/flutter_secure_storage.dart';
+import 'core/utils/auth_utils.dart';
 import 'core/theme/app_colors.dart';
 import 'core/router/app_router.dart';
 
@@ -17,11 +19,14 @@ Future<void> main() async {
   await dotenv.load();
   await initializeDateFormatting('id_ID');
   Intl.defaultLocale = 'id_ID';
-  runApp(const PesantrenApp());
+
+  final isLoggedIn = await checkIsLoggedIn();
+  runApp(PesantrenApp(isLoggedIn: isLoggedIn));
 }
 
 class PesantrenApp extends StatelessWidget {
-  const PesantrenApp({super.key});
+  final bool isLoggedIn;
+  const PesantrenApp({super.key, this.isLoggedIn = false});
 
   @override
   Widget build(BuildContext context) {
@@ -38,7 +43,7 @@ class PesantrenApp extends StatelessWidget {
           centerTitle: false,
         ),
       ),
-      initialRoute: AppRouter.splash,
+      initialRoute: isLoggedIn ? AppRouter.home : AppRouter.splash,
       onGenerateRoute: AppRouter.onGenerateRoute,
     );
   }

@@ -2,8 +2,8 @@ import 'package:flutter/material.dart';
 import 'package:pesantren_app/widgets/banner_container.dart';
 import 'package:pesantren_app/widgets/bottom_banner.dart';
 import 'package:pesantren_app/widgets/section_header.dart';
-import '../../widgets/profile_list.dart';
-import '../../models/profile_section.dart';
+import '../widgets/profile_list.dart';
+import '../models/profile_section.dart';
 
 class ProfileScreen extends StatelessWidget {
   final String title;

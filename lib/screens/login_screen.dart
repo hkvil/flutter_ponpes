@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_login/flutter_login.dart';
+import '../repository/auth_repository.dart';
 
 class LoginScreen extends StatelessWidget {
   const LoginScreen({Key? key}) : super(key: key);
@@ -7,12 +8,8 @@ class LoginScreen extends StatelessWidget {
   Duration get loginTime => const Duration(milliseconds: 2250);
 
   Future<String?> _authUser(LoginData data) async {
-    // Dummy authentication
-    await Future.delayed(loginTime);
-    if (data.name != 'user' || data.password != 'password') {
-      return 'Username or password is incorrect';
-    }
-    return null;
+    final repo = AuthRepository();
+    return await repo.login(identifier: data.name, password: data.password);
   }
 
   Future<String?> _recoverPassword(String name) async {

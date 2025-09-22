@@ -1,13 +1,13 @@
 import 'package:flutter/material.dart';
 
-import '../../widgets/section_header.dart';
-import '../../widgets/top_bar.dart';
-import '../../widgets/bottom_banner.dart';
-import '../../widgets/banner_container.dart';
-import '../../widgets/menu_button.dart';
-import '../../core/router/app_router.dart';
-import '../menu/menu_screen.dart';
-import '../../core/constants/menu_lists.dart';
+import '../widgets/section_header.dart';
+import '../widgets/top_bar.dart';
+import '../widgets/bottom_banner.dart';
+import '../widgets/banner_container.dart';
+import '../widgets/menu_button.dart';
+import '../core/router/app_router.dart';
+import 'menu_screen.dart';
+import '../core/constants/menu_lists.dart';
 
 /// The home screen shows the main menu grid and achievements.
 ///
@@ -172,13 +172,11 @@ class HomeScreen extends StatelessWidget {
                   padding: const EdgeInsets.fromLTRB(16, 8, 16, 6),
                   child: SectionHeader(
                     title: 'Prestasi dan Penghargaan',
-                    backgroundColor: Colors.green.shade700,
-                    textColor: Colors.white,
+                    backgroundColor: Colors.amber.shade700,
+                    textColor: Colors.black,
                   ),
                 ),
-                const _AchievementItem(
-                    title:
-                        'Go Internasional Sejak 1997'), // INI masih data dummy
+                const _AchievementItem(title: 'Go Internasional Sejak 1997'),
                 const _AchievementItem(
                     title: 'Pesantren Unggulan Nasional Sejak 1999'),
                 const _AchievementItem(

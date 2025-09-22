@@ -1,10 +1,10 @@
 import 'package:flutter/material.dart';
-import 'package:pesantren_app/screens/madrasah/detail_screen.dart';
-import '../../widgets/top_bar.dart';
-import '../../widgets/bottom_banner.dart';
-import '../../widgets/reusable_list_tile.dart';
-import '../../widgets/banner_container.dart';
-import '../../core/constants/detail_lists.dart';
+import 'detail_screen.dart';
+import '../widgets/top_bar.dart';
+import '../widgets/bottom_banner.dart';
+import '../widgets/reusable_list_tile.dart';
+import '../widgets/banner_container.dart';
+import '../core/constants/detail_lists.dart';
 
 /// Class argumen tetap.
 class MenuScreenArgs {
@@ -155,3 +155,4 @@ class MenuScreen extends StatelessWidget {
     );
   }
 }
+// ...existing code...

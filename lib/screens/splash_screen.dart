@@ -1,5 +1,5 @@
 import 'package:flutter/material.dart';
-import '../../core/router/app_router.dart';
+import '../core/router/app_router.dart';
 
 /// Splash screen shown when the app starts.
 ///
@@ -61,8 +61,10 @@ class _Logo extends StatelessWidget {
   Widget build(BuildContext context) {
     return Image.asset(
       'assets/logo.png',
-      height: 96,
-      errorBuilder: (_, __, ___) => const FlutterLogo(size: 96),
+      width: 120,
+      height: 120,
+      errorBuilder: (context, error, stackTrace) =>
+          const Icon(Icons.school, size: 120),
     );
   }
 }

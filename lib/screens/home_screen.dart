@@ -40,6 +40,7 @@ class HomeScreen extends StatelessWidget {
         title: 'PONDOK PESANTREN\nAl-ITTIFAQIAH INDRALAYA',
         subtitle: 'ORGAN ILIR SUMATERA SELATAN INDONESIA',
         automaticallyImplyLeading: false,
+        isHomeScreen: true,
       ),
       body: FutureBuilder<List<String>>(
         future: SliderRepository().fetchSliderImageUrls(),
@@ -64,6 +65,7 @@ class HomeScreen extends StatelessWidget {
                         child: Padding(
                           padding: const EdgeInsets.symmetric(vertical: 24),
                           child: Column(
+                            crossAxisAlignment: CrossAxisAlignment.center,
                             children: [
                               // 1 di atas tengah
                               Row(
@@ -96,81 +98,63 @@ class HomeScreen extends StatelessWidget {
                               const SizedBox(height: 16),
                               // 3 di baris kedua
                               Row(
-                                mainAxisAlignment: MainAxisAlignment.center,
+                                mainAxisAlignment:
+                                    MainAxisAlignment.spaceEvenly,
                                 children: [
                                   for (int i = 1; i <= 3; i++)
-                                    Padding(
-                                      padding: EdgeInsets.symmetric(
-                                        horizontal:
-                                            MediaQuery.of(context).size.width *
-                                                0.06,
-                                      ),
-                                      child: MenuButton(
-                                        title: _menuItems[i].$1,
-                                        iconPath: _menuItems[i].$2,
-                                        onTap: () {
-                                          Navigator.pushNamed(
-                                            context,
-                                            AppRouter.menu,
-                                            arguments: MenuScreenArgs(
-                                                title: _menuItems[i].$1),
-                                          );
-                                        },
-                                      ),
+                                    MenuButton(
+                                      title: _menuItems[i].$1,
+                                      iconPath: _menuItems[i].$2,
+                                      onTap: () {
+                                        Navigator.pushNamed(
+                                          context,
+                                          AppRouter.menu,
+                                          arguments: MenuScreenArgs(
+                                              title: _menuItems[i].$1),
+                                        );
+                                      },
                                     ),
                                 ],
                               ),
                               const SizedBox(height: 16),
                               // 3 di baris ketiga
                               Row(
-                                mainAxisAlignment: MainAxisAlignment.center,
+                                mainAxisAlignment:
+                                    MainAxisAlignment.spaceEvenly,
                                 children: [
                                   for (int i = 4; i <= 6; i++)
-                                    Padding(
-                                      padding: EdgeInsets.symmetric(
-                                        horizontal:
-                                            MediaQuery.of(context).size.width *
-                                                0.06,
-                                      ),
-                                      child: MenuButton(
-                                        title: _menuItems[i].$1,
-                                        iconPath: _menuItems[i].$2,
-                                        onTap: () {
-                                          Navigator.pushNamed(
-                                            context,
-                                            AppRouter.menu,
-                                            arguments: MenuScreenArgs(
-                                                title: _menuItems[i].$1),
-                                          );
-                                        },
-                                      ),
+                                    MenuButton(
+                                      title: _menuItems[i].$1,
+                                      iconPath: _menuItems[i].$2,
+                                      onTap: () {
+                                        Navigator.pushNamed(
+                                          context,
+                                          AppRouter.menu,
+                                          arguments: MenuScreenArgs(
+                                              title: _menuItems[i].$1),
+                                        );
+                                      },
                                     ),
                                 ],
                               ),
                               const SizedBox(height: 16),
                               // 3 di bawah tengah
                               Row(
-                                mainAxisAlignment: MainAxisAlignment.center,
+                                mainAxisAlignment:
+                                    MainAxisAlignment.spaceEvenly,
                                 children: [
                                   for (int i = 7; i <= 9; i++)
-                                    Padding(
-                                      padding: EdgeInsets.symmetric(
-                                        horizontal:
-                                            MediaQuery.of(context).size.width *
-                                                0.06,
-                                      ),
-                                      child: MenuButton(
-                                        title: _menuItems[i].$1,
-                                        iconPath: _menuItems[i].$2,
-                                        onTap: () {
-                                          Navigator.pushNamed(
-                                            context,
-                                            AppRouter.menu,
-                                            arguments: MenuScreenArgs(
-                                                title: _menuItems[i].$1),
-                                          );
-                                        },
-                                      ),
+                                    MenuButton(
+                                      title: _menuItems[i].$1,
+                                      iconPath: _menuItems[i].$2,
+                                      onTap: () {
+                                        Navigator.pushNamed(
+                                          context,
+                                          AppRouter.menu,
+                                          arguments: MenuScreenArgs(
+                                              title: _menuItems[i].$1),
+                                        );
+                                      },
                                     ),
                                 ],
                               ),

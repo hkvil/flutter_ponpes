@@ -1,5 +1,5 @@
 import 'package:flutter/material.dart';
-import 'package:pesantren_app/widgets/banner_container.dart';
+import 'package:pesantren_app/widgets/top_banner.dart';
 import 'package:pesantren_app/widgets/bottom_banner.dart';
 import 'package:pesantren_app/widgets/detail_layout.dart';
 
@@ -21,7 +21,7 @@ class DetailScreen extends StatelessWidget {
       ),
       body: Column(
         children: [
-          BannerContainer(
+          TopBanner(
             assetPath: 'assets/banners/top.png',
             height: 150,
           ),

@@ -1,5 +1,5 @@
 import 'package:flutter/material.dart';
-import 'package:pesantren_app/widgets/banner_container.dart';
+import 'package:pesantren_app/widgets/top_banner.dart';
 import 'package:pesantren_app/widgets/bottom_banner.dart';
 import 'package:pesantren_app/widgets/section_header.dart';
 import '../widgets/profile_list.dart';
@@ -20,7 +20,7 @@ class ProfileScreen extends StatelessWidget {
       body: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          BannerContainer(assetPath: 'assets/banners/top.png'),
+          TopBanner(assetPath: 'assets/banners/top.png'),
           SizedBox(
             height: 20,
           ),

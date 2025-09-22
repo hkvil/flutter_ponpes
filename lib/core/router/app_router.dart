@@ -1,8 +1,8 @@
 import 'package:flutter/material.dart';
 
-import '../../screens/splash/splash_screen.dart';
-import '../../screens/home/home_screen.dart';
-import '../../screens/menu/menu_screen.dart';
+import '../../screens/splash_screen.dart';
+import '../../screens/home_screen.dart';
+import '../../screens/menu_screen.dart';
 import '../../screens/login_screen.dart';
 import '../../core/constants/menu_lists.dart';
 

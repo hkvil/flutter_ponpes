@@ -8,11 +8,11 @@ import '../core/theme/app_colors.dart';
 /// no image is provided or if it fails to load, a fallback placeholder
 /// text will be shown. Use this at the top of screens to display
 /// promotional or informational images.
-class BannerContainer extends StatelessWidget {
+class TopBanner extends StatelessWidget {
   final String? assetPath;
   final double height;
 
-  const BannerContainer({super.key, this.assetPath, this.height = 148});
+  const TopBanner({super.key, this.assetPath, this.height = 148});
 
   @override
   Widget build(BuildContext context) {

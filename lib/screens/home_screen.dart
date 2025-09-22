@@ -3,7 +3,7 @@ import 'package:flutter/material.dart';
 import '../widgets/section_header.dart';
 import '../widgets/top_bar.dart';
 import '../widgets/bottom_banner.dart';
-import '../widgets/banner_container.dart';
+import '../widgets/image_carousel.dart';
 import '../widgets/menu_button.dart';
 import '../core/router/app_router.dart';
 import 'menu_screen.dart';
@@ -11,11 +11,17 @@ import '../core/constants/menu_lists.dart';
 
 /// The home screen shows the main menu grid and achievements.
 ///
-/// It consists of a top banner, a grid of ten menu buttons, a list of
-/// achievements, and a fixed bottom banner. Navigation to other
+/// It consists of a carousel slider with autoplay, a grid of ten menu buttons,
+/// a list of achievements, and a fixed bottom banner. Navigation to other
 /// screens is handled via named routes defined in [AppRouter].
 class HomeScreen extends StatelessWidget {
-  const HomeScreen({super.key});
+  const HomeScreen({
+    super.key,
+    this.carouselImages,
+  });
+
+  /// Carousel images from API - list of image URLs
+  final List<String>? carouselImages;
 
   /// List of menu items: each entry holds a title and the path to its icon.
   static const List<(String, String)> _menuItems = [
@@ -40,7 +46,12 @@ class HomeScreen extends StatelessWidget {
       ),
       body: Column(
         children: [
-          const BannerContainer(assetPath: 'assets/banners/top.png'),
+          // Image Carousel with autoplay
+          ImageCarousel(
+            imageUrls: carouselImages,
+            height: 200.0,
+            autoPlayInterval: const Duration(seconds: 5),
+          ),
           Expanded(
             child: ListView(
               padding: EdgeInsets.zero,
@@ -172,7 +183,7 @@ class HomeScreen extends StatelessWidget {
                   padding: const EdgeInsets.fromLTRB(16, 8, 16, 6),
                   child: SectionHeader(
                     title: 'Prestasi dan Penghargaan',
-                    backgroundColor: Colors.amber.shade700,
+                    backgroundColor: Colors.green.shade700,
                     textColor: Colors.black,
                   ),
                 ),

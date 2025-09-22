@@ -1,4 +1,15 @@
 import 'package:flutter_secure_storage/flutter_secure_storage.dart';
+import '../constants/menu_lists.dart';
+import '../constants/detail_lists.dart';
+
+/// Returns the correct detail menu items for a given title and item.
+List<String> getDetailMenuItems(String title) {
+  print(title);
+  if (title == 'Organ Penyelenggara Pendidikan Formal') {
+    return menuItemsJenis2;
+  }
+  return menuItemsJenis1;
+}
 
 /// Mengecek status login dan expired token JWT.
 /// [expiredDurationMs] default 24 jam.

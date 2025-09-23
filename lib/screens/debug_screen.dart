@@ -296,6 +296,13 @@ class _SlugTestTabState extends State<_SlugTestTab> {
                             ? () => _viewContent(slug, nama ?? '')
                             : null,
                       ),
+                      // View raw data
+                      IconButton(
+                        icon: const Icon(Icons.data_object),
+                        onPressed: status == '✅'
+                            ? () => _viewRawData(slug, nama ?? '')
+                            : null,
+                      ),
                     ],
                   ),
                   onTap: () => _showSlugDetails(slug, nama ?? '', status),
@@ -428,6 +435,155 @@ class _SlugTestTabState extends State<_SlugTestTab> {
         );
       }
     }
+  }
+
+  void _viewRawData(String slug, String nama) async {
+    try {
+      // Show loading dialog
+      showDialog(
+        context: context,
+        barrierDismissible: false,
+        builder: (context) => const AlertDialog(
+          content: Row(
+            children: [
+              CircularProgressIndicator(),
+              SizedBox(width: 16),
+              Text('Loading data...'),
+            ],
+          ),
+        ),
+      );
+
+      final lembaga = await _repository.fetchBySlug(slug);
+
+      if (mounted) {
+        Navigator.pop(context); // Close loading dialog
+
+        if (lembaga != null) {
+          _showRawDataDialog(slug, nama, lembaga);
+        } else {
+          ScaffoldMessenger.of(context).showSnackBar(
+            const SnackBar(content: Text('No data found')),
+          );
+        }
+      }
+    } catch (e) {
+      if (mounted) {
+        Navigator.pop(context); // Close loading dialog
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(content: Text('Error: $e')),
+        );
+      }
+    }
+  }
+
+  void _showRawDataDialog(String slug, String nama, dynamic lembaga) {
+    showDialog(
+      context: context,
+      builder: (context) => AlertDialog(
+        title: Text('Raw Data: $nama'),
+        content: SizedBox(
+          width: double.maxFinite,
+          height: 400,
+          child: SingleChildScrollView(
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                _buildDataField('ID', lembaga.id?.toString() ?? 'N/A'),
+                _buildDataField('Document ID', lembaga.documentId ?? 'N/A'),
+                _buildDataField('Nama', lembaga.nama ?? 'N/A'),
+                _buildDataField('Slug', lembaga.slug ?? 'N/A'),
+                const Divider(),
+                const Text('Profil Content:',
+                    style: TextStyle(fontWeight: FontWeight.bold)),
+                const SizedBox(height: 8),
+                Container(
+                  width: double.infinity,
+                  padding: const EdgeInsets.all(8),
+                  decoration: BoxDecoration(
+                    color: Colors.grey.shade100,
+                    borderRadius: BorderRadius.circular(4),
+                    border: Border.all(color: Colors.grey.shade300),
+                  ),
+                  child: Text(
+                    lembaga.profilMd ?? 'No profil content',
+                    style:
+                        const TextStyle(fontSize: 12, fontFamily: 'monospace'),
+                    maxLines: 6,
+                    overflow: TextOverflow.ellipsis,
+                  ),
+                ),
+                Text(
+                  'Characters: ${lembaga.profilMd?.length ?? 0}',
+                  style: TextStyle(fontSize: 10, color: Colors.grey.shade600),
+                ),
+                const SizedBox(height: 16),
+                const Text('Program Kerja Content:',
+                    style: TextStyle(fontWeight: FontWeight.bold)),
+                const SizedBox(height: 8),
+                Container(
+                  width: double.infinity,
+                  padding: const EdgeInsets.all(8),
+                  decoration: BoxDecoration(
+                    color: Colors.grey.shade100,
+                    borderRadius: BorderRadius.circular(4),
+                    border: Border.all(color: Colors.grey.shade300),
+                  ),
+                  child: Text(
+                    lembaga.programKerjaMd ?? 'No program kerja content',
+                    style:
+                        const TextStyle(fontSize: 12, fontFamily: 'monospace'),
+                    maxLines: 6,
+                    overflow: TextOverflow.ellipsis,
+                  ),
+                ),
+                Text(
+                  'Characters: ${lembaga.programKerjaMd?.length ?? 0}',
+                  style: TextStyle(fontSize: 10, color: Colors.grey.shade600),
+                ),
+                const Divider(),
+                _buildDataField(
+                    'Created At', lembaga.createdAt?.toString() ?? 'N/A'),
+                _buildDataField(
+                    'Updated At', lembaga.updatedAt?.toString() ?? 'N/A'),
+              ],
+            ),
+          ),
+        ),
+        actions: [
+          TextButton(
+            onPressed: () => Navigator.pop(context),
+            child: const Text('Close'),
+          ),
+          ElevatedButton(
+            onPressed: () {
+              Navigator.pop(context);
+              _viewContent(slug, nama);
+            },
+            child: const Text('View Content'),
+          ),
+        ],
+      ),
+    );
+  }
+
+  Widget _buildDataField(String label, String value) {
+    return Padding(
+      padding: const EdgeInsets.only(bottom: 8),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          Text(
+            label,
+            style: const TextStyle(fontWeight: FontWeight.bold, fontSize: 12),
+          ),
+          Text(
+            value,
+            style: const TextStyle(fontSize: 14),
+          ),
+        ],
+      ),
+    );
   }
 
   void _showSlugDetails(String slug, String nama, String status) {

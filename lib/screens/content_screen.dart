@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:markdown_widget/markdown_widget.dart';
 import 'package:pesantren_app/widgets/bottom_banner.dart';
 import '../widgets/responsive_wrapper.dart';
 import '../models/profile_section.dart';
@@ -105,17 +106,7 @@ class ContentScreen extends StatelessWidget {
     // Completely remove markdown widget - use simple Text only
     return Container(
       padding: const EdgeInsets.all(16.0),
-      child: const Text(
-        'Test Content Screen\n\n'
-        'Ini adalah halaman konten sederhana tanpa markdown widget.\n\n'
-        'Tidak ada API call, tidak ada markdown rendering.\n\n'
-        'Hanya text biasa untuk test semantics.',
-        style: TextStyle(
-          fontSize: 16,
-          height: 1.5,
-          color: Colors.black87,
-        ),
-      ),
+      child: MarkdownBlock(data: markdownContent ?? ''),
     );
   }
 }

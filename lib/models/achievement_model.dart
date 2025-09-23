@@ -1,5 +1,3 @@
-
-
 class AchievementModel {
   final String documentId;
   final String title;

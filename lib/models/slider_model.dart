@@ -1,5 +1,3 @@
-import '../core/utils/api_url_utils.dart';
-
 class SliderModel {
   final List<String> imageUrls;
   SliderModel({required this.imageUrls});
@@ -9,7 +7,7 @@ class SliderModel {
     final urls = imagesJson.map<String>((img) {
       final formats = img['formats'] as Map<String, dynamic>? ?? {};
       final imagePath = formats['medium']?['url'] ?? img['url'] ?? '';
-      return ApiUrlUtils.buildImageUrl(baseUrl, imagePath);
+      return imagePath.isNotEmpty ? '$baseUrl$imagePath' : '';
     }).toList();
     return SliderModel(imageUrls: urls);
   }

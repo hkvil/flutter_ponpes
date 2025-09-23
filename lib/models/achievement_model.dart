@@ -1,4 +1,4 @@
-import '../core/utils/api_url_utils.dart';
+
 
 class AchievementModel {
   final String documentId;
@@ -30,7 +30,7 @@ class AchievementModel {
       }
 
       if (imagePath != null) {
-        thumbnailUrl = ApiUrlUtils.buildImageUrl(apiHost, imagePath);
+        thumbnailUrl = imagePath.isNotEmpty ? '$apiHost$imagePath' : null;
       }
     }
 

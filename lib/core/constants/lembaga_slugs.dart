@@ -137,7 +137,7 @@ class LembagaSlugs {
         'Pusat Penjaminan Mutu Pendidikan dan Pengajaran',
 
     // ORGAN PENYELENGGARA PENDIDIKAN FORMAL
-    tamanKanakKanak: 'Taman Kanak-Kanak',
+    tamanKanakKanak: 'Taman AKanak-Kanak',
     tamanPendidikanAlQuran: 'Taman Pendidikan Al-Qur\'an',
     madrasahDiniyah: 'Madrasah Diniyah',
     madrasahIbtidaiyah: 'Madrasah Ibtidaiyah',

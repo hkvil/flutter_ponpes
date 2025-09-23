@@ -1,6 +1,8 @@
 import 'package:flutter/material.dart';
 import 'package:markdown_widget/markdown_widget.dart';
 import 'package:pesantren_app/widgets/bottom_banner.dart';
+import 'package:pesantren_app/widgets/section_header.dart';
+import 'package:pesantren_app/widgets/top_banner.dart';
 import '../widgets/responsive_wrapper.dart';
 import '../models/profile_section.dart';
 
@@ -45,12 +47,9 @@ class ContentScreen extends StatelessWidget {
     return Column(
       children: [
         // Hapus banner dulu untuk test
-        Container(
-          height: 100,
-          color: Colors.green.shade100,
-          child: const Center(
-            child: Text('Header Area', style: TextStyle(fontSize: 18)),
-          ),
+        TopBanner(
+          assetPath: 'assets/banners/top.png',
+          height: 150,
         ),
         const SizedBox(height: 20),
 
@@ -61,13 +60,9 @@ class ContentScreen extends StatelessWidget {
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
-                Text(
-                  title,
-                  style: const TextStyle(
-                    fontSize: 24,
-                    fontWeight: FontWeight.bold,
-                    color: Colors.green,
-                  ),
+                SectionHeader(
+                  title: title,
+                  fontSize: 20,
                 ),
                 const SizedBox(height: 16),
 
@@ -106,7 +101,18 @@ class ContentScreen extends StatelessWidget {
     // Completely remove markdown widget - use simple Text only
     return Container(
       padding: const EdgeInsets.all(16.0),
-      child: MarkdownBlock(data: markdownContent ?? ''),
+      child: MarkdownBlock(
+        data: markdownContent ?? '',
+        config: MarkdownConfig(configs: [
+          H1Config(
+            style: const TextStyle(
+              fontSize: 24,
+              fontWeight: FontWeight.bold,
+              color: Colors.black,
+            ),
+          ),
+        ]),
+      ),
     );
   }
 }

@@ -1,11 +1,13 @@
 import 'package:flutter/material.dart';
 import '../core/utils/menu_navigation_helper.dart';
+import '../models/lembaga_model.dart';
 
 class DetailLayout extends StatelessWidget {
   final String title;
   final List<String> imagePaths;
   final List<String> menuItems;
   final String? lembagaSlug;
+  final Lembaga? cachedLembaga; // Data yang sudah di-preload
 
   const DetailLayout({
     Key? key,
@@ -13,6 +15,7 @@ class DetailLayout extends StatelessWidget {
     this.imagePaths = const [],
     this.menuItems = const [],
     this.lembagaSlug,
+    this.cachedLembaga,
   }) : super(key: key);
 
   @override
@@ -146,13 +149,16 @@ class DetailLayout extends StatelessWidget {
       item,
       title,
       lembagaSlug: lembagaSlug,
+      cachedLembaga: cachedLembaga, // Pass cached data
     );
 
     ScaffoldMessenger.of(context).showSnackBar(
       SnackBar(
-        content: Text(lembagaSlug != null
-            ? 'Mengambil data "$item" dari API...'
-            : 'Menampilkan "$title - $item"'),
+        content: Text(cachedLembaga != null
+            ? 'Buka "$item" (data sudah siap)'
+            : lembagaSlug != null
+                ? 'Mengambil data "$item" dari API...'
+                : 'Menampilkan "$title - $item"'),
         duration: const Duration(seconds: 1),
       ),
     );

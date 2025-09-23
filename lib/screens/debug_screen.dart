@@ -1,6 +1,5 @@
 import 'package:flutter/material.dart';
 import 'package:pesantren_app/core/constants/lembaga_slugs.dart';
-import 'package:pesantren_app/models/lembaga_model.dart';
 import 'package:pesantren_app/repository/lembaga_repository.dart';
 import 'package:pesantren_app/screens/content_screen.dart';
 import '../widgets/responsive_wrapper.dart';
@@ -47,6 +46,11 @@ class _DebugScreenState extends State<DebugScreen> {
       ),
     );
   }
+
+  // Method untuk switch tab dari outside class
+  void _switchToTab(int index) {
+    setState(() => _selectedIndex = index);
+  }
 }
 
 // Tab 1: Debug Menu
@@ -68,7 +72,7 @@ class _DebugMenuTab extends StatelessWidget {
               // Switch to slug test tab
               final debugState =
                   context.findAncestorStateOfType<_DebugScreenState>();
-              debugState?.setState(() => debugState._selectedIndex = 1);
+              debugState?._switchToTab(1);
             },
           ),
         ),

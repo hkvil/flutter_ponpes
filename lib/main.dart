@@ -43,9 +43,9 @@ class PesantrenApp extends StatelessWidget {
           centerTitle: false,
         ),
       ),
-      home: DebugScreen(),
-      //initialRoute: isLoggedIn ? AppRouter.home : AppRouter.splash,
+      initialRoute: isLoggedIn ? AppRouter.home : AppRouter.splash,
       onGenerateRoute: AppRouter.onGenerateRoute,
     );
   }
 }
+//home: DebugScreen(),

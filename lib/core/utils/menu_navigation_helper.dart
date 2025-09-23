@@ -1,7 +1,9 @@
 import 'package:flutter/material.dart';
 import '../../screens/detail_content_screen.dart';
 import '../../screens/content_screen.dart';
+import '../../screens/galeri_screen.dart';
 import '../../models/profile_section.dart';
+import '../../models/lembaga_model.dart';
 import '../../repository/lembaga_repository.dart';
 import '../constants/profil.dart';
 
@@ -11,11 +13,15 @@ class MenuNavigationHelper {
   /// Navigate to appropriate screen based on menu item and lembaga slug
   static void navigateToMenuItem(
       BuildContext context, String menuItem, String categoryTitle,
-      {String? lembagaSlug}) {
-    // Jika ada slug, gunakan API. Jika tidak, gunakan static content
-    if (lembagaSlug != null) {
+      {String? lembagaSlug, dynamic cachedLembaga}) {
+    // Jika ada cached data, gunakan itu (instant navigation)
+    if (cachedLembaga != null) {
+      _navigateWithCachedData(context, menuItem, cachedLembaga);
+    } else if (lembagaSlug != null) {
+      // Fallback ke API call (seperti sekarang)
       _navigateWithApiContent(context, menuItem, categoryTitle, lembagaSlug);
     } else {
+      // Static content fallback
       _navigateWithStaticContent(context, menuItem, categoryTitle);
     }
   }
@@ -107,6 +113,62 @@ class MenuNavigationHelper {
     }
   }
 
+  /// Navigate menggunakan cached data (INSTANT NAVIGATION - no loading!)
+  static void _navigateWithCachedData(
+      BuildContext context, String menuItem, Lembaga lembaga) {
+    switch (menuItem.toLowerCase()) {
+      case 'profil':
+        if (lembaga.hasProfilContent()) {
+          Navigator.push(
+            context,
+            MaterialPageRoute(
+              builder: (context) => ContentScreen(
+                title: '${lembaga.nama} - Profil',
+                markdownContent: lembaga.profilMd!,
+                type: ContentScreenType.full,
+              ),
+            ),
+          );
+        } else {
+          _showContentNotAvailable(context, 'Profil ${lembaga.nama}');
+        }
+        break;
+
+      case 'program kerja':
+        if (lembaga.hasProgramKerjaContent()) {
+          Navigator.push(
+            context,
+            MaterialPageRoute(
+              builder: (context) => ContentScreen(
+                title: '${lembaga.nama} - Program Kerja',
+                markdownContent: lembaga.programKerjaMd!,
+                type: ContentScreenType.full,
+              ),
+            ),
+          );
+        } else {
+          _showContentNotAvailable(context, 'Program Kerja ${lembaga.nama}');
+        }
+        break;
+
+      case 'galeri':
+        Navigator.push(
+          context,
+          MaterialPageRoute(
+            builder: (context) => GaleriScreen(
+              title: '${lembaga.nama} - Galeri',
+              lembaga: lembaga, // Pass API data
+            ),
+          ),
+        );
+        break;
+
+      default:
+        // Untuk menu lain, gunakan static content
+        _navigateWithStaticContent(context, menuItem, lembaga.nama);
+    }
+  }
+
   /// Navigate menggunakan static content (fallback)
   static void _navigateWithStaticContent(
       BuildContext context, String menuItem, String categoryTitle) {
@@ -155,7 +217,15 @@ class MenuNavigationHelper {
         break;
 
       case 'galeri':
-        _showComingSoon(context, 'Galeri');
+        Navigator.push(
+          context,
+          MaterialPageRoute(
+            builder: (context) => GaleriScreen(
+              title: '$categoryTitle - Galeri',
+              // No lembaga data, will use static demo data
+            ),
+          ),
+        );
         break;
 
       case 'informasi':

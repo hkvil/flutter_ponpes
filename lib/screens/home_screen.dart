@@ -7,6 +7,7 @@ import '../widgets/top_bar.dart';
 import '../widgets/bottom_banner.dart';
 import '../widgets/image_carousel.dart';
 import '../widgets/menu_button.dart';
+import '../widgets/responsive_wrapper.dart';
 import '../core/router/app_router.dart';
 import 'menu_screen.dart';
 import '../core/constants/menu_lists.dart';
@@ -35,136 +36,122 @@ class HomeScreen extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return Scaffold(
-      appBar: const TopBar(
-        title: 'PONDOK PESANTREN\nAl-ITTIFAQIAH INDRALAYA',
-        subtitle: 'ORGAN ILIR SUMATERA SELATAN INDONESIA',
-        automaticallyImplyLeading: false,
-        isHomeScreen: true,
-      ),
-      body: FutureBuilder<List<String>>(
-        future: SliderRepository().fetchSliderImageUrls(),
-        builder: (context, snapshot) {
-          final images = snapshot.data;
-          return Column(
-            children: [
-              ImageCarousel(
-                imageUrls: images,
-                height: 200.0,
-                autoPlayInterval: const Duration(seconds: 5),
-              ),
-              Expanded(
-                child: Column(
-                  children: [
-                    Padding(
-                      padding: const EdgeInsets.symmetric(
-                          horizontal: 1, vertical: 1),
-                      child: Material(
-                        elevation: 12,
-                        borderRadius: BorderRadius.circular(12),
-                        child: Container(
-                          padding: const EdgeInsets.symmetric(vertical: 24),
-                          child: Column(
-                            crossAxisAlignment: CrossAxisAlignment.center,
-                            children: [
-                              MenuRow(
-                                items: [_menuItems[0]],
-                                buttonSize: 48,
-                                onTap: (title) {
-                                  final menuData = menuTree[title];
-                                  Navigator.push(
-                                    context,
-                                    MaterialPageRoute(
-                                      builder: (context) => MenuScreen(
-                                        args: MenuScreenArgs(title: title),
-                                        menuData: menuData,
+    return ResponsiveWrapper(
+      child: Scaffold(
+        appBar: const TopBar(
+          title: 'PONDOK PESANTREN\nAl-ITTIFAQIAH INDRALAYA',
+          subtitle: 'ORGAN ILIR SUMATERA SELATAN INDONESIA',
+          automaticallyImplyLeading: false,
+          isHomeScreen: true,
+        ),
+        body: FutureBuilder<List<String>>(
+          future: SliderRepository().fetchSliderImageUrls(),
+          builder: (context, snapshot) {
+            final images = snapshot.data;
+            return Column(
+              children: [
+                ImageCarousel(
+                  imageUrls: images,
+                  height: 200.0,
+                  autoPlayInterval: const Duration(seconds: 5),
+                ),
+                Expanded(
+                  child: Column(
+                    children: [
+                      Padding(
+                        padding: const EdgeInsets.symmetric(
+                            horizontal: 1, vertical: 1),
+                        child: Material(
+                          elevation: 12,
+                          borderRadius: BorderRadius.circular(12),
+                          child: Container(
+                            padding: const EdgeInsets.symmetric(vertical: 24),
+                            child: Column(
+                              crossAxisAlignment: CrossAxisAlignment.center,
+                              children: [
+                                MenuRow(
+                                  items: [_menuItems[0]],
+                                  buttonSize: 48,
+                                  onTap: (title) {
+                                    final menuData = menuTree[title];
+                                    Navigator.push(
+                                      context,
+                                      MaterialPageRoute(
+                                        builder: (context) => MenuScreen(
+                                          args: MenuScreenArgs(title: title),
+                                          menuData: menuData,
+                                        ),
                                       ),
-                                    ),
-                                  );
-                                },
-                              ),
-                              SizedBox(height: 8),
-                              MenuRow(
-                                items: _menuItems.sublist(1, 4),
-                                buttonSize: 48,
-                                onTap: (title) {
-                                  Navigator.pushNamed(
-                                    context,
-                                    AppRouter.menu,
-                                    arguments: MenuScreenArgs(title: title),
-                                  );
-                                },
-                              ),
-                              SizedBox(height: 8),
-                              MenuRow(
-                                items: _menuItems.sublist(4, 7),
-                                buttonSize: 48,
-                                onTap: (title) {
-                                  Navigator.pushNamed(
-                                    context,
-                                    AppRouter.menu,
-                                    arguments: MenuScreenArgs(title: title),
-                                  );
-                                },
-                              ),
-                              SizedBox(height: 8),
-                              MenuRow(
-                                items: _menuItems.sublist(7, 10),
-                                buttonSize: 48,
-                                onTap: (title) {
-                                  Navigator.pushNamed(
-                                    context,
-                                    AppRouter.menu,
-                                    arguments: MenuScreenArgs(title: title),
-                                  );
-                                },
-                              ),
-                            ],
+                                    );
+                                  },
+                                ),
+                                SizedBox(height: 8),
+                                MenuRow(
+                                  items: _menuItems.sublist(1, 4),
+                                  buttonSize: 48,
+                                  onTap: (title) {
+                                    Navigator.pushNamed(
+                                      context,
+                                      AppRouter.menu,
+                                      arguments: MenuScreenArgs(title: title),
+                                    );
+                                  },
+                                ),
+                                SizedBox(height: 8),
+                                MenuRow(
+                                  items: _menuItems.sublist(4, 7),
+                                  buttonSize: 48,
+                                  onTap: (title) {
+                                    Navigator.pushNamed(
+                                      context,
+                                      AppRouter.menu,
+                                      arguments: MenuScreenArgs(title: title),
+                                    );
+                                  },
+                                ),
+                                SizedBox(height: 8),
+                                MenuRow(
+                                  items: _menuItems.sublist(7, 10),
+                                  buttonSize: 48,
+                                  onTap: (title) {
+                                    Navigator.pushNamed(
+                                      context,
+                                      AppRouter.menu,
+                                      arguments: MenuScreenArgs(title: title),
+                                    );
+                                  },
+                                ),
+                              ],
+                            ),
                           ),
                         ),
                       ),
-                    ),
-                    Padding(
-                      padding: const EdgeInsets.fromLTRB(16, 8, 16, 6),
-                      child: Align(
-                        alignment: Alignment.centerLeft,
-                        child: SectionHeader(
-                          title: 'Prestasi dan Penghargaan',
-                          backgroundColor: Colors.green.shade700,
-                          textColor: Colors.white,
+                      Padding(
+                        padding: const EdgeInsets.fromLTRB(16, 8, 16, 6),
+                        child: Align(
+                          alignment: Alignment.centerLeft,
+                          child: SectionHeader(
+                            title: 'Prestasi dan Penghargaan',
+                            backgroundColor: Colors.green.shade700,
+                            textColor: Colors.white,
+                          ),
                         ),
                       ),
-                    ),
-                    Expanded(
-                      child: SingleChildScrollView(
-                        child: AchievementSection(
-                          achievementTitles: const [],
+                      Expanded(
+                        child: SingleChildScrollView(
+                          child: AchievementSection(),
                         ),
                       ),
-                    ),
-                  ],
+                    ],
+                  ),
                 ),
-              ),
-            ],
-          );
-        },
+              ],
+            );
+          },
+        ),
+        bottomNavigationBar:
+            const BottomBanner(assetPath: 'assets/banners/bottom.png'),
       ),
-      bottomNavigationBar:
-          const BottomBanner(assetPath: 'assets/banners/bottom.png'),
-    );
-  }
-}
-
-class AchievementItem extends StatelessWidget {
-  final String title;
-  const AchievementItem({required this.title});
-  @override
-  Widget build(BuildContext context) {
-    return ListTile(
-      leading: const Icon(Icons.military_tech, color: Colors.amber),
-      title: Text(title),
-      contentPadding: const EdgeInsets.symmetric(horizontal: 12),
-      dense: true,
     );
   }
 }

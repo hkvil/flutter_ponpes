@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import '../core/router/app_router.dart';
+import '../widgets/responsive_wrapper.dart';
 
 /// Splash screen shown when the app starts.
 ///
@@ -27,27 +28,29 @@ class _SplashScreenState extends State<SplashScreen> {
 
   @override
   Widget build(BuildContext context) {
-    return const Scaffold(
-      backgroundColor: Colors.white,
-      body: Center(
-        child: Column(
-          mainAxisSize: MainAxisSize.min,
-          children: [
-            _Logo(),
-            SizedBox(height: 16),
-            Text(
-              'SISTEM INFORMASI - DATABASE',
-              style: TextStyle(fontWeight: FontWeight.bold),
-            ),
-            Text(
-              'PONDOK PESANTREN AL-ITTIFAQIAH INDRALAYA',
-              style: TextStyle(fontWeight: FontWeight.w500),
-            ),
-            Text(
-              'ORGAN ILIR SUMATERA SELATAN INDONESIA',
-              style: TextStyle(fontWeight: FontWeight.w500),
-            ),
-          ],
+    return ResponsiveWrapper(
+      child: const Scaffold(
+        backgroundColor: Colors.white,
+        body: Center(
+          child: Column(
+            mainAxisSize: MainAxisSize.min,
+            children: [
+              _Logo(),
+              SizedBox(height: 16),
+              Text(
+                'SISTEM INFORMASI - DATABASE',
+                style: TextStyle(fontWeight: FontWeight.bold),
+              ),
+              Text(
+                'PONDOK PESANTREN AL-ITTIFAQIAH INDRALAYA',
+                style: TextStyle(fontWeight: FontWeight.w500),
+              ),
+              Text(
+                'ORGAN ILIR SUMATERA SELATAN INDONESIA',
+                style: TextStyle(fontWeight: FontWeight.w500),
+              ),
+            ],
+          ),
         ),
       ),
     );

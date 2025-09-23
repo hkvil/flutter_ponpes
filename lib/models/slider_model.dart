@@ -1,3 +1,5 @@
+import '../core/utils/api_url_utils.dart';
+
 class SliderModel {
   final List<String> imageUrls;
   SliderModel({required this.imageUrls});
@@ -6,22 +8,8 @@ class SliderModel {
     final imagesJson = json['images'] as List<dynamic>? ?? [];
     final urls = imagesJson.map<String>((img) {
       final formats = img['formats'] as Map<String, dynamic>? ?? {};
-      var url = formats['medium']?['url'] ?? img['url'] ?? '';
-      // Remove '/api' from baseUrl if present
-      var cleanBaseUrl = baseUrl;
-      if (cleanBaseUrl.endsWith('/api')) {
-        cleanBaseUrl = cleanBaseUrl.substring(0, cleanBaseUrl.length - 4);
-      }
-      // Ensure only one slash between baseUrl and url
-      if (!url.startsWith('http')) {
-        if (url.startsWith('/')) {
-          url = url.substring(1);
-        }
-        return cleanBaseUrl.endsWith('/')
-            ? cleanBaseUrl + url
-            : cleanBaseUrl + '/' + url;
-      }
-      return url;
+      final imagePath = formats['medium']?['url'] ?? img['url'] ?? '';
+      return ApiUrlUtils.buildImageUrl(baseUrl, imagePath);
     }).toList();
     return SliderModel(imageUrls: urls);
   }

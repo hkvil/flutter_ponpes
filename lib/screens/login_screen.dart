@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_login/flutter_login.dart';
 import '../repository/auth_repository.dart';
+import '../widgets/responsive_wrapper.dart';
 
 class LoginScreen extends StatelessWidget {
   const LoginScreen({Key? key}) : super(key: key);
@@ -19,30 +20,32 @@ class LoginScreen extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return Scaffold(
-      body: Column(
-        mainAxisAlignment: MainAxisAlignment.center,
-        children: [
-          Expanded(
-            child: FlutterLogin(
-              title: 'Al Ittifaqiah',
-              onLogin: _authUser,
-              onRecoverPassword: _recoverPassword,
-              onSubmitAnimationCompleted: () {
-                Navigator.of(context).pushReplacementNamed('/home');
-              },
+    return ResponsiveWrapper(
+      child: Scaffold(
+        body: Column(
+          mainAxisAlignment: MainAxisAlignment.center,
+          children: [
+            Expanded(
+              child: FlutterLogin(
+                title: 'Al Ittifaqiah',
+                onLogin: _authUser,
+                onRecoverPassword: _recoverPassword,
+                onSubmitAnimationCompleted: () {
+                  Navigator.of(context).pushReplacementNamed('/home');
+                },
+              ),
             ),
-          ),
-          Padding(
-            padding: const EdgeInsets.only(bottom: 16.0),
-            child: TextButton(
-              onPressed: () {
-                Navigator.of(context).pushReplacementNamed('/home');
-              },
-              child: Text('Login as Guest'),
+            Padding(
+              padding: const EdgeInsets.only(bottom: 16.0),
+              child: TextButton(
+                onPressed: () {
+                  Navigator.of(context).pushReplacementNamed('/home');
+                },
+                child: Text('Login as Guest'),
+              ),
             ),
-          ),
-        ],
+          ],
+        ),
       ),
     );
   }

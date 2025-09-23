@@ -169,6 +169,7 @@ import '../widgets/top_bar.dart';
 import '../widgets/bottom_banner.dart';
 import '../widgets/reusable_list_tile.dart';
 import '../widgets/top_banner.dart';
+import '../widgets/responsive_wrapper.dart';
 import '../core/constants/detail_lists.dart';
 
 /// Class argumen tetap.
@@ -187,136 +188,139 @@ class MenuScreen extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     print(args.title);
-    return Scaffold(
-      appBar: TopBar(title: args.title),
-      body: Column(
-        children: [
-          TopBanner(assetPath: 'assets/banners/top.png'),
-          SizedBox(height: 20),
-          Expanded(
-            child: Builder(
-              builder: (context) {
-                if (menuData is Map<String, dynamic>) {
-                  final keys = menuData.keys.toList();
-                  return ListView.builder(
-                    itemCount: keys.length,
-                    itemBuilder: (context, index) {
-                      final key = keys[index];
-                      return ReusableListTileWidget(
-                        value: null,
-                        titleText: key,
-                        onTap: () {
-                          Navigator.push(
-                            context,
-                            MaterialPageRoute(
-                              builder: (context) => MenuScreen(
-                                args: MenuScreenArgs(title: key),
-                                menuData: menuData[key],
-                              ),
-                            ),
-                          );
-                        },
-                      );
-                    },
-                  );
-                } else if (menuData is List) {
-                  // Cek apakah List berisi Map (menu dengan warna)
-                  if (menuData.isNotEmpty && menuData.first is Map) {
+    return ResponsiveWrapper(
+      child: Scaffold(
+        appBar: TopBar(title: args.title),
+        body: Column(
+          children: [
+            TopBanner(assetPath: 'assets/banners/top.png'),
+            SizedBox(height: 20),
+            Expanded(
+              child: Builder(
+                builder: (context) {
+                  if (menuData is Map<String, dynamic>) {
+                    final keys = menuData.keys.toList();
                     return ListView.builder(
-                      itemCount: menuData.length,
+                      itemCount: keys.length,
                       itemBuilder: (context, index) {
-                        final item = menuData[index] as Map<String, dynamic>;
-                        final title = item['title'] ?? '';
-                        final indexBackgroundColor =
-                            item['indexBackgroundColor'] != null
-                                ? Color(item['indexBackgroundColor'])
-                                : null;
-                        final titleTextBackgroundColor =
-                            item['titleTextBackgroundColor'] != null
-                                ? Color(item['titleTextBackgroundColor'])
-                                : null;
-                        Widget tile = ReusableListTileWidget(
+                        final key = keys[index];
+                        return ReusableListTileWidget(
                           value: null,
-                          titleText: title,
-                          indexBackgroundColor: indexBackgroundColor,
-                          titleTextBackgroundColor: titleTextBackgroundColor,
+                          titleText: key,
                           onTap: () {
-                            // Jika item adalah label (Formal/Non Formal), tidak navigasi
-                            if (title == 'Formal' || title == 'Non Formal')
-                              return;
-                            final isPenyelenggara = args.title ==
-                                'Organ Penyelenggara Pendidikan Formal';
                             Navigator.push(
                               context,
                               MaterialPageRoute(
-                                builder: (context) => DetailScreen(
-                                  title: title,
-                                  menuItems: isPenyelenggara
-                                      ? menuItemsJenis2
-                                      : menuItemsJenis1,
+                                builder: (context) => MenuScreen(
+                                  args: MenuScreenArgs(title: key),
+                                  menuData: menuData[key],
                                 ),
                               ),
                             );
                           },
                         );
-                        if (title != 'Formal' && title != 'Non Formal') {
-                          tile = Padding(
-                            padding: const EdgeInsets.only(left: 60.0),
-                            child: tile,
-                          );
-                        }
-                        return tile;
                       },
                     );
-                  } else if (menuData.isNotEmpty && menuData.first is String) {
-                    // Fallback jika masih List<String> atau List menu bercabang
-                    return ListView.builder(
-                      itemCount: menuData.length,
-                      itemBuilder: (context, index) {
-                        final item = menuData[index];
-                        return ReusableListTileWidget(
-                          value: null,
-                          titleText: item.toString(),
-                          onTap: () {
-                            if (item is List) {
-                              Navigator.push(
-                                context,
-                                MaterialPageRoute(
-                                  builder: (context) => MenuScreen(
-                                    args:
-                                        MenuScreenArgs(title: item.toString()),
-                                    menuData: item,
-                                  ),
-                                ),
-                              );
-                            } else {
+                  } else if (menuData is List) {
+                    // Cek apakah List berisi Map (menu dengan warna)
+                    if (menuData.isNotEmpty && menuData.first is Map) {
+                      return ListView.builder(
+                        itemCount: menuData.length,
+                        itemBuilder: (context, index) {
+                          final item = menuData[index] as Map<String, dynamic>;
+                          final title = item['title'] ?? '';
+                          final indexBackgroundColor =
+                              item['indexBackgroundColor'] != null
+                                  ? Color(item['indexBackgroundColor'])
+                                  : null;
+                          final titleTextBackgroundColor =
+                              item['titleTextBackgroundColor'] != null
+                                  ? Color(item['titleTextBackgroundColor'])
+                                  : null;
+                          Widget tile = ReusableListTileWidget(
+                            value: null,
+                            titleText: title,
+                            indexBackgroundColor: indexBackgroundColor,
+                            titleTextBackgroundColor: titleTextBackgroundColor,
+                            onTap: () {
+                              // Jika item adalah label (Formal/Non Formal), tidak navigasi
+                              if (title == 'Formal' || title == 'Non Formal')
+                                return;
+                              final isPenyelenggara = args.title ==
+                                  'Organ Penyelenggara Pendidikan Formal';
                               Navigator.push(
                                 context,
                                 MaterialPageRoute(
                                   builder: (context) => DetailScreen(
-                                    title: item.toString(),
-                                    menuItems: menuItemsJenis1,
+                                    title: title,
+                                    menuItems: isPenyelenggara
+                                        ? menuItemsJenis2
+                                        : menuItemsJenis1,
                                   ),
                                 ),
                               );
-                            }
-                          },
-                        );
-                      },
-                    );
+                            },
+                          );
+                          if (title != 'Formal' && title != 'Non Formal') {
+                            tile = Padding(
+                              padding: const EdgeInsets.only(left: 60.0),
+                              child: tile,
+                            );
+                          }
+                          return tile;
+                        },
+                      );
+                    } else if (menuData.isNotEmpty &&
+                        menuData.first is String) {
+                      // Fallback jika masih List<String> atau List menu bercabang
+                      return ListView.builder(
+                        itemCount: menuData.length,
+                        itemBuilder: (context, index) {
+                          final item = menuData[index];
+                          return ReusableListTileWidget(
+                            value: null,
+                            titleText: item.toString(),
+                            onTap: () {
+                              if (item is List) {
+                                Navigator.push(
+                                  context,
+                                  MaterialPageRoute(
+                                    builder: (context) => MenuScreen(
+                                      args: MenuScreenArgs(
+                                          title: item.toString()),
+                                      menuData: item,
+                                    ),
+                                  ),
+                                );
+                              } else {
+                                Navigator.push(
+                                  context,
+                                  MaterialPageRoute(
+                                    builder: (context) => DetailScreen(
+                                      title: item.toString(),
+                                      menuItems: menuItemsJenis1,
+                                    ),
+                                  ),
+                                );
+                              }
+                            },
+                          );
+                        },
+                      );
+                    } else {
+                      return const Center(child: Text('Belum ada data.'));
+                    }
                   } else {
                     return const Center(child: Text('Belum ada data.'));
                   }
-                } else {
-                  return const Center(child: Text('Belum ada data.'));
-                }
-              },
+                },
+              ),
             ),
-          ),
-        ],
+          ],
+        ),
+        bottomNavigationBar:
+            const BottomBanner(assetPath: 'assets/banners/bottom.png'),
       ),
-      bottomNavigationBar:
-          const BottomBanner(assetPath: 'assets/banners/bottom.png'),
     );
   }
 }

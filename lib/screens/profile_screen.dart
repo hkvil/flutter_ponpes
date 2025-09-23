@@ -3,6 +3,7 @@ import 'package:pesantren_app/widgets/top_banner.dart';
 import 'package:pesantren_app/widgets/bottom_banner.dart';
 import 'package:pesantren_app/widgets/section_header.dart';
 import '../widgets/profile_list.dart';
+import '../widgets/responsive_wrapper.dart';
 import '../models/profile_section.dart';
 
 class ProfileScreen extends StatelessWidget {
@@ -12,32 +13,36 @@ class ProfileScreen extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return Scaffold(
-      appBar: AppBar(
-        title: Text(title),
-        backgroundColor: Colors.green.shade700,
+    return ResponsiveWrapper(
+      child: Scaffold(
+        appBar: AppBar(
+          title: Text(title),
+          backgroundColor: Colors.green.shade700,
+        ),
+        body: Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            TopBanner(assetPath: 'assets/banners/top.png'),
+            SizedBox(
+              height: 20,
+            ),
+            Padding(
+              padding: const EdgeInsets.all(20.0),
+              child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    SectionHeader(
+                      title: title,
+                      width: 200,
+                    ),
+                    ProfileList(sections: sections),
+                  ]),
+            )
+          ],
+        ),
+        bottomNavigationBar:
+            BottomBanner(assetPath: 'assets/banners/bottom.png'),
       ),
-      body: Column(
-        crossAxisAlignment: CrossAxisAlignment.start,
-        children: [
-          TopBanner(assetPath: 'assets/banners/top.png'),
-          SizedBox(
-            height: 20,
-          ),
-          Padding(
-            padding: const EdgeInsets.all(20.0),
-            child:
-                Column(crossAxisAlignment: CrossAxisAlignment.start, children: [
-              SectionHeader(
-                title: title,
-                width: 200,
-              ),
-              ProfileList(sections: sections),
-            ]),
-          )
-        ],
-      ),
-      bottomNavigationBar: BottomBanner(assetPath: 'assets/banners/bottom.png'),
     );
   }
 }

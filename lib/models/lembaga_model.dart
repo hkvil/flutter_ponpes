@@ -75,6 +75,11 @@ class Lembaga {
     );
   }
 
+  // Helper methods untuk cek konten markdown
+  bool hasProfilContent() => profilMd != null && profilMd!.isNotEmpty;
+  bool hasProgramKerjaContent() =>
+      programKerjaMd != null && programKerjaMd!.isNotEmpty;
+
   /// Helper untuk response standar Strapi: { data: [ {id, attributes:{...}}, ... ] }
   static List<Lembaga> listFromStrapiEnvelope(Map<String, dynamic> body) {
     final data = (body['data'] as List?) ?? const [];

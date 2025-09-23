@@ -1,16 +1,15 @@
 import 'package:flutter/material.dart';
+import 'package:carousel_slider/carousel_slider.dart';
 
 import '../widgets/section_header.dart';
-import '../repository/slider_repository.dart';
-import '../widgets/achievement_section.dart';
 import '../widgets/top_bar.dart';
 import '../widgets/bottom_banner.dart';
-import '../widgets/image_carousel.dart';
 import '../widgets/menu_button.dart';
 import '../widgets/responsive_wrapper.dart';
+import '../widgets/achievement_section.dart';
 import '../core/router/app_router.dart';
+import '../repository/slider_repository.dart';
 import 'menu_screen.dart';
-import '../core/constants/menu_lists.dart';
 
 /// The home screen shows the main menu grid and achievements.
 ///
@@ -44,110 +43,153 @@ class HomeScreen extends StatelessWidget {
           automaticallyImplyLeading: false,
           isHomeScreen: true,
         ),
-        body: FutureBuilder<List<String>>(
-          future: SliderRepository().fetchSliderImageUrls(),
-          builder: (context, snapshot) {
-            final images = snapshot.data;
-            return Column(
-              children: [
-                ImageCarousel(
-                  imageUrls: images,
-                  height: 200.0,
-                  autoPlayInterval: const Duration(seconds: 5),
-                ),
-                Expanded(
-                  child: Column(
-                    children: [
-                      Padding(
-                        padding: const EdgeInsets.symmetric(
-                            horizontal: 1, vertical: 1),
-                        child: Material(
-                          elevation: 12,
-                          borderRadius: BorderRadius.circular(12),
-                          child: Container(
-                            padding: const EdgeInsets.symmetric(vertical: 24),
-                            child: Column(
-                              crossAxisAlignment: CrossAxisAlignment.center,
-                              children: [
-                                MenuRow(
-                                  items: [_menuItems[0]],
-                                  buttonSize: 48,
-                                  onTap: (title) {
-                                    final menuData = menuTree[title];
-                                    Navigator.push(
-                                      context,
-                                      MaterialPageRoute(
-                                        builder: (context) => MenuScreen(
-                                          args: MenuScreenArgs(title: title),
-                                          menuData: menuData,
-                                        ),
-                                      ),
-                                    );
-                                  },
-                                ),
-                                SizedBox(height: 8),
-                                MenuRow(
-                                  items: _menuItems.sublist(1, 4),
-                                  buttonSize: 48,
-                                  onTap: (title) {
-                                    Navigator.pushNamed(
-                                      context,
-                                      AppRouter.menu,
-                                      arguments: MenuScreenArgs(title: title),
-                                    );
-                                  },
-                                ),
-                                SizedBox(height: 8),
-                                MenuRow(
-                                  items: _menuItems.sublist(4, 7),
-                                  buttonSize: 48,
-                                  onTap: (title) {
-                                    Navigator.pushNamed(
-                                      context,
-                                      AppRouter.menu,
-                                      arguments: MenuScreenArgs(title: title),
-                                    );
-                                  },
-                                ),
-                                SizedBox(height: 8),
-                                MenuRow(
-                                  items: _menuItems.sublist(7, 10),
-                                  buttonSize: 48,
-                                  onTap: (title) {
-                                    Navigator.pushNamed(
-                                      context,
-                                      AppRouter.menu,
-                                      arguments: MenuScreenArgs(title: title),
-                                    );
-                                  },
-                                ),
-                              ],
-                            ),
-                          ),
-                        ),
-                      ),
-                      Padding(
-                        padding: const EdgeInsets.fromLTRB(16, 8, 16, 6),
-                        child: Align(
-                          alignment: Alignment.centerLeft,
-                          child: SectionHeader(
-                            title: 'Prestasi dan Penghargaan',
-                            backgroundColor: Colors.green.shade700,
-                            textColor: Colors.white,
-                          ),
-                        ),
-                      ),
-                      Expanded(
-                        child: SingleChildScrollView(
-                          child: AchievementSection(),
-                        ),
-                      ),
-                    ],
+        body: Column(
+          children: [
+            // Carousel dengan API call
+            FutureBuilder<List<String>>(
+              future: SliderRepository().fetchSliderImageUrls(),
+              builder: (context, snapshot) {
+                if (snapshot.connectionState == ConnectionState.waiting) {
+                  return Container(
+                    height: 200.0,
+                    color: Colors.grey.shade200,
+                    child: const Center(child: CircularProgressIndicator()),
+                  );
+                } else if (snapshot.hasError) {
+                  return Container(
+                    height: 200.0,
+                    color: Colors.red.shade100,
+                    child: Center(
+                      child: Text('Error: ${snapshot.error}'),
+                    ),
+                  );
+                } else if (!snapshot.hasData || snapshot.data!.isEmpty) {
+                  return Container(
+                    height: 200.0,
+                    color: Colors.grey.shade100,
+                    child: const Center(child: Text('No images available')),
+                  );
+                }
+
+                return CarouselSlider(
+                  options: CarouselOptions(
+                    height: 200.0,
+                    autoPlay: true,
+                    enlargeCenterPage: true,
+                    viewportFraction: 1.0,
+                    autoPlayInterval: const Duration(seconds: 3),
                   ),
-                ),
-              ],
-            );
-          },
+                  items: snapshot.data!.map((imageUrl) {
+                    return Builder(
+                      builder: (BuildContext context) {
+                        return Container(
+                          width: MediaQuery.of(context).size.width,
+                          margin: const EdgeInsets.symmetric(horizontal: 5.0),
+                          decoration: const BoxDecoration(
+                            color: Colors.amber,
+                          ),
+                          child: Image.network(
+                            imageUrl,
+                            fit: BoxFit.cover,
+                            errorBuilder: (context, error, stackTrace) {
+                              return Container(
+                                color: Colors.grey.shade300,
+                                child: const Icon(Icons.broken_image),
+                              );
+                            },
+                          ),
+                        );
+                      },
+                    );
+                  }).toList(),
+                );
+              },
+            ),
+            Expanded(
+              child: Column(
+                children: [
+                  Padding(
+                    padding:
+                        const EdgeInsets.symmetric(horizontal: 1, vertical: 1),
+                    child: Material(
+                      elevation: 12,
+                      borderRadius: BorderRadius.circular(12),
+                      child: Container(
+                        padding: const EdgeInsets.symmetric(vertical: 24),
+                        child: Column(
+                          crossAxisAlignment: CrossAxisAlignment.center,
+                          children: [
+                            MenuRow(
+                              items: [_menuItems[0]],
+                              buttonSize: 48,
+                              onTap: (title) {
+                                Navigator.pushNamed(
+                                  context,
+                                  AppRouter.menu,
+                                  arguments: MenuScreenArgs(title: title),
+                                );
+                              },
+                            ),
+                            SizedBox(height: 8),
+                            MenuRow(
+                              items: _menuItems.sublist(1, 4),
+                              buttonSize: 48,
+                              onTap: (title) {
+                                Navigator.pushNamed(
+                                  context,
+                                  AppRouter.menu,
+                                  arguments: MenuScreenArgs(title: title),
+                                );
+                              },
+                            ),
+                            SizedBox(height: 8),
+                            MenuRow(
+                              items: _menuItems.sublist(4, 7),
+                              buttonSize: 48,
+                              onTap: (title) {
+                                Navigator.pushNamed(
+                                  context,
+                                  AppRouter.menu,
+                                  arguments: MenuScreenArgs(title: title),
+                                );
+                              },
+                            ),
+                            SizedBox(height: 8),
+                            MenuRow(
+                              items: _menuItems.sublist(7, 10),
+                              buttonSize: 48,
+                              onTap: (title) {
+                                Navigator.pushNamed(
+                                  context,
+                                  AppRouter.menu,
+                                  arguments: MenuScreenArgs(title: title),
+                                );
+                              },
+                            ),
+                          ],
+                        ),
+                      ),
+                    ),
+                  ),
+                  Padding(
+                    padding: const EdgeInsets.fromLTRB(16, 8, 16, 6),
+                    child: Align(
+                      alignment: Alignment.centerLeft,
+                      child: SectionHeader(
+                        title: 'Prestasi dan Penghargaan',
+                        backgroundColor: Colors.green.shade700,
+                        textColor: Colors.white,
+                      ),
+                    ),
+                  ),
+                  // Achievement section dengan API call
+                  const Expanded(
+                    child: AchievementSection(),
+                  ),
+                ],
+              ),
+            ),
+          ],
         ),
         bottomNavigationBar:
             const BottomBanner(assetPath: 'assets/banners/bottom.png'),

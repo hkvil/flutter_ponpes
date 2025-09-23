@@ -1,33 +1,142 @@
+import 'package:dio/dio.dart';
+import 'package:flutter_dotenv/flutter_dotenv.dart';
 import 'package:pesantren_app/models/lembaga_model.dart';
-import '../config.dart';
 
 class LembagaRepository {
+  final Dio _dio = Dio(
+    BaseOptions(
+      connectTimeout: const Duration(seconds: 10),
+      receiveTimeout: const Duration(seconds: 10),
+    ),
+  );
+
   /// Ambil daftar lembaga untuk menu (nama + slug + timestamp)
   Future<List<Lembaga>> fetchAll() async {
-    final response = await AppConfig.dio.get('/api/lembagas', queryParameters: {
-      'fields[0]': 'nama',
-      'fields[1]': 'slug',
-      'fields[2]': 'createdAt',
-      'fields[3]': 'updatedAt',
-      'sort': 'nama:asc',
-      'pagination[pageSize]': AppConfig.defaultPageSize,
-    });
+    final apiHost = dotenv.env['API_HOST'] ?? '';
+    final apiToken = dotenv.env['API_TOKEN_READONLY'] ?? '';
+
+    final response = await _dio.get(
+      '$apiHost/api/lembagas',
+      queryParameters: {
+        'fields[0]': 'nama',
+        'fields[1]': 'slug',
+        'fields[2]': 'createdAt',
+        'fields[3]': 'updatedAt',
+        'sort': 'nama:asc',
+        'pagination[pageSize]': 200,
+      },
+      options: Options(
+        headers: {
+          'Content-Type': 'application/json',
+          if (apiToken.isNotEmpty) 'Authorization': 'Bearer $apiToken',
+        },
+      ),
+    );
     final body = response.data as Map<String, dynamic>;
     return Lembaga.listFromStrapiEnvelope(body);
   }
 
-  /// Ambil detail lembaga by slug, lengkap dengan images/videos/kontak
+  /// Ambil detail lembaga by slug, lengkap dengan images/videos/kontak/profilMd/programKerjaMd
   Future<Lembaga?> fetchBySlug(String slug) async {
-    final response = await AppConfig.dio.get('/api/lembagas', queryParameters: {
+    // ===== API REQUEST TRACKING =====
+    print('\n🔄 [LEMBAGA_API] Starting API call...');
+    print('📍 Slug: "$slug"');
+
+    final apiHost = dotenv.env['API_HOST'] ?? '';
+    final apiToken = dotenv.env['API_TOKEN_READONLY'] ?? '';
+
+    print('🔧 [LEMBAGA_API] API Host: $apiHost');
+    print(
+        '🔧 [LEMBAGA_API] API Token: ${apiToken.isNotEmpty ? "Present (${apiToken.length} chars)" : "Missing"}');
+
+    // Gunakan URI encoding yang benar untuk Strapi
+    final uri = Uri.parse('$apiHost/api/lembagas').replace(queryParameters: {
       'filters[slug][\$eq]': slug,
-      'populate[images][populate]': 'media',
-      'populate[videos]': '*',
-      'populate[kontak]': '*',
-      'pagination[pageSize]': 1,
+      'populate': '*',
     });
-    final body = response.data as Map<String, dynamic>;
-    final data = (body['data'] as List?) ?? const [];
-    if (data.isEmpty) return null;
-    return Lembaga.fromJson(data.first as Map<String, dynamic>);
+
+    // Print URL yang akan dihit
+    print('🌐 Final URL: $uri');
+
+    try {
+      final response = await _dio.getUri(
+        uri,
+        options: Options(
+          headers: {
+            'Content-Type': 'application/json',
+            if (apiToken.isNotEmpty) 'Authorization': 'Bearer $apiToken',
+          },
+        ),
+      );
+
+      // ===== API RESPONSE TRACKING =====
+      print('\n✅ [LEMBAGA_API] Response received');
+      print('📊 Status Code: ${response.statusCode}');
+      print('📈 Response Headers: ${response.headers.map}');
+
+      final body = response.data as Map<String, dynamic>;
+      print('📦 Response Body Keys: ${body.keys.toList()}');
+
+      final data = (body['data'] as List?) ?? const [];
+      print('📋 Data Array Length: ${data.length}');
+
+      if (data.isEmpty) {
+        print('❌ [LEMBAGA_API] No lembaga found with slug: "$slug"');
+        print('💡 Available data structure: ${body.toString()}');
+        return null;
+      }
+
+      // ===== DATA PROCESSING TRACKING =====
+      print('\n🔄 [LEMBAGA_API] Processing data...');
+      final rawData = data.first as Map<String, dynamic>;
+      print('📄 Raw Data Keys: ${rawData.keys.toList()}');
+
+      // Print raw markdown content
+      if (rawData['profilMd'] != null) {
+        final profilLength = (rawData['profilMd'] as String).length;
+        print('📝 profilMd: Found ($profilLength chars)');
+        print(
+            '📝 profilMd Preview: "${(rawData['profilMd'] as String).substring(0, (rawData['profilMd'] as String).length > 100 ? 100 : (rawData['profilMd'] as String).length)}${(rawData['profilMd'] as String).length > 100 ? "..." : ""}"');
+      } else {
+        print('📝 profilMd: NULL');
+      }
+
+      if (rawData['programKerjaMd'] != null) {
+        final programKerjaLength = (rawData['programKerjaMd'] as String).length;
+        print('📋 programKerjaMd: Found ($programKerjaLength chars)');
+        print(
+            '📋 programKerjaMd Preview: "${(rawData['programKerjaMd'] as String).substring(0, (rawData['programKerjaMd'] as String).length > 100 ? 100 : (rawData['programKerjaMd'] as String).length)}${(rawData['programKerjaMd'] as String).length > 100 ? "..." : ""}"');
+      } else {
+        print('📋 programKerjaMd: NULL');
+      }
+
+      final lembaga = Lembaga.fromJson(rawData);
+
+      // ===== FINAL RESULT TRACKING =====
+      print('\n✅ [LEMBAGA_API] Data processing completed');
+      print('🏛️  Lembaga Name: "${lembaga.nama}"');
+      print('🔗 Lembaga Slug: "${lembaga.slug}"');
+      print('📝 ProfilMd Available: ${lembaga.hasProfilContent()}');
+      print('📋 ProgramKerjaMd Available: ${lembaga.hasProgramKerjaContent()}');
+
+      if (lembaga.hasProfilContent()) {
+        print('📏 ProfilMd Length: ${lembaga.profilMd!.length} characters');
+      }
+      if (lembaga.hasProgramKerjaContent()) {
+        print(
+            '📏 ProgramKerjaMd Length: ${lembaga.programKerjaMd!.length} characters');
+      }
+
+      print('🎉 [LEMBAGA_API] Success! Returning lembaga data\n');
+      return lembaga;
+    } catch (e, stackTrace) {
+      // ===== ERROR TRACKING =====
+      print('\n❌ [LEMBAGA_API] ERROR occurred!');
+      print('🚨 Error: $e');
+      print('📍 StackTrace: $stackTrace');
+      print('🔧 Slug attempted: "$slug"');
+      print('💡 Please check API endpoint and network connection\n');
+      rethrow;
+    }
   }
 }

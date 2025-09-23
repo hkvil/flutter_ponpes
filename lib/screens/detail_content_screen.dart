@@ -5,8 +5,7 @@ import 'content_screen.dart';
 class DetailContentScreen extends StatelessWidget {
   final String title;
   final List<ProfileSection> sections;
-  const DetailContentScreen(
-      {required this.title, required this.sections, super.key});
+  const DetailContentScreen({required this.title, required this.sections, super.key});
 
   @override
   Widget build(BuildContext context) {

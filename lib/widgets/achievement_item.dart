@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import '../models/achievement_model.dart';
+import '../screens/achievement_detail_screen.dart';
 
 class AchievementItem extends StatelessWidget {
   final AchievementModel achievement;
@@ -62,8 +63,14 @@ class AchievementItem extends StatelessWidget {
       contentPadding: const EdgeInsets.symmetric(horizontal: 12, vertical: 8),
       dense: false,
       onTap: () {
-        // TODO: Navigate ke detail achievement dengan documentId
-        print('Tapped achievement: ${achievement.documentId}');
+        Navigator.of(context).push(
+          MaterialPageRoute(
+            builder: (context) => AchievementDetailScreen(
+              achievement: achievement,
+              showFullLayout: false, // Minimal layout untuk detail
+            ),
+          ),
+        );
       },
     );
   }

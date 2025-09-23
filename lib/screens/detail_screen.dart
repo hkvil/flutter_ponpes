@@ -3,6 +3,7 @@ import 'package:pesantren_app/widgets/top_banner.dart';
 import 'package:pesantren_app/widgets/bottom_banner.dart';
 import 'package:pesantren_app/widgets/detail_layout.dart';
 import '../widgets/responsive_wrapper.dart';
+import '../core/utils/menu_slug_mapper.dart';
 
 class DetailScreen extends StatelessWidget {
   final String title;
@@ -32,6 +33,8 @@ class DetailScreen extends StatelessWidget {
               child: DetailLayout(
                 title: title,
                 menuItems: menuItems,
+                lembagaSlug: MenuSlugMapper.getSlugByMenuTitle(
+                    title), // Add slug mapping
               ),
             ),
           ],

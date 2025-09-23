@@ -58,101 +58,66 @@ class HomeScreen extends StatelessWidget {
                   children: [
                     Padding(
                       padding: const EdgeInsets.symmetric(
-                          horizontal: 12, vertical: 20),
+                          horizontal: 1, vertical: 1),
                       child: Material(
                         elevation: 12,
                         borderRadius: BorderRadius.circular(12),
-                        child: Padding(
+                        child: Container(
                           padding: const EdgeInsets.symmetric(vertical: 24),
                           child: Column(
                             crossAxisAlignment: CrossAxisAlignment.center,
                             children: [
-                              // 1 di atas tengah
-                              Row(
-                                mainAxisAlignment: MainAxisAlignment.center,
-                                children: [
-                                  MenuButton(
-                                    title: _menuItems[0].$1,
-                                    iconPath: _menuItems[0].$2,
-                                    onTap: () {
-                                      final menuData =
-                                          menuTree[_menuItems[0].$1];
-                                      Navigator.push(
-                                        context,
-                                        MaterialPageRoute(
-                                          builder: (context) => MenuScreen(
-                                            args: MenuScreenArgs(
-                                                title: _menuItems[0].$1),
-                                            menuData: menuData,
-                                          ),
-                                        ),
-                                      );
-                                    },
-                                  ),
-                                ],
-                              ),
-                              const SizedBox(height: 16),
-                              // 3 di baris kedua
-                              Row(
-                                mainAxisAlignment:
-                                    MainAxisAlignment.spaceEvenly,
-                                children: [
-                                  for (int i = 1; i <= 3; i++)
-                                    MenuButton(
-                                      title: _menuItems[i].$1,
-                                      iconPath: _menuItems[i].$2,
-                                      onTap: () {
-                                        Navigator.pushNamed(
-                                          context,
-                                          AppRouter.menu,
-                                          arguments: MenuScreenArgs(
-                                              title: _menuItems[i].$1),
-                                        );
-                                      },
+                              MenuRow(
+                                items: [_menuItems[0]],
+                                buttonSize: 48,
+                                onTap: (title) {
+                                  final menuData = menuTree[title];
+                                  Navigator.push(
+                                    context,
+                                    MaterialPageRoute(
+                                      builder: (context) => MenuScreen(
+                                        args: MenuScreenArgs(title: title),
+                                        menuData: menuData,
+                                      ),
                                     ),
-                                ],
+                                  );
+                                },
                               ),
-                              const SizedBox(height: 16),
-                              // 3 di baris ketiga
-                              Row(
-                                mainAxisAlignment:
-                                    MainAxisAlignment.spaceEvenly,
-                                children: [
-                                  for (int i = 4; i <= 6; i++)
-                                    MenuButton(
-                                      title: _menuItems[i].$1,
-                                      iconPath: _menuItems[i].$2,
-                                      onTap: () {
-                                        Navigator.pushNamed(
-                                          context,
-                                          AppRouter.menu,
-                                          arguments: MenuScreenArgs(
-                                              title: _menuItems[i].$1),
-                                        );
-                                      },
-                                    ),
-                                ],
+                              SizedBox(height: 8),
+                              MenuRow(
+                                items: _menuItems.sublist(1, 4),
+                                buttonSize: 48,
+                                onTap: (title) {
+                                  Navigator.pushNamed(
+                                    context,
+                                    AppRouter.menu,
+                                    arguments: MenuScreenArgs(title: title),
+                                  );
+                                },
                               ),
-                              const SizedBox(height: 16),
-                              // 3 di bawah tengah
-                              Row(
-                                mainAxisAlignment:
-                                    MainAxisAlignment.spaceEvenly,
-                                children: [
-                                  for (int i = 7; i <= 9; i++)
-                                    MenuButton(
-                                      title: _menuItems[i].$1,
-                                      iconPath: _menuItems[i].$2,
-                                      onTap: () {
-                                        Navigator.pushNamed(
-                                          context,
-                                          AppRouter.menu,
-                                          arguments: MenuScreenArgs(
-                                              title: _menuItems[i].$1),
-                                        );
-                                      },
-                                    ),
-                                ],
+                              SizedBox(height: 8),
+                              MenuRow(
+                                items: _menuItems.sublist(4, 7),
+                                buttonSize: 48,
+                                onTap: (title) {
+                                  Navigator.pushNamed(
+                                    context,
+                                    AppRouter.menu,
+                                    arguments: MenuScreenArgs(title: title),
+                                  );
+                                },
+                              ),
+                              SizedBox(height: 8),
+                              MenuRow(
+                                items: _menuItems.sublist(7, 10),
+                                buttonSize: 48,
+                                onTap: (title) {
+                                  Navigator.pushNamed(
+                                    context,
+                                    AppRouter.menu,
+                                    arguments: MenuScreenArgs(title: title),
+                                  );
+                                },
                               ),
                             ],
                           ),
@@ -200,6 +165,35 @@ class AchievementItem extends StatelessWidget {
       title: Text(title),
       contentPadding: const EdgeInsets.symmetric(horizontal: 12),
       dense: true,
+    );
+  }
+}
+
+class MenuRow extends StatelessWidget {
+  final List<(String, String)> items;
+  final void Function(String title) onTap;
+  final double buttonSize;
+  final MainAxisAlignment alignment;
+  const MenuRow(
+      {super.key,
+      required this.items,
+      required this.onTap,
+      this.buttonSize = 48,
+      this.alignment = MainAxisAlignment.spaceEvenly});
+
+  @override
+  Widget build(BuildContext context) {
+    return Row(
+      mainAxisAlignment: alignment,
+      children: [
+        for (final item in items)
+          MenuButton(
+            title: item.$1,
+            iconPath: item.$2,
+            buttonSize: buttonSize,
+            onTap: () => onTap(item.$1),
+          ),
+      ],
     );
   }
 }

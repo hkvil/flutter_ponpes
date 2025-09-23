@@ -74,7 +74,7 @@ class TopBar extends StatelessWidget implements PreferredSizeWidget {
                       Text(
                         title,
                         style: TextStyle(
-                          fontSize: 16,
+                          fontSize: 14,
                           fontWeight: FontWeight.bold,
                           color: AppColors.primaryGreen,
                           height: 1.0,

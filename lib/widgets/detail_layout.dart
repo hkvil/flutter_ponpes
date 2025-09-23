@@ -3,6 +3,14 @@ import '../core/utils/menu_navigation_helper.dart';
 import '../models/lembaga_model.dart';
 
 class DetailLayout extends StatelessWidget {
+  // 🎨 Konstanta ukuran gambar - Edit di sini untuk mengubah semua ukuran
+  // Rasio 16:9 - Width 96px, Height 54px
+  static const double imageWidth = 96.0 * 2;
+  static const double imageHeight = 54.0 * 2;
+  static const double borderRadius = 8.0;
+  static const double imageSpacing = 8.0; // Jarak antar gambar
+  static const int maxImages = 6; // Maksimal gambar yang ditampilkan
+
   final String title;
   final List<String> imagePaths;
   final List<String> menuItems;
@@ -27,7 +35,7 @@ class DetailLayout extends StatelessWidget {
         children: [
           // Left side - Images
           Container(
-            width: 100,
+            width: imageWidth + 20, // Tambah padding 20px untuk margin
             child: _buildImagesList(),
           ),
           const SizedBox(width: 16),
@@ -41,30 +49,113 @@ class DetailLayout extends StatelessWidget {
   }
 
   Widget _buildImagesList() {
-    if (imagePaths.isEmpty) {
+    // Gunakan frontImages dari cached lembaga jika ada
+    if (cachedLembaga != null && cachedLembaga!.frontImages.isNotEmpty) {
       return Column(
         mainAxisSize: MainAxisSize.min,
-        children: List.generate(
-          6,
-          (index) => Container(
-            margin: const EdgeInsets.only(bottom: 8.0),
-            child: const Placeholder(
-              fallbackHeight: 65,
-              fallbackWidth: 80,
+        children: cachedLembaga!.frontImages.take(maxImages).map((frontImage) {
+          return Container(
+            margin: EdgeInsets.only(bottom: imageSpacing),
+            child: ClipRRect(
+              borderRadius: BorderRadius.circular(borderRadius),
+              child: Container(
+                height: imageHeight,
+                width: imageWidth,
+                decoration: BoxDecoration(
+                  color: Colors.grey.shade200,
+                ),
+                child: Image.network(
+                  frontImage.resolvedUrl,
+                  fit: BoxFit.cover,
+                  loadingBuilder: (context, child, progress) {
+                    if (progress == null) return child;
+                    return Container(
+                      height: imageHeight,
+                      width: imageWidth,
+                      color: Colors.grey.shade200,
+                      child: const Center(
+                        child: SizedBox(
+                          width: 20,
+                          height: 20,
+                          child: CircularProgressIndicator(strokeWidth: 2),
+                        ),
+                      ),
+                    );
+                  },
+                  errorBuilder: (context, error, stackTrace) {
+                    return Container(
+                      height: imageHeight,
+                      width: imageWidth,
+                      color: Colors.grey.shade300,
+                      child: Icon(
+                        Icons.broken_image,
+                        color: Colors.grey.shade500,
+                        size: 30,
+                      ),
+                    );
+                  },
+                ),
+              ),
             ),
-          ),
-        ),
+          );
+        }).toList(),
       );
     }
 
+    // Fallback ke imagePaths jika ada
+    if (imagePaths.isNotEmpty) {
+      return Column(
+        mainAxisSize: MainAxisSize.min,
+        children: imagePaths.take(maxImages).map((path) {
+          return Container(
+            margin: EdgeInsets.only(bottom: imageSpacing),
+            child: ClipRRect(
+              borderRadius: BorderRadius.circular(borderRadius),
+              child: Container(
+                height: imageHeight,
+                width: imageWidth,
+                decoration: BoxDecoration(
+                  color: Colors.grey.shade200,
+                ),
+                child: Image.asset(
+                  path,
+                  fit: BoxFit.cover,
+                  errorBuilder: (context, error, stackTrace) {
+                    return Placeholder(
+                      fallbackHeight: imageHeight,
+                      fallbackWidth: imageWidth,
+                    );
+                  },
+                ),
+              ),
+            ),
+          );
+        }).toList(),
+      );
+    }
+
+    // Default placeholders jika tidak ada gambar sama sekali
     return Column(
       mainAxisSize: MainAxisSize.min,
-      children: imagePaths
-          .map((img) => Container(
-                margin: const EdgeInsets.only(bottom: 8.0),
-                child: Image.asset(img, width: 80, height: 80),
-              ))
-          .toList(),
+      children: List.generate(
+        maxImages,
+        (index) => Container(
+          margin: EdgeInsets.only(bottom: imageSpacing),
+          child: ClipRRect(
+            borderRadius: BorderRadius.circular(borderRadius),
+            child: Container(
+              height: imageHeight,
+              width: imageWidth,
+              color: Colors.grey.shade200,
+              child: Icon(
+                Icons.image,
+                color: Colors.grey.shade500,
+                size: 30,
+              ),
+            ),
+          ),
+        ),
+      ),
     );
   }
 

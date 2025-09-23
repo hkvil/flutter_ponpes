@@ -13,6 +13,7 @@ class Lembaga {
   final List<ImageItem> images;
   final List<VideoItem> videos;
   final List<KontakItem> kontak;
+  final List<FrontImageItem> frontImages; // Foto untuk halaman depan
 
   Lembaga({
     required this.id,
@@ -27,6 +28,7 @@ class Lembaga {
     this.images = const [],
     this.videos = const [],
     this.kontak = const [],
+    this.frontImages = const [],
   });
 
   /// Menerima JSON **flat** (seperti contohmu) atau **envelope Strapi** ({id, attributes:{...}}).
@@ -72,6 +74,7 @@ class Lembaga {
       images: _list(attrs['images'], ImageItem.fromAny),
       videos: _list(attrs['videos'], VideoItem.fromAny),
       kontak: _list(attrs['kontak'], KontakItem.fromAny),
+      frontImages: _list(attrs['frontImages'], FrontImageItem.fromAny),
     );
   }
 
@@ -174,5 +177,41 @@ class KontakItem {
       );
     }
     return KontakItem();
+  }
+}
+
+class FrontImageItem {
+  final String? url;
+
+  FrontImageItem({this.url});
+
+  String get resolvedUrl => AppConfig.absoluteUrl(url ?? '');
+
+  /// Parse Strapi media object untuk ambil URL saja
+  static FrontImageItem fromAny(dynamic any) {
+    if (any is String) return FrontImageItem(url: any);
+
+    if (any is Map) {
+      final m = any.cast<String, dynamic>();
+
+      // Ambil URL langsung dari field 'url'
+      if (m['url'] is String) {
+        return FrontImageItem(url: m['url'] as String);
+      }
+
+      // Fallback: coba ambil dari formats jika ada (medium/small/large)
+      final formats = m['formats'];
+      if (formats is Map) {
+        // Prioritas: medium > small > large > thumbnail
+        for (final size in ['medium', 'small', 'large', 'thumbnail']) {
+          final format = formats[size];
+          if (format is Map && format['url'] is String) {
+            return FrontImageItem(url: format['url'] as String);
+          }
+        }
+      }
+    }
+
+    return FrontImageItem();
   }
 }

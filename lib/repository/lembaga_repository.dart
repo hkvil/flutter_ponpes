@@ -110,6 +110,24 @@ class LembagaRepository {
         print('📋 programKerjaMd: NULL');
       }
 
+      // Check frontImages
+      if (rawData['frontImages'] is List) {
+        final frontImagesCount = (rawData['frontImages'] as List).length;
+        print('🖼️  frontImages: Found ($frontImagesCount images)');
+        for (int i = 0;
+            i < (rawData['frontImages'] as List).length && i < 3;
+            i++) {
+          final img = (rawData['frontImages'] as List)[i];
+          if (img is Map && img['url'] is String) {
+            print('🖼️  Image $i: ${img['url']}');
+          }
+        }
+        if (frontImagesCount > 3)
+          print('🖼️  ... and ${frontImagesCount - 3} more images');
+      } else {
+        print('🖼️  frontImages: NULL or empty');
+      }
+
       final lembaga = Lembaga.fromJson(rawData);
 
       // ===== FINAL RESULT TRACKING =====
@@ -118,6 +136,8 @@ class LembagaRepository {
       print('🔗 Lembaga Slug: "${lembaga.slug}"');
       print('📝 ProfilMd Available: ${lembaga.hasProfilContent()}');
       print('📋 ProgramKerjaMd Available: ${lembaga.hasProgramKerjaContent()}');
+      print(
+          '🖼️  FrontImages Available: ${lembaga.frontImages.isNotEmpty} (${lembaga.frontImages.length} images)');
 
       if (lembaga.hasProfilContent()) {
         print('📏 ProfilMd Length: ${lembaga.profilMd!.length} characters');

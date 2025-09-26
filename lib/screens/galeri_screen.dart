@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:url_launcher/url_launcher.dart';
+import 'package:photo_view/photo_view.dart';
 import '../widgets/responsive_wrapper.dart';
 import '../models/lembaga_model.dart';
 
@@ -261,14 +262,33 @@ class _FotoTab extends StatelessWidget {
                     ],
                   ),
                 ),
-                child: const Align(
+                child: Align(
                   alignment: Alignment.topRight,
                   child: Padding(
-                    padding: EdgeInsets.all(8),
-                    child: Icon(
-                      Icons.zoom_in,
-                      color: Colors.white,
-                      size: 20,
+                    padding: const EdgeInsets.all(8),
+                    child: InkWell(
+                      borderRadius: BorderRadius.circular(20),
+                      onTap: () {
+                        final allImageUrls = lembaga!.images
+                            .map((img) => img.resolvedUrl.isNotEmpty
+                                ? img.resolvedUrl
+                                : 'https://picsum.photos/400/300?random=${img.id ?? (lembaga!.images.indexOf(img) + 1)}')
+                            .toList();
+                        _openPhotoViewer(
+                            context, imageUrl, allImageUrls, index);
+                      },
+                      child: Container(
+                        padding: const EdgeInsets.all(6),
+                        decoration: BoxDecoration(
+                          color: Colors.black.withOpacity(0.6),
+                          borderRadius: BorderRadius.circular(20),
+                        ),
+                        child: const Icon(
+                          Icons.zoom_in,
+                          color: Colors.white,
+                          size: 20,
+                        ),
+                      ),
                     ),
                   ),
                 ),
@@ -326,6 +346,59 @@ class _FotoTab extends StatelessWidget {
             ),
           ),
         ],
+      ),
+    );
+  }
+
+  void _openPhotoViewer(BuildContext context, String imageUrl,
+      List<String> images, int initialIndex) {
+    Navigator.of(context).push(
+      MaterialPageRoute(
+        builder: (context) => PhotoViewer(
+          imageUrl: imageUrl,
+          images: images,
+          initialIndex: initialIndex,
+        ),
+      ),
+    );
+  }
+}
+
+class PhotoViewer extends StatelessWidget {
+  final String imageUrl;
+  final List<String> images;
+  final int initialIndex;
+
+  const PhotoViewer({
+    Key? key,
+    required this.imageUrl,
+    required this.images,
+    required this.initialIndex,
+  }) : super(key: key);
+
+  @override
+  Widget build(BuildContext context) {
+    return Scaffold(
+      backgroundColor: Colors.black,
+      appBar: AppBar(
+        backgroundColor: Colors.black,
+        iconTheme: const IconThemeData(color: Colors.white),
+        title: Text(
+          'Foto ${initialIndex + 1} dari ${images.length}',
+          style: const TextStyle(color: Colors.white),
+        ),
+      ),
+      body: PhotoView(
+        imageProvider: NetworkImage(imageUrl),
+        minScale: PhotoViewComputedScale.contained * 0.8,
+        maxScale: PhotoViewComputedScale.covered * 3.0,
+        initialScale: PhotoViewComputedScale.contained,
+        heroAttributes: PhotoViewHeroAttributes(
+          tag: 'photo_$initialIndex',
+        ),
+        backgroundDecoration: const BoxDecoration(
+          color: Colors.black,
+        ),
       ),
     );
   }

@@ -50,12 +50,12 @@ class LembagaRepository {
         '🔧 [LEMBAGA_API] API Token: ${apiToken.isNotEmpty ? "Present (${apiToken.length} chars)" : "Missing"}');
 
     try {
-      // Strapi v5: Kembali ke populate=* yang sudah berhasil
+      // Strapi v5 dengan plugin: populate=all untuk mendapatkan semua field termasuk deep populate
       final response = await _dio.get(
         '$apiHost/api/lembagas',
         queryParameters: {
           'filters[slug][\$eq]': slug,
-          'populate': '*',
+          'populate': 'all',
         },
         options: Options(
           headers: {
@@ -66,7 +66,7 @@ class LembagaRepository {
       );
 
       print(
-          '🔧 [API_DEBUG] URL called with populate=* (kembali ke yang berhasil)');
+          '🔧 [API_DEBUG] URL called with populate=all (plugin untuk deep populate)');
 
       // Print URL untuk debugging
       print('🌐 Final URL: ${response.realUri}');

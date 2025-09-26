@@ -21,6 +21,7 @@ dependencies:
   url_launcher: ^6.2.4
   font_awesome_flutter: ^10.7.0
   cached_network_image: ^3.3.1
+  photo_view: ^0.15.0
   #flutter_markdown_plus: ^1.0.5
 
 dev_dependencies:

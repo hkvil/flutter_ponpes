@@ -126,6 +126,18 @@ class MenuNavigationHelper {
         );
         break;
 
+      case 'kontak':
+        Navigator.push(
+          context,
+          MaterialPageRoute(
+            builder: (context) => ContactScreen(
+              title: '${lembaga.nama} - Kontak',
+              lembaga: lembaga, // Pass API data with contact info
+            ),
+          ),
+        );
+        break;
+
       case 'galeri':
         Navigator.push(
           context,

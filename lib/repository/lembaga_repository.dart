@@ -49,18 +49,14 @@ class LembagaRepository {
     print(
         '🔧 [LEMBAGA_API] API Token: ${apiToken.isNotEmpty ? "Present (${apiToken.length} chars)" : "Missing"}');
 
-    // Gunakan URI encoding yang benar untuk Strapi
-    final uri = Uri.parse('$apiHost/api/lembagas').replace(queryParameters: {
-      'filters[slug][\$eq]': slug,
-      'populate': '*',
-    });
-
-    // Print URL yang akan dihit
-    print('🌐 Final URL: $uri');
-
     try {
-      final response = await _dio.getUri(
-        uri,
+      // Strapi v5: Kembali ke populate=* yang sudah berhasil
+      final response = await _dio.get(
+        '$apiHost/api/lembagas',
+        queryParameters: {
+          'filters[slug][\$eq]': slug,
+          'populate': '*',
+        },
         options: Options(
           headers: {
             'Content-Type': 'application/json',
@@ -68,6 +64,12 @@ class LembagaRepository {
           },
         ),
       );
+
+      print(
+          '🔧 [API_DEBUG] URL called with populate=* (kembali ke yang berhasil)');
+
+      // Print URL untuk debugging
+      print('🌐 Final URL: ${response.realUri}');
 
       // ===== API RESPONSE TRACKING =====
       print('\n✅ [LEMBAGA_API] Response received');

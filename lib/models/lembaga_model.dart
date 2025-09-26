@@ -105,15 +105,28 @@ class Lembaga {
 
 class ImageItem {
   final String? title;
+  final String? desc;
+  final String? date;
+  final int? id;
+  final int? order;
 
   /// Diambil dari `media.url` atau `media.data.attributes.url`.
   final String? url;
 
-  ImageItem({this.title, this.url});
+  ImageItem({
+    this.title,
+    this.desc,
+    this.date,
+    this.id,
+    this.order,
+    this.url,
+  });
 
   String get resolvedUrl => AppConfig.absoluteUrl(url ?? '');
 
   /// Menerima:
+  /// - { id, title, desc, date, order, media: { url, formats: {...} } } (Strapi v5)
+  /// - { id, title, desc, date, order } (dari API galeri tanpa media)
   /// - { title, media: { url } }
   /// - { title, media: { data: { attributes: { url } } } }
   /// - { title, url } (fallback)
@@ -124,21 +137,39 @@ class ImageItem {
     if (any is Map) {
       final m = any.cast<String, dynamic>();
 
-      String? extractUrl(dynamic media) {
-        if (media is Map) {
-          if (media['url'] is String) return media['url'] as String;
-          final d = media['data'];
-          if (d is Map && d['attributes'] is Map) {
-            final a = (d['attributes'] as Map).cast<String, dynamic>();
-            if (a['url'] is String) return a['url'] as String;
+      // Handle galeri structure dengan media yang ter-populate (Strapi v5)
+      String? finalUrl;
+
+      // Untuk struktur galeri images dengan field media
+      if (m['media'] != null && m['media'] is Map) {
+        final media = m['media'] as Map<String, dynamic>;
+        finalUrl = media['url'] as String?;
+
+        // Fallback ke format yang lebih kecil jika url utama kosong
+        if (finalUrl == null || finalUrl.isEmpty) {
+          final formats = media['formats'] as Map<String, dynamic>?;
+          if (formats != null) {
+            // Prioritas: small > medium > thumbnail
+            finalUrl = formats['small']?['url'] as String? ??
+                formats['medium']?['url'] as String? ??
+                formats['thumbnail']?['url'] as String?;
           }
         }
-        return null;
+      } else {
+        // Fallback untuk struktur lama
+        finalUrl = m['url'] as String? ?? m['imageUrl'] as String?;
       }
 
+      print(
+          '🔧 [IMAGE_ITEM] Parsing - ID: ${m['id']}, Title: ${m['title']}, URL: $finalUrl');
+
       return ImageItem(
+        id: m['id'] as int?,
         title: m['title'] as String?,
-        url: extractUrl(m['media']) ?? m['url'] as String?,
+        desc: m['desc'] as String?,
+        date: m['date'] as String?,
+        order: m['order'] as int?,
+        url: finalUrl,
       );
     }
     return ImageItem();
@@ -147,17 +178,44 @@ class ImageItem {
 
 class VideoItem {
   final String? title;
+  final String? desc;
+  final String? date;
+  final int? id;
+  final int? order;
   final String? videoUrl;
 
-  VideoItem({this.title, this.videoUrl});
+  VideoItem({
+    this.title,
+    this.desc,
+    this.date,
+    this.id,
+    this.order,
+    this.videoUrl,
+  });
 
   /// Menerima:
+  /// - { id, title, videoUrl, desc, date, order } (dari API galeri)
   /// - { title, videoUrl }
   /// - string (url langsung)
   static VideoItem fromAny(dynamic any) {
     if (any is String) return VideoItem(videoUrl: any);
+
     if (any is Map) {
       final m = any.cast<String, dynamic>();
+
+      // Handle API galeri structure (new format)
+      if (m['id'] is int && m['title'] is String) {
+        return VideoItem(
+          id: m['id'] as int?,
+          title: m['title'] as String?,
+          desc: m['desc'] as String?,
+          date: m['date'] as String?,
+          order: m['order'] as int?,
+          videoUrl: m['videoUrl'] as String?,
+        );
+      }
+
+      // Handle existing structure
       return VideoItem(
         title: m['title'] as String?,
         videoUrl: m['videoUrl'] as String?,

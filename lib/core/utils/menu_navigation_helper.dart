@@ -1,5 +1,4 @@
 import 'package:flutter/material.dart';
-import '../../screens/content_screen.dart';
 import '../../screens/galeri_screen.dart';
 import '../../screens/contact_screen.dart';
 import '../../screens/bannered_detail_screen.dart';
@@ -32,6 +31,8 @@ class MenuNavigationHelper {
   /// Navigate menggunakan API content berdasarkan slug
   static void _navigateWithApiContent(BuildContext context, String menuItem,
       String categoryTitle, String slug) async {
+    print('🌐 [API_NAV] Starting API navigation for: $menuItem (slug: $slug)');
+
     // Show loading
     showDialog(
       context: context,
@@ -65,37 +66,21 @@ class MenuNavigationHelper {
 
       switch (menuItem.toLowerCase()) {
         case 'profil':
-          if (lembaga.hasProfilContent()) {
-            Navigator.push(
-              context,
-              MaterialPageRoute(
-                builder: (context) => ContentScreen(
-                  title: '${lembaga.nama} - Profil',
-                  markdownContent: lembaga.profilMd!,
-                  type: ContentScreenType.full,
-                ),
-              ),
-            );
-          } else {
-            _showContentNotAvailable(context, 'Profil ${lembaga.nama}');
-          }
+          _navigateWithContentAndBanner(
+            context,
+            menuItem,
+            lembaga,
+            lembaga.hasProfilContent() ? lembaga.profilMd! : null,
+          );
           break;
 
         case 'program kerja':
-          if (lembaga.hasProgramKerjaContent()) {
-            Navigator.push(
-              context,
-              MaterialPageRoute(
-                builder: (context) => ContentScreen(
-                  title: '${lembaga.nama} - Program Kerja',
-                  markdownContent: lembaga.programKerjaMd!,
-                  type: ContentScreenType.full,
-                ),
-              ),
-            );
-          } else {
-            _showContentNotAvailable(context, 'Program Kerja ${lembaga.nama}');
-          }
+          _navigateWithContentAndBanner(
+            context,
+            menuItem,
+            lembaga,
+            lembaga.hasProgramKerjaContent() ? lembaga.programKerjaMd! : null,
+          );
           break;
 
         default:
@@ -119,39 +104,26 @@ class MenuNavigationHelper {
   /// Navigate menggunakan cached data (INSTANT NAVIGATION - no loading!)
   static void _navigateWithCachedData(
       BuildContext context, String menuItem, Lembaga lembaga) {
+    print('🚀 [CACHED_NAV] Navigating to: $menuItem for ${lembaga.nama}');
+    print('🚀 [CACHED_NAV] Using banner from lembaga: ${lembaga.slug}');
+
     switch (menuItem.toLowerCase()) {
       case 'profil':
-        if (lembaga.hasProfilContent()) {
-          Navigator.push(
-            context,
-            MaterialPageRoute(
-              builder: (context) => ContentScreen(
-                title: '${lembaga.nama} - Profil',
-                markdownContent: lembaga.profilMd!,
-                type: ContentScreenType.full,
-              ),
-            ),
-          );
-        } else {
-          _showContentNotAvailable(context, 'Profil ${lembaga.nama}');
-        }
+        _navigateWithContentAndBanner(
+          context,
+          menuItem,
+          lembaga,
+          lembaga.hasProfilContent() ? lembaga.profilMd! : null,
+        );
         break;
 
       case 'program kerja':
-        if (lembaga.hasProgramKerjaContent()) {
-          Navigator.push(
-            context,
-            MaterialPageRoute(
-              builder: (context) => ContentScreen(
-                title: '${lembaga.nama} - Program Kerja',
-                markdownContent: lembaga.programKerjaMd!,
-                type: ContentScreenType.full,
-              ),
-            ),
-          );
-        } else {
-          _showContentNotAvailable(context, 'Program Kerja ${lembaga.nama}');
-        }
+        _navigateWithContentAndBanner(
+          context,
+          menuItem,
+          lembaga,
+          lembaga.hasProgramKerjaContent() ? lembaga.programKerjaMd! : null,
+        );
         break;
 
       case 'galeri':
@@ -303,6 +275,59 @@ class MenuNavigationHelper {
         ''',
       ),
     ];
+  }
+
+  /// Navigate dengan content API dan banner system
+  static void _navigateWithContentAndBanner(
+    BuildContext context,
+    String menuItem,
+    Lembaga lembaga,
+    String? markdownContent,
+  ) async {
+    print('🎯 [CONTENT_BANNER] Loading banner for: ${lembaga.slug}');
+    print(
+        '🎯 [CONTENT_BANNER] Menu: $menuItem, hasContent: ${markdownContent != null}');
+
+    // Get banner config from lembaga
+    final bannerConfig = await _bannerManager.getBannerConfig(menuItem,
+        lembagaSlug: lembaga.slug);
+
+    print(
+        '🎯 [CONTENT_BANNER] Banner config loaded - hasTopBanner: ${bannerConfig.hasTopBanner}, hasBottomBanner: ${bannerConfig.hasBottomBanner}');
+
+    if (!context.mounted) return;
+
+    final title = '${lembaga.nama} - ${_capitalizeFirst(menuItem)}';
+
+    if (markdownContent != null && markdownContent.isNotEmpty) {
+      // Convert markdown content to sections (simple approach)
+      // Don't add title here since BanneredDetailScreen already has SectionHeader
+      final sections = [
+        ProfileSection(
+          title: '', // Empty title to avoid duplication with SectionHeader
+          content: markdownContent,
+        ),
+      ];
+
+      Navigator.push(
+        context,
+        MaterialPageRoute(
+          builder: (context) => BanneredDetailScreen(
+            title: title,
+            sections: sections,
+            bannerConfig: bannerConfig,
+          ),
+        ),
+      );
+    } else {
+      // No content available
+      _showContentNotAvailable(context, title);
+    }
+  }
+
+  static String _capitalizeFirst(String text) {
+    if (text.isEmpty) return text;
+    return text[0].toUpperCase() + text.substring(1);
   }
 
   static void _showContentNotAvailable(

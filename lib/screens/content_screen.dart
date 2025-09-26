@@ -5,6 +5,7 @@ import 'package:pesantren_app/widgets/section_header.dart';
 import 'package:pesantren_app/widgets/top_banner.dart';
 import '../widgets/responsive_wrapper.dart';
 import '../models/profile_section.dart';
+import '../core/config/markdown_config.dart';
 
 enum ContentScreenType {
   full, // dengan top banner, section header, bottom banner + markdown
@@ -98,20 +99,12 @@ class ContentScreen extends StatelessWidget {
   }
 
   Widget _buildMarkdownWidget() {
-    // Completely remove markdown widget - use simple Text only
+    // Use centralized markdown configuration
     return Container(
       padding: const EdgeInsets.all(16.0),
       child: MarkdownBlock(
         data: markdownContent ?? '',
-        config: MarkdownConfig(configs: [
-          H1Config(
-            style: const TextStyle(
-              fontSize: 24,
-              fontWeight: FontWeight.bold,
-              color: Colors.black,
-            ),
-          ),
-        ]),
+        config: AppMarkdownConfig.defaultConfig,
       ),
     );
   }

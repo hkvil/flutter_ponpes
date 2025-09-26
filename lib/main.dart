@@ -48,4 +48,3 @@ class PesantrenApp extends StatelessWidget {
     );
   }
 }
-//home: DebugScreen(),

@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:cached_network_image/cached_network_image.dart';
 import 'package:url_launcher/url_launcher.dart';
 import '../models/banner_config.dart';
+import '../core/theme/app_colors.dart';
 
 class BannerWidget extends StatelessWidget {
   final BannerConfig bannerConfig;
@@ -29,29 +30,61 @@ class BannerWidget extends StatelessWidget {
       return const SizedBox.shrink();
     }
 
-    Widget bannerImage = Container(
-      height: height,
-      margin: margin ?? const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
-      decoration: BoxDecoration(
-        borderRadius: BorderRadius.circular(12),
-        boxShadow: [
-          BoxShadow(
-            color: Colors.black.withValues(alpha: 0.1),
-            blurRadius: 8,
-            offset: const Offset(0, 2),
+    // Style yang sesuai dengan TopBanner dan BottomBanner original
+    Widget bannerImage;
+
+    if (isTopBanner) {
+      // Style untuk TopBanner: elevation, height=148, no border radius
+      bannerImage = Material(
+        elevation: 8,
+        child: Container(
+          height: height ?? 148,
+          width: double.infinity,
+          decoration: const BoxDecoration(
+            color: AppColors.bannerBg,
           ),
-        ],
-      ),
-      child: ClipRRect(
-        borderRadius: BorderRadius.circular(12),
+          clipBehavior: Clip.antiAlias,
+          child: CachedNetworkImage(
+            imageUrl: bannerUrl,
+            fit: BoxFit.fill, // sama seperti TopBanner original
+            placeholder: (context, url) => Container(
+              width: double.infinity,
+              height: height ?? 148,
+              color: Colors.grey.shade200,
+              child: const Center(
+                child: SizedBox(
+                  width: 24,
+                  height: 24,
+                  child: CircularProgressIndicator(strokeWidth: 2),
+                ),
+              ),
+            ),
+            errorWidget: (context, url, error) => Container(
+              width: double.infinity,
+              height: height ?? 148,
+              color: Colors.grey.shade300,
+              child: const Center(
+                child: Text('Banner Placeholder'),
+              ),
+            ),
+          ),
+        ),
+      );
+    } else {
+      // Style untuk BottomBanner: no elevation, height=100, no border radius
+      bannerImage = Container(
+        height: height ?? 100,
+        width: double.infinity,
+        decoration: const BoxDecoration(
+          color: AppColors.bannerBg,
+        ),
         child: CachedNetworkImage(
           imageUrl: bannerUrl,
+          fit: BoxFit.cover, // sama seperti BottomBanner original
           width: double.infinity,
-          height: height,
-          fit: BoxFit.cover,
           placeholder: (context, url) => Container(
             width: double.infinity,
-            height: height,
+            height: height ?? 100,
             color: Colors.grey.shade200,
             child: const Center(
               child: SizedBox(
@@ -63,17 +96,18 @@ class BannerWidget extends StatelessWidget {
           ),
           errorWidget: (context, url, error) => Container(
             width: double.infinity,
-            height: height,
+            height: height ?? 100,
             color: Colors.grey.shade300,
-            child: Icon(
-              Icons.image_not_supported,
-              size: 32,
-              color: Colors.grey.shade600,
+            child: const Center(
+              child: Text(
+                'Dirgahayu Indonesia – Banner Placeholder',
+                style: TextStyle(fontWeight: FontWeight.w600),
+              ),
             ),
           ),
         ),
-      ),
-    );
+      );
+    }
 
     // Jika ada redirect URL, buat clickable
     if (redirectUrl != null && redirectUrl.isNotEmpty) {
@@ -120,6 +154,7 @@ class BanneredContent extends StatelessWidget {
           BannerWidget(
             bannerConfig: bannerConfig,
             isTopBanner: true,
+            height: 148, // sama dengan TopBanner original
           ),
 
         // Main Content
@@ -135,6 +170,7 @@ class BanneredContent extends StatelessWidget {
           BannerWidget(
             bannerConfig: bannerConfig,
             isTopBanner: false,
+            height: 100, // sama dengan BottomBanner original
           ),
       ],
     );

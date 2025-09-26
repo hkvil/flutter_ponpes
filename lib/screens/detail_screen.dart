@@ -2,6 +2,8 @@ import 'package:flutter/material.dart';
 import 'package:pesantren_app/widgets/top_banner.dart';
 import 'package:pesantren_app/widgets/bottom_banner.dart';
 import 'package:pesantren_app/widgets/detail_layout.dart';
+import 'package:pesantren_app/widgets/banner_widget.dart';
+import 'package:pesantren_app/models/banner_config.dart';
 import '../widgets/responsive_wrapper.dart';
 import '../core/utils/menu_slug_mapper.dart';
 import '../repository/lembaga_repository.dart';
@@ -74,6 +76,18 @@ class _DetailScreenState extends State<DetailScreen> {
     }
   }
 
+  /// Create BannerConfig from cached lembaga data
+  BannerConfig _createBannerConfig() {
+    if (_cachedLembaga != null) {
+      return BannerConfig.fromLembaga(
+        _cachedLembaga!.topBanner,
+        _cachedLembaga!.botBanner,
+      );
+    }
+    // Return empty banner config if no cached data
+    return const BannerConfig();
+  }
+
   @override
   Widget build(BuildContext context) {
     return ResponsiveWrapper(
@@ -83,10 +97,17 @@ class _DetailScreenState extends State<DetailScreen> {
         ),
         body: Column(
           children: [
-            TopBanner(
-              assetPath: 'assets/banners/top.png',
-              height: 150,
-            ),
+            // Use BannerWidget with API data if available, fallback to TopBanner as placeholder
+            (_cachedLembaga != null && _createBannerConfig().hasTopBanner)
+                ? BannerWidget(
+                    bannerConfig: _createBannerConfig(),
+                    isTopBanner: true,
+                    height: 150,
+                  )
+                : TopBanner(
+                    assetPath: 'assets/banners/top.png',
+                    height: 150,
+                  ),
 
             // Loading indicator untuk pre-load
             if (_isLoadingData)
@@ -174,7 +195,13 @@ class _DetailScreenState extends State<DetailScreen> {
           ],
         ),
         bottomNavigationBar:
-            BottomBanner(assetPath: 'assets/banners/bottom.png'),
+            (_cachedLembaga != null && _createBannerConfig().hasBottomBanner)
+                ? BannerWidget(
+                    bannerConfig: _createBannerConfig(),
+                    isTopBanner: false,
+                    height: 100,
+                  )
+                : BottomBanner(assetPath: 'assets/banners/bottom.png'),
       ),
     );
   }

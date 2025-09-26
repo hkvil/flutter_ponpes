@@ -14,6 +14,8 @@ class Lembaga {
   final List<VideoItem> videos;
   final List<KontakItem> kontak;
   final List<FrontImageItem> frontImages; // Foto untuk halaman depan
+  final ImageItem? topBanner; // Banner atas untuk semua menu lembaga
+  final ImageItem? botBanner; // Banner bawah untuk semua menu lembaga
 
   Lembaga({
     required this.id,
@@ -29,6 +31,8 @@ class Lembaga {
     this.videos = const [],
     this.kontak = const [],
     this.frontImages = const [],
+    this.topBanner,
+    this.botBanner,
   });
 
   /// Menerima JSON **flat** (seperti contohmu) atau **envelope Strapi** ({id, attributes:{...}}).
@@ -75,6 +79,12 @@ class Lembaga {
       videos: _list(attrs['videos'], VideoItem.fromAny),
       kontak: _list(attrs['kontak'], KontakItem.fromAny),
       frontImages: _list(attrs['frontImages'], FrontImageItem.fromAny),
+      topBanner: attrs['topBanner'] != null
+          ? ImageItem.fromAny(attrs['topBanner'])
+          : null,
+      botBanner: attrs['botBanner'] != null
+          ? ImageItem.fromAny(attrs['botBanner'])
+          : null,
     );
   }
 

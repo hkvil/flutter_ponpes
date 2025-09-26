@@ -1,14 +1,17 @@
 import 'package:flutter/material.dart';
-import '../../screens/detail_content_screen.dart';
 import '../../screens/content_screen.dart';
 import '../../screens/galeri_screen.dart';
+import '../../screens/contact_screen.dart';
+import '../../screens/bannered_detail_screen.dart';
 import '../../models/profile_section.dart';
 import '../../models/lembaga_model.dart';
 import '../../repository/lembaga_repository.dart';
+import 'banner_manager.dart';
 import '../constants/profil.dart';
 
 class MenuNavigationHelper {
   static final LembagaRepository _lembagaRepository = LembagaRepository();
+  static final BannerManager _bannerManager = BannerManager();
 
   /// Navigate to appropriate screen based on menu item and lembaga slug
   static void navigateToMenuItem(
@@ -164,22 +167,35 @@ class MenuNavigationHelper {
         break;
 
       default:
-        // Untuk menu lain, gunakan static content
-        _navigateWithStaticContent(context, menuItem, lembaga.nama);
+        // Untuk menu lain, gunakan static content dengan banner dari API
+        _navigateWithBanner(context, menuItem, lembaga.nama, lembaga.slug);
     }
   }
 
   /// Navigate menggunakan static content (fallback)
   static void _navigateWithStaticContent(
       BuildContext context, String menuItem, String categoryTitle) {
+    _navigateWithBanner(context, menuItem, categoryTitle, null);
+  }
+
+  /// Navigate dengan support banner
+  static void _navigateWithBanner(BuildContext context, String menuItem,
+      String categoryTitle, String? lembagaSlug) async {
+    // Get banner config
+    final bannerConfig = await _bannerManager.getBannerConfig(menuItem,
+        lembagaSlug: lembagaSlug);
+
+    if (!context.mounted) return;
+
     switch (menuItem.toLowerCase()) {
       case 'profil':
         Navigator.push(
           context,
           MaterialPageRoute(
-            builder: (context) => DetailContentScreen(
+            builder: (context) => BanneredDetailScreen(
               title: '$categoryTitle - Profil',
               sections: profilPKP, // Dari constants/profil.dart
+              bannerConfig: bannerConfig,
             ),
           ),
         );
@@ -189,9 +205,10 @@ class MenuNavigationHelper {
         Navigator.push(
           context,
           MaterialPageRoute(
-            builder: (context) => DetailContentScreen(
+            builder: (context) => BanneredDetailScreen(
               title: '$categoryTitle - Program Kerja',
               sections: _getProgramKerjaSections(),
+              bannerConfig: bannerConfig,
             ),
           ),
         );
@@ -201,9 +218,8 @@ class MenuNavigationHelper {
         Navigator.push(
           context,
           MaterialPageRoute(
-            builder: (context) => DetailContentScreen(
+            builder: (context) => ContactScreen(
               title: '$categoryTitle - Kontak',
-              sections: _getKontakSections(),
             ),
           ),
         );
@@ -284,37 +300,6 @@ class MenuNavigationHelper {
 • Pengabdian Masyarakat
 • Dakwah Komunitas
 • Pemberdayaan Ekonomi
-        ''',
-      ),
-    ];
-  }
-
-  static List<ProfileSection> _getKontakSections() {
-    return [
-      const ProfileSection(
-        title: 'Alamat',
-        content: '''
-📍 Jl. Pesantren Al-Hikam No. 123
-   Kelurahan Dinoyo, Kec. Lowokwaru
-   Kota Malang, Jawa Timur 65144
-        ''',
-      ),
-      const ProfileSection(
-        title: 'Kontak',
-        content: '''
-📞 Telepon: (0341) 123-4567
-📱 WhatsApp: +62 812-3456-7890
-✉️ Email: info@ponpes-alhikam.ac.id
-🌐 Website: www.ponpes-alhikam.ac.id
-        ''',
-      ),
-      const ProfileSection(
-        title: 'Media Sosial',
-        content: '''
-📘 Facebook: Pondok Pesantren Al-Hikam
-📸 Instagram: @ponpes_alhikam
-🎥 YouTube: Al-Hikam Official
-🎵 TikTok: @ponpes.alhikam
         ''',
       ),
     ];

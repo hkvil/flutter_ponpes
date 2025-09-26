@@ -20,7 +20,7 @@ class BottomBanner extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return Container(
-      height: 120,
+      height: 100,
       decoration: const BoxDecoration(color: AppColors.bannerBg),
       child: assetPath != null
           ? Center(

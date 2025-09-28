@@ -4,6 +4,7 @@ import '../../screens/splash_screen.dart';
 import '../../screens/home_screen.dart';
 import '../../screens/menu_screen.dart';
 import '../../screens/login_screen.dart';
+import '../../screens/donasi_screen.dart';
 import '../../core/constants/menu_lists.dart';
 
 /// Defines all named routes and handles route generation for the app.
@@ -16,6 +17,7 @@ class AppRouter {
   static const String login = '/login';
   static const String home = '/home';
   static const String menu = '/menu';
+  static const String donasi = '/donasi';
 
   /// Handles generation of routes based on the route name.
   static Route<dynamic> onGenerateRoute(RouteSettings settings) {
@@ -31,6 +33,8 @@ class AppRouter {
         final menuData = menuTree[args.title];
         return MaterialPageRoute(
             builder: (_) => MenuScreen(args: args, menuData: menuData));
+      case donasi:
+        return MaterialPageRoute(builder: (_) => DonationScreen());
       default:
         return MaterialPageRoute(
           builder: (_) => const Scaffold(

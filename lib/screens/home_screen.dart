@@ -159,11 +159,16 @@ class HomeScreen extends StatelessWidget {
                               items: _menuItems.sublist(7, 10),
                               buttonSize: 48,
                               onTap: (title) {
-                                Navigator.pushNamed(
-                                  context,
-                                  AppRouter.menu,
-                                  arguments: MenuScreenArgs(title: title),
-                                );
+                                if (title == 'DONASI') {
+                                  Navigator.pushNamed(
+                                      context, AppRouter.donasi);
+                                } else {
+                                  Navigator.pushNamed(
+                                    context,
+                                    AppRouter.menu,
+                                    arguments: MenuScreenArgs(title: title),
+                                  );
+                                }
                               },
                             ),
                           ],

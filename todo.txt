@@ -1,0 +1,111 @@
+📋 TODO LIST - Menu Restructuring dengan Tabbed Views
+
+🎯 1. Santri Screen - Tabbed View
+Current: SantriScreen (hanya daftar)
+New: SantriScreen dengan TabBar
+├── Tab 1: "Daftar Santri" (existing functionality)
+└── Tab 2: "Kehadiran Santri" (new feature)
+
+Tasks:
+□ Convert `SantriScreen` dari single view ke `TabBarView`
+□ Tab 1: Move existing daftar santri code
+□ Tab 2: Buat `KehadiranSantriTab` dengan:
+  □ Calendar view untuk pilih tanggal
+  □ List kehadiran per santri (Hadir/Tidak Hadir/Izin/Sakit)
+  □ Filter berdasarkan kelas
+  □ Summary statistics (% kehadiran)
+
+🎯 2. Staff/Guru Screen - Tabbed View
+Current: StaffScreen (hanya daftar)
+New: StaffScreen dengan TabBar
+├── Tab 1: "Daftar Staff/Guru" (existing functionality)
+└── Tab 2: "Kehadiran Staff/Guru" (new feature)
+
+Tasks:
+□ Convert `StaffScreen` dari single view ke `TabBarView`
+□ Tab 1: Move existing daftar staff code
+□ Tab 2: Buat `KehadiranStaffTab` dengan:
+  □ Calendar view untuk pilih tanggal
+  □ List kehadiran per staff/guru
+  □ Status: Hadir/Tidak Hadir/Izin/Cuti/Dinas Luar
+  □ Summary jam kerja
+
+🎯 3. Informasi Screen - Tabbed View
+Current: Menu "Informasi" (bercabang confusing)
+New: InformasiScreen dengan TabBar
+├── Tab 1: "Berita" (news & announcements)
+└── Tab 2: "Dokumen" (downloadable files)
+
+Tasks:
+□ Buat `InformasiScreen` dengan `TabBarView`
+□ Tab 1: Buat `BeritaTab` dengan:
+  □ List berita dengan thumbnail
+  □ Filter berdasarkan kategori (Akademik/Kegiatan/Pengumuman)
+  □ Search functionality
+  □ Detail berita dengan rich content
+□ Tab 2: Buat `DokumenTab` dengan:
+  □ List file dengan icon berdasarkan type
+  □ Download functionality
+  □ Kategori dokumen (Formulir/Peraturan/Laporan)
+  □ File size dan date info
+
+🎯 4. Menu Navigation Helper Updates
+
+Tasks:
+□ Update `MenuNavigationHelper`:
+  □ Remove confusing "Informasi" sub-menu logic
+  □ Update `case 'santri'` → navigate to tabbed `SantriScreen`
+  □ Update `case 'sdm'/'guru'` → navigate to tabbed `StaffScreen`
+  □ Update `case 'informasi'` → navigate to tabbed `InformasiScreen`
+□ Clean up unused methods:
+  □ Remove `_handleInformasiMenu()` if created
+  □ Remove separate "kehadiran santri"/"kehadiran guru" cases
+
+🎯 5. UI/UX Improvements
+
+Common Tabbed Screen Features:
+□ Consistent TabBar styling (green theme)
+□ Tab indicators dan animations
+□ Preserve tab state saat navigate back
+□ Loading states per tab
+□ Empty states dengan proper messaging
+□ Pull-to-refresh per tab
+
+🎯 6. Data Structure & API
+
+Kehadiran Data Structure:
+□ Buat model `KehadiranModel` untuk santri & staff
+□ Repository untuk kehadiran API calls
+□ Static data untuk demo (seperti santri/staff)
+
+Berita & Dokumen Data:
+□ Model `BeritaModel` dengan rich content support
+□ Model `DokumenModel` dengan file metadata
+□ Repository untuk fetch berita & dokumen
+
+🎯 7. Testing & Polish
+
+□ Test all tab navigation flows
+□ Test state preservation
+□ Verify consistent styling across tabs
+□ Performance testing dengan large data sets
+□ Responsive design validation
+
+🎨 Expected Final Structure:
+
+MENU UTAMA:
+├── Profil
+├── Program Kerja
+├── Santri          → [Daftar Santri | Kehadiran Santri]
+├── Guru/SDM        → [Daftar Staff | Kehadiran Staff]
+├── Galeri
+├── Informasi       → [Berita | Dokumen]
+└── Kontak
+
+💡 Benefits:
+
+✅ Cleaner menu structure - No confusing sub-menus
+✅ Logical grouping - Related features dalam satu screen
+✅ Better UX - Less navigation depth
+✅ Consistent experience - Tabbed pattern throughout app
+✅ Scalable - Easy to add more tabs if needed

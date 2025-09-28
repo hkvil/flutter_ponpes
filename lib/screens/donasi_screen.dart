@@ -231,7 +231,8 @@ class _DonationScreenState extends State<DonationScreen> {
                               ),
                               child: Image.network(
                                 donation.getImageUrl(
-                                    dotenv.env['API_HOST'] ?? 'http://localhost:1337',
+                                    dotenv.env['API_HOST'] ??
+                                        'http://localhost:1337',
                                     size: 'small'),
                                 fit: BoxFit.cover,
                                 errorBuilder: (context, error, stackTrace) {

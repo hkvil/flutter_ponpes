@@ -3,11 +3,14 @@ import 'package:flutter_dotenv/flutter_dotenv.dart';
 // Helper function to resolve relative URLs
 String _absoluteUrl(String maybeRelative) {
   if (maybeRelative.isEmpty) return '';
-  if (maybeRelative.startsWith('http://') || maybeRelative.startsWith('https://')) {
+  if (maybeRelative.startsWith('http://') ||
+      maybeRelative.startsWith('https://')) {
     return maybeRelative;
   }
   final baseUrl = dotenv.env['API_HOST'] ?? 'http://localhost:1337';
-  final cleanBase = baseUrl.endsWith('/') ? baseUrl.substring(0, baseUrl.length - 1) : baseUrl;
+  final cleanBase = baseUrl.endsWith('/')
+      ? baseUrl.substring(0, baseUrl.length - 1)
+      : baseUrl;
   if (maybeRelative.startsWith('/')) {
     return '$cleanBase$maybeRelative';
   }

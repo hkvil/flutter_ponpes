@@ -1,4 +1,18 @@
-import '../config.dart';
+import 'package:flutter_dotenv/flutter_dotenv.dart';
+
+// Helper function to resolve relative URLs
+String _absoluteUrl(String maybeRelative) {
+  if (maybeRelative.isEmpty) return '';
+  if (maybeRelative.startsWith('http://') || maybeRelative.startsWith('https://')) {
+    return maybeRelative;
+  }
+  final baseUrl = dotenv.env['API_HOST'] ?? 'http://localhost:1337';
+  final cleanBase = baseUrl.endsWith('/') ? baseUrl.substring(0, baseUrl.length - 1) : baseUrl;
+  if (maybeRelative.startsWith('/')) {
+    return '$cleanBase$maybeRelative';
+  }
+  return '$cleanBase/$maybeRelative';
+}
 
 class Lembaga {
   final int id;
@@ -122,7 +136,7 @@ class ImageItem {
     this.url,
   });
 
-  String get resolvedUrl => AppConfig.absoluteUrl(url ?? '');
+  String get resolvedUrl => _absoluteUrl(url ?? '');
 
   /// Menerima:
   /// - { id, title, desc, date, order, media: { url, formats: {...} } } (Strapi v5)
@@ -253,7 +267,7 @@ class FrontImageItem {
 
   FrontImageItem({this.url});
 
-  String get resolvedUrl => AppConfig.absoluteUrl(url ?? '');
+  String get resolvedUrl => _absoluteUrl(url ?? '');
 
   /// Parse Strapi media object untuk ambil URL saja
   static FrontImageItem fromAny(dynamic any) {

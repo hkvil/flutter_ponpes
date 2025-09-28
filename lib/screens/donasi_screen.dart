@@ -1,8 +1,8 @@
 import 'package:flutter/material.dart';
 import 'package:carousel_slider/carousel_slider.dart';
+import 'package:flutter_dotenv/flutter_dotenv.dart';
 import '../repository/donasi_repository.dart';
 import '../models/donasi_model.dart';
-import '../config.dart';
 
 class DonationScreen extends StatefulWidget {
   const DonationScreen({super.key});
@@ -21,15 +21,15 @@ class _DonationScreenState extends State<DonationScreen> {
   final List<Map<String, String>> sliderImages = [
     {
       "image":
-          "${AppConfig.strapiBaseUrl}/uploads/medium_default_image_c7eeb5b3b0.png",
+          "${dotenv.env['API_HOST'] ?? 'http://localhost:1337'}/uploads/medium_default_image_c7eeb5b3b0.png",
     },
     {
       "image":
-          "${AppConfig.strapiBaseUrl}/uploads/medium_beautiful_picture_69d0581d2e.jpeg",
+          "${dotenv.env['API_HOST'] ?? 'http://localhost:1337'}/uploads/medium_beautiful_picture_69d0581d2e.jpeg",
     },
     {
       "image":
-          "${AppConfig.strapiBaseUrl}/uploads/medium_coffee_art_b88bab6c4b.jpeg",
+          "${dotenv.env['API_HOST'] ?? 'http://localhost:1337'}/uploads/medium_coffee_art_b88bab6c4b.jpeg",
     },
   ];
 
@@ -230,7 +230,8 @@ class _DonationScreenState extends State<DonationScreen> {
                                 bottomLeft: Radius.circular(12),
                               ),
                               child: Image.network(
-                                donation.getImageUrl(AppConfig.strapiBaseUrl,
+                                donation.getImageUrl(
+                                    dotenv.env['API_HOST'] ?? 'http://localhost:1337',
                                     size: 'small'),
                                 fit: BoxFit.cover,
                                 errorBuilder: (context, error, stackTrace) {

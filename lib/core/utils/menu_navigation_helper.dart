@@ -2,6 +2,8 @@ import 'package:flutter/material.dart';
 import '../../screens/galeri_screen.dart';
 import '../../screens/contact_screen.dart';
 import '../../screens/bannered_detail_screen.dart';
+import '../../screens/santri_screen.dart';
+import '../../screens/staff_screen.dart';
 import '../../models/profile_section.dart';
 import '../../models/lembaga_model.dart';
 import '../../repository/lembaga_repository.dart';
@@ -150,6 +152,42 @@ class MenuNavigationHelper {
         );
         break;
 
+      case 'santri':
+        Navigator.push(
+          context,
+          MaterialPageRoute(
+            builder: (context) => SantriScreen(
+              title: '${lembaga.nama} - Daftar Santri',
+              lembagaName: lembaga.nama,
+            ),
+          ),
+        );
+        break;
+
+      case 'sdm':
+        Navigator.push(
+          context,
+          MaterialPageRoute(
+            builder: (context) => StaffScreen(
+              title: '${lembaga.nama} - Data Staff',
+              lembagaName: lembaga.nama,
+            ),
+          ),
+        );
+        break;
+
+      case 'guru':
+        Navigator.push(
+          context,
+          MaterialPageRoute(
+            builder: (context) => StaffScreen(
+              title: '${lembaga.nama} - Data Guru',
+              lembagaName: lembaga.nama,
+            ),
+          ),
+        );
+        break;
+
       default:
         // Untuk menu lain, gunakan static content dengan banner dari API
         _navigateWithBanner(context, menuItem, lembaga.nama, lembaga.slug);
@@ -232,11 +270,44 @@ class MenuNavigationHelper {
         _showComingSoon(context, 'Informasi');
         break;
 
-      case 'sdm':
       case 'santri':
+        Navigator.push(
+          context,
+          MaterialPageRoute(
+            builder: (context) => SantriScreen(
+              title: '$categoryTitle - Daftar Santri',
+              lembagaName: categoryTitle,
+            ),
+          ),
+        );
+        break;
+
+      case 'sdm':
+        Navigator.push(
+          context,
+          MaterialPageRoute(
+            builder: (context) => StaffScreen(
+              title: '$categoryTitle - Data Staff',
+              lembagaName: categoryTitle,
+            ),
+          ),
+        );
+        break;
+
       case 'guru':
+        Navigator.push(
+          context,
+          MaterialPageRoute(
+            builder: (context) => StaffScreen(
+              title: '$categoryTitle - Data Guru',
+              lembagaName: categoryTitle,
+            ),
+          ),
+        );
+        break;
+
       case 'alumni':
-        _showComingSoon(context, menuItem);
+        _showComingSoon(context, 'alumni');
         break;
 
       case 'peraturan sdm':

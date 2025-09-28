@@ -19,10 +19,10 @@ class _SantriScreenState extends State<SantriScreen> {
   int jumlahSantri = 12;
   String searchQuery = '';
   final TextEditingController _searchController = TextEditingController();
-  
+
   final List<String> kelasList = [
     'Kelas 1',
-    'Kelas 2', 
+    'Kelas 2',
     'Kelas 3',
     'Kelas 4',
     'Kelas 5',
@@ -50,7 +50,7 @@ class _SantriScreenState extends State<SantriScreen> {
       'tahunIjazah': '2024'
     },
     {
-      'nama': 'Muhammad Arkia Bin Wazdan', 
+      'nama': 'Muhammad Arkia Bin Wazdan',
       'subtitle': 'Inaralaya Ujian Ilir Sumasel',
       'avatar': 'https://i.pravatar.cc/150?img=2',
       'kelas': 'Kelas 1',
@@ -69,7 +69,7 @@ class _SantriScreenState extends State<SantriScreen> {
     },
     {
       'nama': 'Muhammad Arkia Bin Wazdan',
-      'subtitle': 'Inaralaya Ujian Ilir Sumasel', 
+      'subtitle': 'Inaralaya Ujian Ilir Sumasel',
       'avatar': 'https://i.pravatar.cc/150?img=3',
       'kelas': 'Kelas 1',
       'nisn': '0123456791',
@@ -245,15 +245,23 @@ class _SantriScreenState extends State<SantriScreen> {
   ];
 
   List<Map<String, dynamic>> get filteredSantri {
-    var filtered = santriData.where((santri) => santri['kelas'] == selectedKelas).toList();
-    
+    var filtered =
+        santriData.where((santri) => santri['kelas'] == selectedKelas).toList();
+
     if (searchQuery.isNotEmpty) {
-      filtered = filtered.where((santri) =>
-        santri['nama'].toString().toLowerCase().contains(searchQuery.toLowerCase()) ||
-        santri['subtitle'].toString().toLowerCase().contains(searchQuery.toLowerCase())
-      ).toList();
+      filtered = filtered
+          .where((santri) =>
+              santri['nama']
+                  .toString()
+                  .toLowerCase()
+                  .contains(searchQuery.toLowerCase()) ||
+              santri['subtitle']
+                  .toString()
+                  .toLowerCase()
+                  .contains(searchQuery.toLowerCase()))
+          .toList();
     }
-    
+
     return filtered;
   }
 
@@ -364,9 +372,10 @@ class _SantriScreenState extends State<SantriScreen> {
                         onBackgroundImageError: (exception, stackTrace) {
                           // Fallback handled by child
                         },
-                        child: santri['avatar'] == null 
-                          ? const Icon(Icons.person, color: Colors.white, size: 30)
-                          : null,
+                        child: santri['avatar'] == null
+                            ? const Icon(Icons.person,
+                                color: Colors.white, size: 30)
+                            : null,
                       ),
                       const SizedBox(width: 15),
                       Expanded(
@@ -398,7 +407,7 @@ class _SantriScreenState extends State<SantriScreen> {
                     ],
                   ),
                 ),
-                
+
                 // Content
                 Expanded(
                   child: SingleChildScrollView(
@@ -410,31 +419,29 @@ class _SantriScreenState extends State<SantriScreen> {
                           _buildDetailRow('Nama Lengkap', santri['nama']),
                           _buildDetailRow('NISN', santri['nisn']),
                           _buildDetailRow('Jenis Kelamin', santri['gender']),
-                          _buildDetailRow('Tempat Lahir', santri['tempatLahir']),
-                          _buildDetailRow('Tanggal Lahir', santri['tanggalLahir']),
+                          _buildDetailRow(
+                              'Tempat Lahir', santri['tempatLahir']),
+                          _buildDetailRow(
+                              'Tanggal Lahir', santri['tanggalLahir']),
                         ]),
-                        
                         const SizedBox(height: 20),
-                        
                         _buildDetailSection('Data Orang Tua', [
                           _buildDetailRow('Nama Ayah', santri['namaAyah']),
                           _buildDetailRow('Nama Ibu', santri['namaIbu']),
                         ]),
-                        
                         const SizedBox(height: 20),
-                        
                         _buildDetailSection('Alamat', [
                           _buildDetailRow('Kelurahan', santri['kelurahan']),
                           _buildDetailRow('Kecamatan', santri['kecamatan']),
                           _buildDetailRow('Kota', santri['kota']),
                         ]),
-                        
                         const SizedBox(height: 20),
-                        
                         _buildDetailSection('Data Pendidikan', [
                           _buildDetailRow('Lembaga', santri['lembaga']),
-                          _buildDetailRow('Nomor Ijazah', santri['nomorIjazah']),
-                          _buildDetailRow('Tahun Ijazah', santri['tahunIjazah']),
+                          _buildDetailRow(
+                              'Nomor Ijazah', santri['nomorIjazah']),
+                          _buildDetailRow(
+                              'Tahun Ijazah', santri['tahunIjazah']),
                         ]),
                       ],
                     ),
@@ -523,7 +530,7 @@ class _SantriScreenState extends State<SantriScreen> {
                   ],
                 ),
                 const SizedBox(height: 25),
-                
+
                 // Filter dan Info section
                 Container(
                   margin: const EdgeInsets.symmetric(horizontal: 20),
@@ -545,7 +552,8 @@ class _SantriScreenState extends State<SantriScreen> {
                       Expanded(
                         flex: 2,
                         child: Container(
-                          padding: const EdgeInsets.symmetric(horizontal: 15, vertical: 10),
+                          padding: const EdgeInsets.symmetric(
+                              horizontal: 15, vertical: 10),
                           decoration: BoxDecoration(
                             color: Colors.black,
                             borderRadius: BorderRadius.circular(25),
@@ -555,7 +563,8 @@ class _SantriScreenState extends State<SantriScreen> {
                               value: selectedKelas,
                               dropdownColor: Colors.black,
                               style: const TextStyle(color: Colors.white),
-                              icon: const Icon(Icons.arrow_drop_down, color: Colors.white),
+                              icon: const Icon(Icons.arrow_drop_down,
+                                  color: Colors.white),
                               items: kelasList.map((String kelas) {
                                 return DropdownMenuItem<String>(
                                   value: kelas,
@@ -574,9 +583,9 @@ class _SantriScreenState extends State<SantriScreen> {
                           ),
                         ),
                       ),
-                      
+
                       const SizedBox(width: 20),
-                      
+
                       // Jumlah Santri
                       Expanded(
                         flex: 2,
@@ -593,7 +602,8 @@ class _SantriScreenState extends State<SantriScreen> {
                             ),
                             const SizedBox(height: 5),
                             Container(
-                              padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 8),
+                              padding: const EdgeInsets.symmetric(
+                                  horizontal: 12, vertical: 8),
                               decoration: BoxDecoration(
                                 color: Colors.green,
                                 borderRadius: BorderRadius.circular(8),
@@ -610,27 +620,27 @@ class _SantriScreenState extends State<SantriScreen> {
                           ],
                         ),
                       ),
-                      
+
                       const SizedBox(width: 15),
-                      
+
                       // Search Icon
                       GestureDetector(
                         onTap: _showSearchDialog,
                         child: Container(
                           padding: const EdgeInsets.all(10),
                           decoration: BoxDecoration(
-                            color: searchQuery.isNotEmpty 
-                              ? Colors.blue.shade100 
-                              : Colors.grey.shade100,
+                            color: searchQuery.isNotEmpty
+                                ? Colors.blue.shade100
+                                : Colors.grey.shade100,
                             borderRadius: BorderRadius.circular(8),
                           ),
                           child: Stack(
                             children: [
                               Icon(
                                 Icons.search,
-                                color: searchQuery.isNotEmpty 
-                                  ? Colors.blue.shade600 
-                                  : Colors.grey.shade600,
+                                color: searchQuery.isNotEmpty
+                                    ? Colors.blue.shade600
+                                    : Colors.grey.shade600,
                                 size: 24,
                               ),
                               if (searchQuery.isNotEmpty)
@@ -657,7 +667,7 @@ class _SantriScreenState extends State<SantriScreen> {
               ],
             ),
           ),
-          
+
           // List Santri
           Expanded(
             child: Column(
@@ -707,45 +717,45 @@ class _SantriScreenState extends State<SantriScreen> {
                       ],
                     ),
                   ),
-                
+
                 // Content area
                 Expanded(
                   child: Container(
                     color: Colors.grey.shade50,
-                    child: filteredSantri.isEmpty 
-                      ? Center(
-                          child: Column(
-                            mainAxisAlignment: MainAxisAlignment.center,
-                            children: [
-                              Icon(
-                                searchQuery.isNotEmpty 
-                                  ? Icons.search_off
-                                  : Icons.people_outline,
-                                size: 64,
-                                color: Colors.grey,
-                              ),
-                              const SizedBox(height: 16),
-                              Text(
-                                searchQuery.isNotEmpty
-                                  ? 'Tidak ditemukan santri dengan kata kunci "$searchQuery"'
-                                  : 'Tidak ada santri di kelas ini',
-                                textAlign: TextAlign.center,
-                                style: const TextStyle(
+                    child: filteredSantri.isEmpty
+                        ? Center(
+                            child: Column(
+                              mainAxisAlignment: MainAxisAlignment.center,
+                              children: [
+                                Icon(
+                                  searchQuery.isNotEmpty
+                                      ? Icons.search_off
+                                      : Icons.people_outline,
+                                  size: 64,
                                   color: Colors.grey,
-                                  fontSize: 16,
                                 ),
-                              ),
-                            ],
+                                const SizedBox(height: 16),
+                                Text(
+                                  searchQuery.isNotEmpty
+                                      ? 'Tidak ditemukan santri dengan kata kunci "$searchQuery"'
+                                      : 'Tidak ada santri di kelas ini',
+                                  textAlign: TextAlign.center,
+                                  style: const TextStyle(
+                                    color: Colors.grey,
+                                    fontSize: 16,
+                                  ),
+                                ),
+                              ],
+                            ),
+                          )
+                        : ListView.builder(
+                            padding: const EdgeInsets.all(20),
+                            itemCount: filteredSantri.length,
+                            itemBuilder: (context, index) {
+                              final santri = filteredSantri[index];
+                              return _buildSantriCard(santri, index);
+                            },
                           ),
-                        )
-                      : ListView.builder(
-                          padding: const EdgeInsets.all(20),
-                          itemCount: filteredSantri.length,
-                          itemBuilder: (context, index) {
-                            final santri = filteredSantri[index];
-                            return _buildSantriCard(santri, index);
-                          },
-                        ),
                   ),
                 ),
               ],
@@ -778,13 +788,13 @@ class _SantriScreenState extends State<SantriScreen> {
           onBackgroundImageError: (exception, stackTrace) {
             // Fallback to default avatar
           },
-          child: santri['avatar'] == null 
-            ? Icon(
-                Icons.person,
-                color: Colors.grey.shade400,
-                size: 30,
-              )
-            : null,
+          child: santri['avatar'] == null
+              ? Icon(
+                  Icons.person,
+                  color: Colors.grey.shade400,
+                  size: 30,
+                )
+              : null,
         ),
         title: Text(
           santri['nama'],

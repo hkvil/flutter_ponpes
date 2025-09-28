@@ -41,7 +41,11 @@ class _StaffScreenState extends State<StaffScreen> {
       'lulusan': 'UIN Raden Fatah Palembang',
       'statusPNS': 'PNS',
       'statusGuruTetap': 'Guru Tetap',
-      'sertifikasi': ['Sertifikat Pendidik', 'Sertifikat Tahfidz', 'Sertifikat Kepemimpinan']
+      'sertifikasi': [
+        'Sertifikat Pendidik',
+        'Sertifikat Tahfidz',
+        'Sertifikat Kepemimpinan'
+      ]
     },
     {
       'nama': 'Ustadz Muhammad Hakim, S.Pd.I',
@@ -64,7 +68,11 @@ class _StaffScreenState extends State<StaffScreen> {
       'lulusan': 'IAIN Raden Fatah Palembang',
       'statusPNS': 'Non PNS',
       'statusGuruTetap': 'Guru Tetap',
-      'sertifikasi': ['Sertifikat Tahfidz 30 Juz', 'Sertifikat Qira\'at', 'Pelatihan Metode Tilawah']
+      'sertifikasi': [
+        'Sertifikat Tahfidz 30 Juz',
+        'Sertifikat Qira\'at',
+        'Pelatihan Metode Tilawah'
+      ]
     },
     {
       'nama': 'Ustadzah Khadijah, S.Pd',
@@ -87,7 +95,11 @@ class _StaffScreenState extends State<StaffScreen> {
       'lulusan': 'UNSRI Palembang',
       'statusPNS': 'Non PNS',
       'statusGuruTetap': 'Guru Tetap',
-      'sertifikasi': ['Sertifikat Pendidik', 'Workshop Kurikulum 2013', 'Pelatihan Bahasa Arab']
+      'sertifikasi': [
+        'Sertifikat Pendidik',
+        'Workshop Kurikulum 2013',
+        'Pelatihan Bahasa Arab'
+      ]
     },
     {
       'nama': 'Ahmad Subhan, S.Kom',
@@ -110,7 +122,10 @@ class _StaffScreenState extends State<StaffScreen> {
       'lulusan': 'STMIK MDP Palembang',
       'statusPNS': 'Non PNS',
       'statusGuruTetap': 'Non Guru',
-      'sertifikasi': ['Sertifikat Microsoft Office', 'Pelatihan Sistem Informasi Sekolah']
+      'sertifikasi': [
+        'Sertifikat Microsoft Office',
+        'Pelatihan Sistem Informasi Sekolah'
+      ]
     },
     {
       'nama': 'Ustadz Abdullah Yusuf, Lc',
@@ -133,7 +148,11 @@ class _StaffScreenState extends State<StaffScreen> {
       'lulusan': 'Universitas Al-Azhar Kairo',
       'statusPNS': 'Non PNS',
       'statusGuruTetap': 'Guru Tetap',
-      'sertifikasi': ['Ijazah Bahasa Arab', 'Sertifikat Fiqh', 'Sertifikat Da\'wah']
+      'sertifikasi': [
+        'Ijazah Bahasa Arab',
+        'Sertifikat Fiqh',
+        'Sertifikat Da\'wah'
+      ]
     },
     {
       'nama': 'Ustadzah Asiyah, S.Pd.I',
@@ -156,7 +175,11 @@ class _StaffScreenState extends State<StaffScreen> {
       'lulusan': 'UIN Raden Fatah Palembang',
       'statusPNS': 'Non PNS',
       'statusGuruTetap': 'Guru Tetap',
-      'sertifikasi': ['Hafidzah 30 Juz', 'Sertifikat Qira\'at Sab\'ah', 'Ijazah Tahfidz']
+      'sertifikasi': [
+        'Hafidzah 30 Juz',
+        'Sertifikat Qira\'at Sab\'ah',
+        'Ijazah Tahfidz'
+      ]
     },
   ];
 
@@ -164,12 +187,22 @@ class _StaffScreenState extends State<StaffScreen> {
     if (searchQuery.isEmpty) {
       return staffData;
     }
-    
-    return staffData.where((staff) =>
-      staff['nama'].toString().toLowerCase().contains(searchQuery.toLowerCase()) ||
-      staff['subtitle'].toString().toLowerCase().contains(searchQuery.toLowerCase()) ||
-      staff['kategoriPersonil'].toString().toLowerCase().contains(searchQuery.toLowerCase())
-    ).toList();
+
+    return staffData
+        .where((staff) =>
+            staff['nama']
+                .toString()
+                .toLowerCase()
+                .contains(searchQuery.toLowerCase()) ||
+            staff['subtitle']
+                .toString()
+                .toLowerCase()
+                .contains(searchQuery.toLowerCase()) ||
+            staff['kategoriPersonil']
+                .toString()
+                .toLowerCase()
+                .contains(searchQuery.toLowerCase()))
+        .toList();
   }
 
   @override
@@ -263,9 +296,10 @@ class _StaffScreenState extends State<StaffScreen> {
                         radius: 30,
                         backgroundImage: NetworkImage(staff['avatar']),
                         onBackgroundImageError: (exception, stackTrace) {},
-                        child: staff['avatar'] == null 
-                          ? const Icon(Icons.person, color: Colors.white, size: 30)
-                          : null,
+                        child: staff['avatar'] == null
+                            ? const Icon(Icons.person,
+                                color: Colors.white, size: 30)
+                            : null,
                       ),
                       const SizedBox(width: 15),
                       Expanded(
@@ -297,7 +331,7 @@ class _StaffScreenState extends State<StaffScreen> {
                     ],
                   ),
                 ),
-                
+
                 // Content
                 Expanded(
                   child: SingleChildScrollView(
@@ -308,36 +342,37 @@ class _StaffScreenState extends State<StaffScreen> {
                         _buildDetailSection('Data Pribadi', [
                           _buildDetailRow('Nama Lengkap', staff['nama']),
                           _buildDetailRow('Tempat Lahir', staff['tempatLahir']),
-                          _buildDetailRow('Tanggal Lahir', staff['tanggalLahir']),
+                          _buildDetailRow(
+                              'Tanggal Lahir', staff['tanggalLahir']),
                           _buildDetailRow('Jenis Kelamin', staff['gender']),
                           _buildDetailRow('Agama', staff['agama']),
                           _buildDetailRow('No. Telepon', staff['noTelephone']),
                           _buildDetailRow('Nama Ibu', staff['namaIbu']),
                           _buildDetailRow('NIK', staff['nik']),
                         ]),
-                        
                         const SizedBox(height: 20),
-                        
                         _buildDetailSection('Data Kepegawaian', [
                           _buildDetailRow('Lembaga', staff['lembaga']),
-                          _buildDetailRow('Kategori Personil', staff['kategoriPersonil']),
-                          _buildDetailRow('Keterangan Tugas', staff['keteranganTugas']),
-                          _buildDetailRow('Status Kepegawaian', staff['statusKepegawaian']),
+                          _buildDetailRow(
+                              'Kategori Personil', staff['kategoriPersonil']),
+                          _buildDetailRow(
+                              'Keterangan Tugas', staff['keteranganTugas']),
+                          _buildDetailRow(
+                              'Status Kepegawaian', staff['statusKepegawaian']),
                           _buildDetailRow('Mulai Tugas', staff['mulaiTugas']),
-                          _buildDetailRow('Status Aktif', staff['aktif'] ? 'Aktif' : 'Tidak Aktif'),
+                          _buildDetailRow('Status Aktif',
+                              staff['aktif'] ? 'Aktif' : 'Tidak Aktif'),
                           _buildDetailRow('Status PNS', staff['statusPNS']),
-                          _buildDetailRow('Status Guru Tetap', staff['statusGuruTetap']),
+                          _buildDetailRow(
+                              'Status Guru Tetap', staff['statusGuruTetap']),
                         ]),
-                        
                         const SizedBox(height: 20),
-                        
                         _buildDetailSection('Data Pendidikan', [
-                          _buildDetailRow('Pendidikan Terakhir', staff['pendidikanTerakhir']),
+                          _buildDetailRow('Pendidikan Terakhir',
+                              staff['pendidikanTerakhir']),
                           _buildDetailRow('Lulusan', staff['lulusan']),
                         ]),
-                        
                         const SizedBox(height: 20),
-                        
                         _buildDetailSection('Sertifikasi', [
                           _buildSertifikasiList(staff['sertifikasi']),
                         ]),
@@ -428,7 +463,7 @@ class _StaffScreenState extends State<StaffScreen> {
                   ],
                 ),
                 const SizedBox(height: 25),
-                
+
                 // Info section dengan search
                 Container(
                   margin: const EdgeInsets.symmetric(horizontal: 20),
@@ -461,7 +496,8 @@ class _StaffScreenState extends State<StaffScreen> {
                             ),
                             const SizedBox(height: 5),
                             Container(
-                              padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 8),
+                              padding: const EdgeInsets.symmetric(
+                                  horizontal: 12, vertical: 8),
                               decoration: BoxDecoration(
                                 color: Colors.blue,
                                 borderRadius: BorderRadius.circular(8),
@@ -478,27 +514,27 @@ class _StaffScreenState extends State<StaffScreen> {
                           ],
                         ),
                       ),
-                      
+
                       const SizedBox(width: 15),
-                      
+
                       // Search Icon
                       GestureDetector(
                         onTap: _showSearchDialog,
                         child: Container(
                           padding: const EdgeInsets.all(10),
                           decoration: BoxDecoration(
-                            color: searchQuery.isNotEmpty 
-                              ? Colors.blue.shade100 
-                              : Colors.grey.shade100,
+                            color: searchQuery.isNotEmpty
+                                ? Colors.blue.shade100
+                                : Colors.grey.shade100,
                             borderRadius: BorderRadius.circular(8),
                           ),
                           child: Stack(
                             children: [
                               Icon(
                                 Icons.search,
-                                color: searchQuery.isNotEmpty 
-                                  ? Colors.blue.shade600 
-                                  : Colors.grey.shade600,
+                                color: searchQuery.isNotEmpty
+                                    ? Colors.blue.shade600
+                                    : Colors.grey.shade600,
                                 size: 24,
                               ),
                               if (searchQuery.isNotEmpty)
@@ -525,7 +561,7 @@ class _StaffScreenState extends State<StaffScreen> {
               ],
             ),
           ),
-          
+
           // List Staff
           Expanded(
             child: Column(
@@ -574,45 +610,45 @@ class _StaffScreenState extends State<StaffScreen> {
                       ],
                     ),
                   ),
-                
+
                 // Content area
                 Expanded(
                   child: Container(
                     color: Colors.grey.shade50,
-                    child: filteredStaff.isEmpty 
-                      ? Center(
-                          child: Column(
-                            mainAxisAlignment: MainAxisAlignment.center,
-                            children: [
-                              Icon(
-                                searchQuery.isNotEmpty 
-                                  ? Icons.search_off
-                                  : Icons.people_outline,
-                                size: 64,
-                                color: Colors.grey,
-                              ),
-                              const SizedBox(height: 16),
-                              Text(
-                                searchQuery.isNotEmpty
-                                  ? 'Tidak ditemukan Staff dengan kata kunci "$searchQuery"'
-                                  : 'Tidak ada data Staff',
-                                textAlign: TextAlign.center,
-                                style: const TextStyle(
+                    child: filteredStaff.isEmpty
+                        ? Center(
+                            child: Column(
+                              mainAxisAlignment: MainAxisAlignment.center,
+                              children: [
+                                Icon(
+                                  searchQuery.isNotEmpty
+                                      ? Icons.search_off
+                                      : Icons.people_outline,
+                                  size: 64,
                                   color: Colors.grey,
-                                  fontSize: 16,
                                 ),
-                              ),
-                            ],
+                                const SizedBox(height: 16),
+                                Text(
+                                  searchQuery.isNotEmpty
+                                      ? 'Tidak ditemukan Staff dengan kata kunci "$searchQuery"'
+                                      : 'Tidak ada data Staff',
+                                  textAlign: TextAlign.center,
+                                  style: const TextStyle(
+                                    color: Colors.grey,
+                                    fontSize: 16,
+                                  ),
+                                ),
+                              ],
+                            ),
+                          )
+                        : ListView.builder(
+                            padding: const EdgeInsets.all(20),
+                            itemCount: filteredStaff.length,
+                            itemBuilder: (context, index) {
+                              final staff = filteredStaff[index];
+                              return _buildStaffCard(staff, index);
+                            },
                           ),
-                        )
-                      : ListView.builder(
-                          padding: const EdgeInsets.all(20),
-                          itemCount: filteredStaff.length,
-                          itemBuilder: (context, index) {
-                            final staff = filteredStaff[index];
-                            return _buildStaffCard(staff, index);
-                          },
-                        ),
                   ),
                 ),
               ],
@@ -643,13 +679,13 @@ class _StaffScreenState extends State<StaffScreen> {
           radius: 30,
           backgroundImage: NetworkImage(staff['avatar']),
           onBackgroundImageError: (exception, stackTrace) {},
-          child: staff['avatar'] == null 
-            ? Icon(
-                Icons.person,
-                color: Colors.grey.shade400,
-                size: 30,
-              )
-            : null,
+          child: staff['avatar'] == null
+              ? Icon(
+                  Icons.person,
+                  color: Colors.grey.shade400,
+                  size: 30,
+                )
+              : null,
         ),
         title: Text(
           staff['nama'],
@@ -765,7 +801,8 @@ class _StaffScreenState extends State<StaffScreen> {
           child: Row(
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
-              const Text('• ', style: TextStyle(color: Colors.blue, fontSize: 16)),
+              const Text('• ',
+                  style: TextStyle(color: Colors.blue, fontSize: 16)),
               Expanded(
                 child: Text(
                   sert.toString(),

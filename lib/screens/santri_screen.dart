@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import '../core/theme/app_colors.dart';
 
 class SantriScreen extends StatefulWidget {
   final String title;
@@ -36,7 +37,7 @@ class _SantriScreenState extends State<SantriScreen>
       backgroundColor: Colors.grey.shade50,
       appBar: AppBar(
         title: Text(widget.title),
-        backgroundColor: Colors.green,
+        backgroundColor: AppColors.primaryGreen,
         foregroundColor: Colors.white,
         elevation: 0,
         bottom: TabBar(
@@ -243,7 +244,7 @@ class _DaftarSantriTabState extends State<DaftarSantriTab> {
                   padding: const EdgeInsets.all(20),
                   decoration: BoxDecoration(
                     gradient: LinearGradient(
-                      colors: [Colors.green, Colors.green.shade300],
+                      colors: [AppColors.primaryGreen, AppColors.lightGreen],
                       begin: Alignment.topLeft,
                       end: Alignment.bottomRight,
                     ),
@@ -327,7 +328,7 @@ class _DaftarSantriTabState extends State<DaftarSantriTab> {
           width: double.infinity,
           decoration: BoxDecoration(
             gradient: LinearGradient(
-              colors: [Colors.green, Colors.green.shade300],
+              colors: [AppColors.primaryGreen, AppColors.lightGreen],
               begin: Alignment.topLeft,
               end: Alignment.bottomRight,
             ),
@@ -352,9 +353,9 @@ class _DaftarSantriTabState extends State<DaftarSantriTab> {
                         ),
                       ],
                     ),
-                    child: const Icon(
+                    child: Icon(
                       Icons.school,
-                      color: Colors.green,
+                      color: AppColors.primaryGreen,
                       size: 30,
                     ),
                   ),
@@ -453,7 +454,7 @@ class _DaftarSantriTabState extends State<DaftarSantriTab> {
                             padding: const EdgeInsets.symmetric(
                                 horizontal: 12, vertical: 8),
                             decoration: BoxDecoration(
-                              color: Colors.green,
+                              color: AppColors.primaryGreen,
                               borderRadius: BorderRadius.circular(8),
                             ),
                             child: Text(
@@ -582,10 +583,10 @@ class _DaftarSantriTabState extends State<DaftarSantriTab> {
         children: [
           Text(
             title,
-            style: const TextStyle(
+            style: TextStyle(
               fontSize: 16,
               fontWeight: FontWeight.bold,
-              color: Colors.green,
+              color: AppColors.primaryGreen,
             ),
           ),
           const SizedBox(height: 12),
@@ -627,16 +628,25 @@ class _DaftarSantriTabState extends State<DaftarSantriTab> {
   }
 }
 
-class KehadiranSantriTab extends StatelessWidget {
+class KehadiranSantriTab extends StatefulWidget {
   final String? lembagaName;
 
   const KehadiranSantriTab({super.key, this.lembagaName});
 
+  @override
+  State<KehadiranSantriTab> createState() => _KehadiranSantriTabState();
+}
+
+class _KehadiranSantriTabState extends State<KehadiranSantriTab> {
+  DateTime? startDate;
+  DateTime? endDate;
+
   // Data static kehadiran
-  static final List<Map<String, dynamic>> kehadiranData = [
+  final List<Map<String, dynamic>> kehadiranData = [
     {
       'nama': 'Muhammad Arkia Bin Wazdan',
       'tanggal': '29 September 2025',
+      'tanggalObj': DateTime(2025, 9, 29),
       'keterangan': 'Hadir tepat waktu',
       'jenis': 'Hadir',
       'avatar': 'https://i.pravatar.cc/150?img=1',
@@ -644,6 +654,7 @@ class KehadiranSantriTab extends StatelessWidget {
     {
       'nama': 'Ahmad Fadhil Bin Ibrahim',
       'tanggal': '29 September 2025',
+      'tanggalObj': DateTime(2025, 9, 29),
       'keterangan': 'Izin karena sakit',
       'jenis': 'Izin',
       'avatar': 'https://i.pravatar.cc/150?img=2',
@@ -651,6 +662,7 @@ class KehadiranSantriTab extends StatelessWidget {
     {
       'nama': 'Umar Abdillah Bin Sulaiman',
       'tanggal': '29 September 2025',
+      'tanggalObj': DateTime(2025, 9, 29),
       'keterangan': 'Tidak hadir tanpa keterangan',
       'jenis': 'Alpha',
       'avatar': 'https://i.pravatar.cc/150?img=3',
@@ -658,6 +670,7 @@ class KehadiranSantriTab extends StatelessWidget {
     {
       'nama': 'Ali Hasan Bin Ahmad',
       'tanggal': '29 September 2025',
+      'tanggalObj': DateTime(2025, 9, 29),
       'keterangan': 'Hadir, terlambat 15 menit',
       'jenis': 'Terlambat',
       'avatar': 'https://i.pravatar.cc/150?img=4',
@@ -665,6 +678,7 @@ class KehadiranSantriTab extends StatelessWidget {
     {
       'nama': 'Muhammad Yusuf Bin Omar',
       'tanggal': '28 September 2025',
+      'tanggalObj': DateTime(2025, 9, 28),
       'keterangan': 'Izin keperluan keluarga',
       'jenis': 'Izin',
       'avatar': 'https://i.pravatar.cc/150?img=5',
@@ -672,6 +686,7 @@ class KehadiranSantriTab extends StatelessWidget {
     {
       'nama': 'Abdullah Rahman Bin Ali',
       'tanggal': '28 September 2025',
+      'tanggalObj': DateTime(2025, 9, 28),
       'keterangan': 'Hadir tepat waktu',
       'jenis': 'Hadir',
       'avatar': 'https://i.pravatar.cc/150?img=6',
@@ -679,16 +694,113 @@ class KehadiranSantriTab extends StatelessWidget {
     {
       'nama': 'Hassan Bin Muhammad',
       'tanggal': '28 September 2025',
+      'tanggalObj': DateTime(2025, 9, 28),
       'keterangan': 'Sakit demam',
       'jenis': 'Sakit',
       'avatar': 'https://i.pravatar.cc/150?img=7',
     },
+    {
+      'nama': 'Ibrahim Bin Yusuf',
+      'tanggal': '27 September 2025',
+      'tanggalObj': DateTime(2025, 9, 27),
+      'keterangan': 'Hadir tepat waktu',
+      'jenis': 'Hadir',
+      'avatar': 'https://i.pravatar.cc/150?img=8',
+    },
+    {
+      'nama': 'Omar Bin Khattab',
+      'tanggal': '27 September 2025',
+      'tanggalObj': DateTime(2025, 9, 27),
+      'keterangan': 'Alpha tanpa keterangan',
+      'jenis': 'Alpha',
+      'avatar': 'https://i.pravatar.cc/150?img=9',
+    },
+    {
+      'nama': 'Sulaiman Bin Ahmad',
+      'tanggal': '27 September 2025',
+      'tanggalObj': DateTime(2025, 9, 27),
+      'keterangan': 'Terlambat 10 menit',
+      'jenis': 'Terlambat',
+      'avatar': 'https://i.pravatar.cc/150?img=10',
+    },
+    {
+      'nama': 'Muhammad Arkia Bin Wazdan',
+      'tanggal': '26 September 2025',
+      'tanggalObj': DateTime(2025, 9, 26),
+      'keterangan': 'Hadir tepat waktu',
+      'jenis': 'Hadir',
+      'avatar': 'https://i.pravatar.cc/150?img=1',
+    },
+    {
+      'nama': 'Ahmad Fadhil Bin Ibrahim',
+      'tanggal': '25 September 2025',
+      'tanggalObj': DateTime(2025, 9, 25),
+      'keterangan': 'Hadir tepat waktu',
+      'jenis': 'Hadir',
+      'avatar': 'https://i.pravatar.cc/150?img=2',
+    },
   ];
+
+  List<Map<String, dynamic>> get filteredKehadiran {
+    if (startDate == null || endDate == null) {
+      return kehadiranData;
+    }
+
+    return kehadiranData.where((kehadiran) {
+      final tanggal = kehadiran['tanggalObj'] as DateTime;
+      return tanggal.isAfter(startDate!.subtract(const Duration(days: 1))) &&
+          tanggal.isBefore(endDate!.add(const Duration(days: 1)));
+    }).toList();
+  }
+
+  Future<void> _selectDateRange() async {
+    final DateTimeRange? picked = await showDateRangePicker(
+      context: context,
+      firstDate: DateTime(2024, 1, 1),
+      lastDate: DateTime.now().add(const Duration(days: 30)),
+      initialDateRange: startDate != null && endDate != null
+          ? DateTimeRange(start: startDate!, end: endDate!)
+          : null,
+    );
+
+    if (picked != null) {
+      setState(() {
+        startDate = picked.start;
+        endDate = picked.end;
+      });
+    }
+  }
+
+  void _clearDateFilter() {
+    setState(() {
+      startDate = null;
+      endDate = null;
+    });
+  }
+
+  String _formatDate(DateTime date) {
+    final months = [
+      '',
+      'Januari',
+      'Februari',
+      'Maret',
+      'April',
+      'Mei',
+      'Juni',
+      'Juli',
+      'Agustus',
+      'September',
+      'Oktober',
+      'November',
+      'Desember'
+    ];
+    return '${date.day} ${months[date.month]} ${date.year}';
+  }
 
   Color _getJenisColor(String jenis) {
     switch (jenis) {
       case 'Hadir':
-        return Colors.green;
+        return AppColors.primaryGreen;
       case 'Izin':
         return Colors.blue;
       case 'Sakit':
@@ -729,7 +841,7 @@ class KehadiranSantriTab extends StatelessWidget {
             width: double.infinity,
             decoration: BoxDecoration(
               gradient: LinearGradient(
-                colors: [Colors.green, Colors.green.shade300],
+                colors: [AppColors.primaryGreen, AppColors.lightGreen],
                 begin: Alignment.topLeft,
                 end: Alignment.bottomRight,
               ),
@@ -754,9 +866,9 @@ class KehadiranSantriTab extends StatelessWidget {
                           ),
                         ],
                       ),
-                      child: const Icon(
+                      child: Icon(
                         Icons.assignment_turned_in,
-                        color: Colors.green,
+                        color: AppColors.primaryGreen,
                         size: 30,
                       ),
                     ),
@@ -783,18 +895,99 @@ class KehadiranSantriTab extends StatelessWidget {
                         ],
                       ),
                     ),
+                    // Filter tanggal button
+                    Container(
+                      margin: const EdgeInsets.only(right: 20),
+                      child: Row(
+                        children: [
+                          GestureDetector(
+                            onTap: _selectDateRange,
+                            child: Container(
+                              padding: const EdgeInsets.all(8),
+                              decoration: BoxDecoration(
+                                color: Colors.white.withOpacity(0.2),
+                                borderRadius: BorderRadius.circular(8),
+                              ),
+                              child: Icon(
+                                Icons.date_range,
+                                color: Colors.white,
+                                size: 20,
+                              ),
+                            ),
+                          ),
+                          if (startDate != null && endDate != null) ...[
+                            const SizedBox(width: 8),
+                            GestureDetector(
+                              onTap: _clearDateFilter,
+                              child: Container(
+                                padding: const EdgeInsets.all(6),
+                                decoration: BoxDecoration(
+                                  color: Colors.white.withOpacity(0.2),
+                                  borderRadius: BorderRadius.circular(8),
+                                ),
+                                child: Icon(
+                                  Icons.clear,
+                                  color: Colors.white,
+                                  size: 16,
+                                ),
+                              ),
+                            ),
+                          ],
+                        ],
+                      ),
+                    ),
                   ],
                 ),
                 const SizedBox(height: 20),
               ],
             ),
           ),
+          // Filter indicator
+          if (startDate != null && endDate != null)
+            Container(
+              margin: const EdgeInsets.fromLTRB(20, 10, 20, 0),
+              padding: const EdgeInsets.all(12),
+              decoration: BoxDecoration(
+                color: AppColors.lightGreen.withOpacity(0.2),
+                borderRadius: BorderRadius.circular(8),
+                border: Border.all(color: AppColors.lightGreen),
+              ),
+              child: Row(
+                children: [
+                  Icon(
+                    Icons.date_range,
+                    color: AppColors.primaryGreen,
+                    size: 16,
+                  ),
+                  const SizedBox(width: 8),
+                  Expanded(
+                    child: Text(
+                      startDate!.isAtSameMomentAs(endDate!)
+                          ? 'Tanggal: ${_formatDate(startDate!)}'
+                          : 'Periode: ${_formatDate(startDate!)} - ${_formatDate(endDate!)}',
+                      style: TextStyle(
+                        color: AppColors.darkGreen,
+                        fontSize: 14,
+                      ),
+                    ),
+                  ),
+                  Text(
+                    '${filteredKehadiran.length} data',
+                    style: TextStyle(
+                      color: AppColors.primaryGreen,
+                      fontSize: 12,
+                      fontWeight: FontWeight.bold,
+                    ),
+                  ),
+                ],
+              ),
+            ),
           Expanded(
             child: ListView.builder(
               padding: const EdgeInsets.all(20),
-              itemCount: kehadiranData.length,
+              itemCount: filteredKehadiran.length,
               itemBuilder: (context, index) {
-                final kehadiran = kehadiranData[index];
+                final kehadiran = filteredKehadiran[index];
                 return Container(
                   margin: const EdgeInsets.only(bottom: 12),
                   decoration: BoxDecoration(

@@ -5,6 +5,8 @@ import '../../screens/bannered_detail_screen.dart';
 import '../../screens/santri_screen.dart';
 import '../../screens/staff_screen.dart';
 import '../../screens/informasi_screen.dart';
+import '../../screens/alumni_screen.dart';
+import '../../screens/prestasi_santri_screen.dart';
 import '../../models/profile_section.dart';
 import '../../models/lembaga_model.dart';
 import '../../repository/lembaga_repository.dart';
@@ -201,6 +203,30 @@ class MenuNavigationHelper {
         );
         break;
 
+      case 'alumni':
+        Navigator.push(
+          context,
+          MaterialPageRoute(
+            builder: (context) => AlumniScreen(
+              title: '${lembaga.nama} - Data Alumni',
+              lembagaName: lembaga.nama,
+            ),
+          ),
+        );
+        break;
+
+      case 'prestasi':
+        Navigator.push(
+          context,
+          MaterialPageRoute(
+            builder: (context) => PrestasiSantriScreen(
+              title: '${lembaga.nama} - Prestasi Santri',
+              lembagaName: lembaga.nama,
+            ),
+          ),
+        );
+        break;
+
       default:
         // Untuk menu lain, gunakan static content dengan banner dari API
         _navigateWithBanner(context, menuItem, lembaga.nama, lembaga.slug);
@@ -261,7 +287,15 @@ class MenuNavigationHelper {
         break;
 
       case 'prestasi':
-        _showComingSoon(context, 'Prestasi');
+        Navigator.push(
+          context,
+          MaterialPageRoute(
+            builder: (context) => PrestasiSantriScreen(
+              title: '$categoryTitle - Prestasi Santri',
+              lembagaName: categoryTitle,
+            ),
+          ),
+        );
         break;
       case 'prestasi sdm':
         _showComingSoon(context, 'Prestasi SDM');
@@ -328,7 +362,15 @@ class MenuNavigationHelper {
         break;
 
       case 'alumni':
-        _showComingSoon(context, 'alumni');
+        Navigator.push(
+          context,
+          MaterialPageRoute(
+            builder: (context) => AlumniScreen(
+              title: '$categoryTitle - Data Alumni',
+              lembagaName: categoryTitle,
+            ),
+          ),
+        );
         break;
 
       case 'peraturan sdm':

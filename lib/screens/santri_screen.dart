@@ -243,11 +243,7 @@ class _DaftarSantriTabState extends State<DaftarSantriTab> {
                 Container(
                   padding: const EdgeInsets.all(20),
                   decoration: BoxDecoration(
-                    gradient: LinearGradient(
-                      colors: [AppColors.primaryGreen, AppColors.lightGreen],
-                      begin: Alignment.topLeft,
-                      end: Alignment.bottomRight,
-                    ),
+                    color: AppColors.primaryGreen,
                     borderRadius: const BorderRadius.only(
                       topLeft: Radius.circular(16),
                       topRight: Radius.circular(16),
@@ -327,11 +323,7 @@ class _DaftarSantriTabState extends State<DaftarSantriTab> {
         Container(
           width: double.infinity,
           decoration: BoxDecoration(
-            gradient: LinearGradient(
-              colors: [AppColors.primaryGreen, AppColors.lightGreen],
-              begin: Alignment.topLeft,
-              end: Alignment.bottomRight,
-            ),
+            color: AppColors.primaryGreen,
           ),
           child: Column(
             children: [
@@ -840,11 +832,7 @@ class _KehadiranSantriTabState extends State<KehadiranSantriTab> {
           Container(
             width: double.infinity,
             decoration: BoxDecoration(
-              gradient: LinearGradient(
-                colors: [AppColors.primaryGreen, AppColors.lightGreen],
-                begin: Alignment.topLeft,
-                end: Alignment.bottomRight,
-              ),
+              color: AppColors.primaryGreen,
             ),
             child: Column(
               children: [

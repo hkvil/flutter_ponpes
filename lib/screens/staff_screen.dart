@@ -271,11 +271,7 @@ class _DaftarStaffTabState extends State<DaftarStaffTab> {
                 Container(
                   padding: const EdgeInsets.all(20),
                   decoration: BoxDecoration(
-                    gradient: LinearGradient(
-                      colors: [Colors.blue, Colors.blue.shade300],
-                      begin: Alignment.topLeft,
-                      end: Alignment.bottomRight,
-                    ),
+                    color: Colors.blue,
                     borderRadius: const BorderRadius.only(
                       topLeft: Radius.circular(16),
                       topRight: Radius.circular(16),
@@ -369,11 +365,7 @@ class _DaftarStaffTabState extends State<DaftarStaffTab> {
         Container(
           width: double.infinity,
           decoration: BoxDecoration(
-            gradient: LinearGradient(
-              colors: [Colors.blue, Colors.blue.shade300],
-              begin: Alignment.topLeft,
-              end: Alignment.bottomRight,
-            ),
+            color: Colors.blue,
           ),
           child: Column(
             children: [
@@ -888,11 +880,7 @@ class _KehadiranStaffTabState extends State<KehadiranStaffTab> {
           Container(
             width: double.infinity,
             decoration: BoxDecoration(
-              gradient: LinearGradient(
-                colors: [Colors.blue, Colors.blue.shade300],
-                begin: Alignment.topLeft,
-                end: Alignment.bottomRight,
-              ),
+              color: Colors.blue,
             ),
             child: Column(
               children: [

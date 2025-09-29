@@ -14,7 +14,71 @@ class SantriScreen extends StatefulWidget {
   State<SantriScreen> createState() => _SantriScreenState();
 }
 
-class _SantriScreenState extends State<SantriScreen> {
+class _SantriScreenState extends State<SantriScreen>
+    with TickerProviderStateMixin {
+  late TabController _tabController;
+
+  @override
+  void initState() {
+    super.initState();
+    _tabController = TabController(length: 2, vsync: this);
+  }
+
+  @override
+  void dispose() {
+    _tabController.dispose();
+    super.dispose();
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    return Scaffold(
+      backgroundColor: Colors.grey.shade50,
+      appBar: AppBar(
+        title: Text(widget.title),
+        backgroundColor: Colors.green,
+        foregroundColor: Colors.white,
+        elevation: 0,
+        bottom: TabBar(
+          controller: _tabController,
+          indicatorColor: Colors.white,
+          labelColor: Colors.white,
+          unselectedLabelColor: Colors.white.withOpacity(0.7),
+          tabs: const [
+            Tab(text: 'Daftar'),
+            Tab(text: 'Kehadiran'),
+          ],
+        ),
+      ),
+      body: TabBarView(
+        controller: _tabController,
+        children: [
+          DaftarSantriTab(
+            title: widget.title,
+            lembagaName: widget.lembagaName,
+          ),
+          KehadiranSantriTab(lembagaName: widget.lembagaName),
+        ],
+      ),
+    );
+  }
+}
+
+class DaftarSantriTab extends StatefulWidget {
+  final String title;
+  final String? lembagaName;
+
+  const DaftarSantriTab({
+    super.key,
+    required this.title,
+    this.lembagaName,
+  });
+
+  @override
+  State<DaftarSantriTab> createState() => _DaftarSantriTabState();
+}
+
+class _DaftarSantriTabState extends State<DaftarSantriTab> {
   String selectedKelas = 'Kelas 1';
   int jumlahSantri = 12;
   String searchQuery = '';
@@ -50,145 +114,6 @@ class _SantriScreenState extends State<SantriScreen> {
       'tahunIjazah': '2024'
     },
     {
-      'nama': 'Muhammad Arkia Bin Wazdan',
-      'subtitle': 'Inaralaya Ujian Ilir Sumasel',
-      'avatar': 'https://i.pravatar.cc/150?img=2',
-      'kelas': 'Kelas 1',
-      'nisn': '0123456790',
-      'lembaga': 'Taman Pendidikan Al-Quran Al-Ittifaqiah',
-      'gender': 'Laki-laki',
-      'tempatLahir': 'Palembang',
-      'tanggalLahir': '22 Februari 2010',
-      'namaAyah': 'Ahmad Bin Sulaiman',
-      'namaIbu': 'Aminah',
-      'kelurahan': 'Inaralaya',
-      'kecamatan': 'Ujian Ilir',
-      'kota': 'Palembang',
-      'nomorIjazah': 'IJ-2024-002',
-      'tahunIjazah': '2024'
-    },
-    {
-      'nama': 'Muhammad Arkia Bin Wazdan',
-      'subtitle': 'Inaralaya Ujian Ilir Sumasel',
-      'avatar': 'https://i.pravatar.cc/150?img=3',
-      'kelas': 'Kelas 1',
-      'nisn': '0123456791',
-      'lembaga': 'Taman Pendidikan Al-Quran Al-Ittifaqiah',
-      'gender': 'Laki-laki',
-      'tempatLahir': 'Palembang',
-      'tanggalLahir': '08 Maret 2010',
-      'namaAyah': 'Usman Bin Ali',
-      'namaIbu': 'Khadijah',
-      'kelurahan': 'Inaralaya',
-      'kecamatan': 'Ujian Ilir',
-      'kota': 'Palembang',
-      'nomorIjazah': 'IJ-2024-003',
-      'tahunIjazah': '2024'
-    },
-    {
-      'nama': 'Muhammad Arkia Bin Wazdan',
-      'subtitle': 'Inaralaya Ujian Ilir Sumasel',
-      'avatar': 'https://i.pravatar.cc/150?img=4',
-      'kelas': 'Kelas 1',
-      'nisn': '0123456792',
-      'lembaga': 'Taman Pendidikan Al-Quran Al-Ittifaqiah',
-      'gender': 'Laki-laki',
-      'tempatLahir': 'Palembang',
-      'tanggalLahir': '14 April 2010',
-      'namaAyah': 'Yusuf Bin Ibrahim',
-      'namaIbu': 'Asiyah',
-      'kelurahan': 'Inaralaya',
-      'kecamatan': 'Ujian Ilir',
-      'kota': 'Palembang',
-      'nomorIjazah': 'IJ-2024-004',
-      'tahunIjazah': '2024'
-    },
-    {
-      'nama': 'Muhammad Arkia Bin Wazdan',
-      'subtitle': 'Inaralaya Ujian Ilir Sumasel',
-      'avatar': 'https://i.pravatar.cc/150?img=5',
-      'kelas': 'Kelas 1',
-      'nisn': '0123456793',
-      'lembaga': 'Taman Pendidikan Al-Quran Al-Ittifaqiah',
-      'gender': 'Laki-laki',
-      'tempatLahir': 'Palembang',
-      'tanggalLahir': '30 Mei 2010',
-      'namaAyah': 'Hasan Bin Muhammad',
-      'namaIbu': 'Ruqayyah',
-      'kelurahan': 'Inaralaya',
-      'kecamatan': 'Ujian Ilir',
-      'kota': 'Palembang',
-      'nomorIjazah': 'IJ-2024-005',
-      'tahunIjazah': '2024'
-    },
-    {
-      'nama': 'Muhammad Arkia Bin Wazdan',
-      'subtitle': 'Inaralaya Ujian Ilir Sumasel',
-      'avatar': 'https://i.pravatar.cc/150?img=6',
-      'kelas': 'Kelas 1',
-      'nisn': '0123456794',
-      'lembaga': 'Taman Pendidikan Al-Quran Al-Ittifaqiah',
-      'gender': 'Laki-laki',
-      'tempatLahir': 'Palembang',
-      'tanggalLahir': '07 Juni 2010',
-      'namaAyah': 'Omar Bin Khattab',
-      'namaIbu': 'Ummu Salamah',
-      'kelurahan': 'Inaralaya',
-      'kecamatan': 'Ujian Ilir',
-      'kota': 'Palembang',
-      'nomorIjazah': 'IJ-2024-006',
-      'tahunIjazah': '2024'
-    },
-    {
-      'nama': 'Muhammad Arkia Bin Wazdan',
-      'subtitle': 'Inaralaya Ujian Ilir Sumasel',
-      'avatar': 'https://i.pravatar.cc/150?img=7',
-      'kelas': 'Kelas 1',
-      'nisn': '0123456795',
-      'lembaga': 'Taman Pendidikan Al-Quran Al-Ittifaqiah',
-      'gender': 'Laki-laki',
-      'tempatLahir': 'Palembang',
-      'tanggalLahir': '23 Juli 2010',
-      'namaAyah': 'Abdullah Bin Zubair',
-      'namaIbu': 'Sakinah',
-      'kelurahan': 'Inaralaya',
-      'kecamatan': 'Ujian Ilir',
-      'kota': 'Palembang',
-      'nomorIjazah': 'IJ-2024-007',
-      'tahunIjazah': '2024'
-    },
-    {
-      'nama': 'Muhammad Arkia Bin Wazdan',
-      'subtitle': 'Inaralaya Ujian Ilir Sumasel',
-      'avatar': 'https://i.pravatar.cc/150?img=8',
-      'kelas': 'Kelas 1'
-    },
-    {
-      'nama': 'Muhammad Arkia Bin Wazdan',
-      'subtitle': 'Inaralaya Ujian Ilir Sumasel',
-      'avatar': 'https://i.pravatar.cc/150?img=9',
-      'kelas': 'Kelas 1'
-    },
-    {
-      'nama': 'Muhammad Arkia Bin Wazdan',
-      'subtitle': 'Inaralaya Ujian Ilir Sumasel',
-      'avatar': 'https://i.pravatar.cc/150?img=10',
-      'kelas': 'Kelas 1'
-    },
-    {
-      'nama': 'Muhammad Arkia Bin Wazdan',
-      'subtitle': 'Inaralaya Ujian Ilir Sumasel',
-      'avatar': 'https://i.pravatar.cc/150?img=11',
-      'kelas': 'Kelas 1'
-    },
-    {
-      'nama': 'Muhammad Arkia Bin Wazdan',
-      'subtitle': 'Inaralaya Ujian Ilir Sumasel',
-      'avatar': 'https://i.pravatar.cc/150?img=12',
-      'kelas': 'Kelas 1'
-    },
-    // Tambah data untuk kelas lain dengan data lengkap
-    {
       'nama': 'Ahmad Fadhil Bin Ibrahim',
       'subtitle': 'Inaralaya Ujian Ilir Sumasel',
       'avatar': 'https://i.pravatar.cc/150?img=13',
@@ -205,42 +130,6 @@ class _SantriScreenState extends State<SantriScreen> {
       'kota': 'Palembang',
       'nomorIjazah': 'IJ-2023-013',
       'tahunIjazah': '2023'
-    },
-    {
-      'nama': 'Umar Abdillah Bin Sulaiman',
-      'subtitle': 'Inaralaya Ujian Ilir Sumasel',
-      'avatar': 'https://i.pravatar.cc/150?img=14',
-      'kelas': 'Kelas 2',
-      'nisn': '0123456814',
-      'lembaga': 'Taman Pendidikan Al-Quran Al-Ittifaqiah',
-      'gender': 'Laki-laki',
-      'tempatLahir': 'Palembang',
-      'tanggalLahir': '25 Mei 2009',
-      'namaAyah': 'Sulaiman Bin Omar',
-      'namaIbu': 'Zainab',
-      'kelurahan': 'Inaralaya',
-      'kecamatan': 'Ujian Ilir',
-      'kota': 'Palembang',
-      'nomorIjazah': 'IJ-2023-014',
-      'tahunIjazah': '2023'
-    },
-    {
-      'nama': 'Ali Hasan Bin Ahmad',
-      'subtitle': 'Inaralaya Ujian Ilir Sumasel',
-      'avatar': 'https://i.pravatar.cc/150?img=15',
-      'kelas': 'Kelas 3',
-      'nisn': '0123456815',
-      'lembaga': 'Taman Pendidikan Al-Quran Al-Ittifaqiah',
-      'gender': 'Laki-laki',
-      'tempatLahir': 'Palembang',
-      'tanggalLahir': '18 Juni 2008',
-      'namaAyah': 'Ahmad Bin Hassan',
-      'namaIbu': 'Hafsah',
-      'kelurahan': 'Inaralaya',
-      'kecamatan': 'Ujian Ilir',
-      'kota': 'Palembang',
-      'nomorIjazah': 'IJ-2022-015',
-      'tahunIjazah': '2022'
     },
   ];
 
@@ -330,7 +219,7 @@ class _SantriScreenState extends State<SantriScreen> {
   void _showSantriDetail(Map<String, dynamic> santri) {
     showDialog(
       context: context,
-      barrierColor: Colors.black.withOpacity(0.7), // Semi-transparent overlay
+      barrierColor: Colors.black.withOpacity(0.7),
       builder: (BuildContext context) {
         return Dialog(
           backgroundColor: Colors.transparent,
@@ -350,7 +239,6 @@ class _SantriScreenState extends State<SantriScreen> {
             ),
             child: Column(
               children: [
-                // Header
                 Container(
                   padding: const EdgeInsets.all(20),
                   decoration: BoxDecoration(
@@ -369,9 +257,6 @@ class _SantriScreenState extends State<SantriScreen> {
                       CircleAvatar(
                         radius: 30,
                         backgroundImage: NetworkImage(santri['avatar']),
-                        onBackgroundImageError: (exception, stackTrace) {
-                          // Fallback handled by child
-                        },
                         child: santri['avatar'] == null
                             ? const Icon(Icons.person,
                                 color: Colors.white, size: 30)
@@ -382,16 +267,16 @@ class _SantriScreenState extends State<SantriScreen> {
                         child: Column(
                           crossAxisAlignment: CrossAxisAlignment.start,
                           children: [
-                            Text(
+                            const Text(
                               'Detail Santri',
-                              style: const TextStyle(
+                              style: TextStyle(
                                 color: Colors.white,
                                 fontSize: 18,
                                 fontWeight: FontWeight.bold,
                               ),
                             ),
                             Text(
-                              santri['kelas'],
+                              santri['kelas'] ?? '-',
                               style: TextStyle(
                                 color: Colors.white.withOpacity(0.9),
                                 fontSize: 14,
@@ -407,8 +292,6 @@ class _SantriScreenState extends State<SantriScreen> {
                     ],
                   ),
                 ),
-
-                // Content
                 Expanded(
                   child: SingleChildScrollView(
                     padding: const EdgeInsets.all(20),
@@ -424,25 +307,6 @@ class _SantriScreenState extends State<SantriScreen> {
                           _buildDetailRow(
                               'Tanggal Lahir', santri['tanggalLahir']),
                         ]),
-                        const SizedBox(height: 20),
-                        _buildDetailSection('Data Orang Tua', [
-                          _buildDetailRow('Nama Ayah', santri['namaAyah']),
-                          _buildDetailRow('Nama Ibu', santri['namaIbu']),
-                        ]),
-                        const SizedBox(height: 20),
-                        _buildDetailSection('Alamat', [
-                          _buildDetailRow('Kelurahan', santri['kelurahan']),
-                          _buildDetailRow('Kecamatan', santri['kecamatan']),
-                          _buildDetailRow('Kota', santri['kota']),
-                        ]),
-                        const SizedBox(height: 20),
-                        _buildDetailSection('Data Pendidikan', [
-                          _buildDetailRow('Lembaga', santri['lembaga']),
-                          _buildDetailRow(
-                              'Nomor Ijazah', santri['nomorIjazah']),
-                          _buildDetailRow(
-                              'Tahun Ijazah', santri['tahunIjazah']),
-                        ]),
                       ],
                     ),
                   ),
@@ -457,369 +321,251 @@ class _SantriScreenState extends State<SantriScreen> {
 
   @override
   Widget build(BuildContext context) {
-    return Scaffold(
-      backgroundColor: Colors.grey.shade50,
-      appBar: AppBar(
-        title: Text(widget.title),
-        backgroundColor: Colors.green,
-        foregroundColor: Colors.white,
-        elevation: 0,
-      ),
-      body: Column(
-        children: [
-          // Header dengan background hijau dan logo
-          Container(
-            width: double.infinity,
-            decoration: BoxDecoration(
-              gradient: LinearGradient(
-                colors: [Colors.green, Colors.green.shade300],
-                begin: Alignment.topLeft,
-                end: Alignment.bottomRight,
-              ),
-            ),
-            child: Column(
-              children: [
-                const SizedBox(height: 20),
-                // Logo dan title
-                Row(
-                  children: [
-                    const SizedBox(width: 20),
-                    Container(
-                      width: 60,
-                      height: 60,
-                      decoration: BoxDecoration(
-                        color: Colors.white,
-                        shape: BoxShape.circle,
-                        boxShadow: [
-                          BoxShadow(
-                            color: Colors.black.withOpacity(0.1),
-                            blurRadius: 8,
-                            offset: const Offset(0, 2),
-                          ),
-                        ],
-                      ),
-                      child: const Icon(
-                        Icons.school,
-                        color: Colors.green,
-                        size: 30,
-                      ),
-                    ),
-                    const SizedBox(width: 15),
-                    Expanded(
-                      child: Column(
-                        crossAxisAlignment: CrossAxisAlignment.start,
-                        children: [
-                          Text(
-                            widget.lembagaName ?? 'TAMAN PENDIDIKAN AL-QURAN',
-                            style: const TextStyle(
-                              color: Colors.white,
-                              fontSize: 16,
-                              fontWeight: FontWeight.bold,
-                            ),
-                          ),
-                          Text(
-                            'AL-ITTIFAQIAH',
-                            style: TextStyle(
-                              color: Colors.white.withOpacity(0.9),
-                              fontSize: 14,
-                            ),
-                          ),
-                        ],
-                      ),
-                    ),
-                  ],
-                ),
-                const SizedBox(height: 25),
-
-                // Filter dan Info section
-                Container(
-                  margin: const EdgeInsets.symmetric(horizontal: 20),
-                  padding: const EdgeInsets.all(20),
-                  decoration: BoxDecoration(
-                    color: Colors.white,
-                    borderRadius: BorderRadius.circular(12),
-                    boxShadow: [
-                      BoxShadow(
-                        color: Colors.black.withOpacity(0.1),
-                        blurRadius: 10,
-                        offset: const Offset(0, 5),
-                      ),
-                    ],
-                  ),
-                  child: Row(
-                    children: [
-                      // Dropdown Kelas
-                      Expanded(
-                        flex: 2,
-                        child: Container(
-                          padding: const EdgeInsets.symmetric(
-                              horizontal: 15, vertical: 10),
-                          decoration: BoxDecoration(
-                            color: Colors.black,
-                            borderRadius: BorderRadius.circular(25),
-                          ),
-                          child: DropdownButtonHideUnderline(
-                            child: DropdownButton<String>(
-                              value: selectedKelas,
-                              dropdownColor: Colors.black,
-                              style: const TextStyle(color: Colors.white),
-                              icon: const Icon(Icons.arrow_drop_down,
-                                  color: Colors.white),
-                              items: kelasList.map((String kelas) {
-                                return DropdownMenuItem<String>(
-                                  value: kelas,
-                                  child: Text(kelas),
-                                );
-                              }).toList(),
-                              onChanged: (String? newValue) {
-                                if (newValue != null) {
-                                  setState(() {
-                                    selectedKelas = newValue;
-                                    _updateJumlahSantri();
-                                  });
-                                }
-                              },
-                            ),
-                          ),
-                        ),
-                      ),
-
-                      const SizedBox(width: 20),
-
-                      // Jumlah Santri
-                      Expanded(
-                        flex: 2,
-                        child: Column(
-                          crossAxisAlignment: CrossAxisAlignment.start,
-                          children: [
-                            const Text(
-                              'Jumlah\nSantri',
-                              style: TextStyle(
-                                fontSize: 12,
-                                color: Colors.grey,
-                                height: 1.2,
-                              ),
-                            ),
-                            const SizedBox(height: 5),
-                            Container(
-                              padding: const EdgeInsets.symmetric(
-                                  horizontal: 12, vertical: 8),
-                              decoration: BoxDecoration(
-                                color: Colors.green,
-                                borderRadius: BorderRadius.circular(8),
-                              ),
-                              child: Text(
-                                jumlahSantri.toString(),
-                                style: const TextStyle(
-                                  color: Colors.white,
-                                  fontSize: 18,
-                                  fontWeight: FontWeight.bold,
-                                ),
-                              ),
-                            ),
-                          ],
-                        ),
-                      ),
-
-                      const SizedBox(width: 15),
-
-                      // Search Icon
-                      GestureDetector(
-                        onTap: _showSearchDialog,
-                        child: Container(
-                          padding: const EdgeInsets.all(10),
-                          decoration: BoxDecoration(
-                            color: searchQuery.isNotEmpty
-                                ? Colors.blue.shade100
-                                : Colors.grey.shade100,
-                            borderRadius: BorderRadius.circular(8),
-                          ),
-                          child: Stack(
-                            children: [
-                              Icon(
-                                Icons.search,
-                                color: searchQuery.isNotEmpty
-                                    ? Colors.blue.shade600
-                                    : Colors.grey.shade600,
-                                size: 24,
-                              ),
-                              if (searchQuery.isNotEmpty)
-                                Positioned(
-                                  right: 0,
-                                  top: 0,
-                                  child: Container(
-                                    width: 8,
-                                    height: 8,
-                                    decoration: const BoxDecoration(
-                                      color: Colors.red,
-                                      shape: BoxShape.circle,
-                                    ),
-                                  ),
-                                ),
-                            ],
-                          ),
-                        ),
-                      ),
-                    ],
-                  ),
-                ),
-                const SizedBox(height: 20),
-              ],
+    return Column(
+      children: [
+        Container(
+          width: double.infinity,
+          decoration: BoxDecoration(
+            gradient: LinearGradient(
+              colors: [Colors.green, Colors.green.shade300],
+              begin: Alignment.topLeft,
+              end: Alignment.bottomRight,
             ),
           ),
-
-          // List Santri
-          Expanded(
-            child: Column(
-              children: [
-                // Search indicator
-                if (searchQuery.isNotEmpty)
+          child: Column(
+            children: [
+              const SizedBox(height: 20),
+              Row(
+                children: [
+                  const SizedBox(width: 20),
                   Container(
-                    width: double.infinity,
-                    margin: const EdgeInsets.fromLTRB(20, 10, 20, 0),
-                    padding: const EdgeInsets.all(12),
+                    width: 60,
+                    height: 60,
                     decoration: BoxDecoration(
-                      color: Colors.blue.shade50,
-                      borderRadius: BorderRadius.circular(8),
-                      border: Border.all(color: Colors.blue.shade200),
-                    ),
-                    child: Row(
-                      children: [
-                        Icon(
-                          Icons.search,
-                          color: Colors.blue.shade600,
-                          size: 16,
+                      color: Colors.white,
+                      shape: BoxShape.circle,
+                      boxShadow: [
+                        BoxShadow(
+                          color: Colors.black.withOpacity(0.1),
+                          blurRadius: 8,
+                          offset: const Offset(0, 2),
                         ),
-                        const SizedBox(width: 8),
-                        Expanded(
-                          child: Text(
-                            'Mencari: "$searchQuery" di $selectedKelas',
-                            style: TextStyle(
-                              color: Colors.blue.shade700,
-                              fontSize: 14,
-                            ),
+                      ],
+                    ),
+                    child: const Icon(
+                      Icons.school,
+                      color: Colors.green,
+                      size: 30,
+                    ),
+                  ),
+                  const SizedBox(width: 15),
+                  Expanded(
+                    child: Column(
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      children: [
+                        Text(
+                          widget.lembagaName ?? 'TAMAN PENDIDIKAN AL-QURAN',
+                          style: const TextStyle(
+                            color: Colors.white,
+                            fontSize: 16,
+                            fontWeight: FontWeight.bold,
                           ),
                         ),
-                        GestureDetector(
-                          onTap: () {
-                            setState(() {
-                              searchQuery = '';
-                              _searchController.clear();
-                              _updateJumlahSantri();
-                            });
-                          },
-                          child: Icon(
-                            Icons.close,
-                            color: Colors.blue.shade600,
-                            size: 16,
+                        Text(
+                          'AL-ITTIFAQIAH',
+                          style: TextStyle(
+                            color: Colors.white.withOpacity(0.9),
+                            fontSize: 14,
                           ),
                         ),
                       ],
                     ),
                   ),
-
-                // Content area
-                Expanded(
-                  child: Container(
-                    color: Colors.grey.shade50,
-                    child: filteredSantri.isEmpty
-                        ? Center(
-                            child: Column(
-                              mainAxisAlignment: MainAxisAlignment.center,
-                              children: [
-                                Icon(
-                                  searchQuery.isNotEmpty
-                                      ? Icons.search_off
-                                      : Icons.people_outline,
-                                  size: 64,
-                                  color: Colors.grey,
-                                ),
-                                const SizedBox(height: 16),
-                                Text(
-                                  searchQuery.isNotEmpty
-                                      ? 'Tidak ditemukan santri dengan kata kunci "$searchQuery"'
-                                      : 'Tidak ada santri di kelas ini',
-                                  textAlign: TextAlign.center,
-                                  style: const TextStyle(
-                                    color: Colors.grey,
-                                    fontSize: 16,
-                                  ),
-                                ),
-                              ],
-                            ),
-                          )
-                        : ListView.builder(
-                            padding: const EdgeInsets.all(20),
-                            itemCount: filteredSantri.length,
-                            itemBuilder: (context, index) {
-                              final santri = filteredSantri[index];
-                              return _buildSantriCard(santri, index);
+                ],
+              ),
+              const SizedBox(height: 25),
+              Container(
+                margin: const EdgeInsets.symmetric(horizontal: 20),
+                padding: const EdgeInsets.all(20),
+                decoration: BoxDecoration(
+                  color: Colors.white,
+                  borderRadius: BorderRadius.circular(12),
+                  boxShadow: [
+                    BoxShadow(
+                      color: Colors.black.withOpacity(0.1),
+                      blurRadius: 10,
+                      offset: const Offset(0, 5),
+                    ),
+                  ],
+                ),
+                child: Row(
+                  children: [
+                    Expanded(
+                      flex: 2,
+                      child: Container(
+                        padding: const EdgeInsets.symmetric(
+                            horizontal: 15, vertical: 10),
+                        decoration: BoxDecoration(
+                          color: Colors.black,
+                          borderRadius: BorderRadius.circular(25),
+                        ),
+                        child: DropdownButtonHideUnderline(
+                          child: DropdownButton<String>(
+                            value: selectedKelas,
+                            dropdownColor: Colors.black,
+                            style: const TextStyle(color: Colors.white),
+                            icon: const Icon(Icons.arrow_drop_down,
+                                color: Colors.white),
+                            items: kelasList.map((String kelas) {
+                              return DropdownMenuItem<String>(
+                                value: kelas,
+                                child: Text(kelas),
+                              );
+                            }).toList(),
+                            onChanged: (String? newValue) {
+                              if (newValue != null) {
+                                setState(() {
+                                  selectedKelas = newValue;
+                                  _updateJumlahSantri();
+                                });
+                              }
                             },
                           ),
-                  ),
+                        ),
+                      ),
+                    ),
+                    const SizedBox(width: 20),
+                    Expanded(
+                      flex: 2,
+                      child: Column(
+                        crossAxisAlignment: CrossAxisAlignment.start,
+                        children: [
+                          const Text(
+                            'Jumlah\nSantri',
+                            style: TextStyle(
+                              fontSize: 12,
+                              color: Colors.grey,
+                              height: 1.2,
+                            ),
+                          ),
+                          const SizedBox(height: 5),
+                          Container(
+                            padding: const EdgeInsets.symmetric(
+                                horizontal: 12, vertical: 8),
+                            decoration: BoxDecoration(
+                              color: Colors.green,
+                              borderRadius: BorderRadius.circular(8),
+                            ),
+                            child: Text(
+                              jumlahSantri.toString(),
+                              style: const TextStyle(
+                                color: Colors.white,
+                                fontSize: 18,
+                                fontWeight: FontWeight.bold,
+                              ),
+                            ),
+                          ),
+                        ],
+                      ),
+                    ),
+                    const SizedBox(width: 15),
+                    GestureDetector(
+                      onTap: _showSearchDialog,
+                      child: Container(
+                        padding: const EdgeInsets.all(10),
+                        decoration: BoxDecoration(
+                          color: searchQuery.isNotEmpty
+                              ? Colors.blue.shade100
+                              : Colors.grey.shade100,
+                          borderRadius: BorderRadius.circular(8),
+                        ),
+                        child: Icon(
+                          Icons.search,
+                          color: searchQuery.isNotEmpty
+                              ? Colors.blue.shade600
+                              : Colors.grey.shade600,
+                          size: 24,
+                        ),
+                      ),
+                    ),
+                  ],
                 ),
-              ],
-            ),
-          ),
-        ],
-      ),
-    );
-  }
-
-  Widget _buildSantriCard(Map<String, dynamic> santri, int index) {
-    return Container(
-      margin: const EdgeInsets.only(bottom: 12),
-      decoration: BoxDecoration(
-        color: Colors.white,
-        borderRadius: BorderRadius.circular(12),
-        boxShadow: [
-          BoxShadow(
-            color: Colors.black.withOpacity(0.05),
-            blurRadius: 8,
-            offset: const Offset(0, 2),
-          ),
-        ],
-      ),
-      child: ListTile(
-        contentPadding: const EdgeInsets.all(16),
-        leading: CircleAvatar(
-          radius: 30,
-          backgroundImage: NetworkImage(santri['avatar']),
-          onBackgroundImageError: (exception, stackTrace) {
-            // Fallback to default avatar
-          },
-          child: santri['avatar'] == null
-              ? Icon(
-                  Icons.person,
-                  color: Colors.grey.shade400,
-                  size: 30,
-                )
-              : null,
-        ),
-        title: Text(
-          santri['nama'],
-          style: const TextStyle(
-            fontWeight: FontWeight.bold,
-            fontSize: 14,
+              ),
+              const SizedBox(height: 20),
+            ],
           ),
         ),
-        subtitle: Text(
-          santri['subtitle'],
-          style: TextStyle(
-            color: Colors.grey.shade600,
-            fontSize: 12,
+        Expanded(
+          child: Container(
+            color: Colors.grey.shade50,
+            child: filteredSantri.isEmpty
+                ? const Center(
+                    child: Text(
+                      'Tidak ada santri di kelas ini',
+                      style: TextStyle(color: Colors.grey, fontSize: 16),
+                    ),
+                  )
+                : ListView.builder(
+                    padding: const EdgeInsets.all(20),
+                    itemCount: filteredSantri.length,
+                    itemBuilder: (context, index) {
+                      final santri = filteredSantri[index];
+                      return Container(
+                        margin: const EdgeInsets.only(bottom: 12),
+                        decoration: BoxDecoration(
+                          color: Colors.white,
+                          borderRadius: BorderRadius.circular(12),
+                          boxShadow: [
+                            BoxShadow(
+                              color: Colors.black.withOpacity(0.05),
+                              blurRadius: 8,
+                              offset: const Offset(0, 2),
+                            ),
+                          ],
+                        ),
+                        child: ListTile(
+                          contentPadding: const EdgeInsets.all(16),
+                          leading: CircleAvatar(
+                            radius: 30,
+                            backgroundImage: NetworkImage(santri['avatar']),
+                            child: santri['avatar'] == null
+                                ? Icon(
+                                    Icons.person,
+                                    color: Colors.grey.shade400,
+                                    size: 30,
+                                  )
+                                : null,
+                          ),
+                          title: Text(
+                            santri['nama'],
+                            style: const TextStyle(
+                              fontWeight: FontWeight.bold,
+                              fontSize: 14,
+                            ),
+                          ),
+                          subtitle: Text(
+                            santri['subtitle'],
+                            style: TextStyle(
+                              color: Colors.grey.shade600,
+                              fontSize: 12,
+                            ),
+                          ),
+                          trailing: Container(
+                            width: 8,
+                            height: 8,
+                            decoration: BoxDecoration(
+                              color: index.isEven ? Colors.red : Colors.blue,
+                              shape: BoxShape.circle,
+                            ),
+                          ),
+                          onTap: () => _showSantriDetail(santri),
+                        ),
+                      );
+                    },
+                  ),
           ),
         ),
-        trailing: Container(
-          width: 8,
-          height: 8,
-          decoration: BoxDecoration(
-            color: index.isEven ? Colors.red : Colors.blue,
-            shape: BoxShape.circle,
-          ),
-        ),
-        onTap: () => _showSantriDetail(santri), // ← Tambahkan onTap
-      ),
+      ],
     );
   }
 
@@ -873,6 +619,269 @@ class _SantriScreenState extends State<SantriScreen> {
                 fontSize: 14,
                 color: Colors.black87,
               ),
+            ),
+          ),
+        ],
+      ),
+    );
+  }
+}
+
+class KehadiranSantriTab extends StatelessWidget {
+  final String? lembagaName;
+
+  const KehadiranSantriTab({super.key, this.lembagaName});
+
+  // Data static kehadiran
+  static final List<Map<String, dynamic>> kehadiranData = [
+    {
+      'nama': 'Muhammad Arkia Bin Wazdan',
+      'tanggal': '29 September 2025',
+      'keterangan': 'Hadir tepat waktu',
+      'jenis': 'Hadir',
+      'avatar': 'https://i.pravatar.cc/150?img=1',
+    },
+    {
+      'nama': 'Ahmad Fadhil Bin Ibrahim',
+      'tanggal': '29 September 2025',
+      'keterangan': 'Izin karena sakit',
+      'jenis': 'Izin',
+      'avatar': 'https://i.pravatar.cc/150?img=2',
+    },
+    {
+      'nama': 'Umar Abdillah Bin Sulaiman',
+      'tanggal': '29 September 2025',
+      'keterangan': 'Tidak hadir tanpa keterangan',
+      'jenis': 'Alpha',
+      'avatar': 'https://i.pravatar.cc/150?img=3',
+    },
+    {
+      'nama': 'Ali Hasan Bin Ahmad',
+      'tanggal': '29 September 2025',
+      'keterangan': 'Hadir, terlambat 15 menit',
+      'jenis': 'Terlambat',
+      'avatar': 'https://i.pravatar.cc/150?img=4',
+    },
+    {
+      'nama': 'Muhammad Yusuf Bin Omar',
+      'tanggal': '28 September 2025',
+      'keterangan': 'Izin keperluan keluarga',
+      'jenis': 'Izin',
+      'avatar': 'https://i.pravatar.cc/150?img=5',
+    },
+    {
+      'nama': 'Abdullah Rahman Bin Ali',
+      'tanggal': '28 September 2025',
+      'keterangan': 'Hadir tepat waktu',
+      'jenis': 'Hadir',
+      'avatar': 'https://i.pravatar.cc/150?img=6',
+    },
+    {
+      'nama': 'Hassan Bin Muhammad',
+      'tanggal': '28 September 2025',
+      'keterangan': 'Sakit demam',
+      'jenis': 'Sakit',
+      'avatar': 'https://i.pravatar.cc/150?img=7',
+    },
+  ];
+
+  Color _getJenisColor(String jenis) {
+    switch (jenis) {
+      case 'Hadir':
+        return Colors.green;
+      case 'Izin':
+        return Colors.blue;
+      case 'Sakit':
+        return Colors.orange;
+      case 'Alpha':
+        return Colors.red;
+      case 'Terlambat':
+        return Colors.purple;
+      default:
+        return Colors.grey;
+    }
+  }
+
+  IconData _getJenisIcon(String jenis) {
+    switch (jenis) {
+      case 'Hadir':
+        return Icons.check_circle;
+      case 'Izin':
+        return Icons.info;
+      case 'Sakit':
+        return Icons.local_hospital;
+      case 'Alpha':
+        return Icons.cancel;
+      case 'Terlambat':
+        return Icons.access_time;
+      default:
+        return Icons.help;
+    }
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    return Container(
+      color: Colors.grey.shade50,
+      child: Column(
+        children: [
+          Container(
+            width: double.infinity,
+            decoration: BoxDecoration(
+              gradient: LinearGradient(
+                colors: [Colors.green, Colors.green.shade300],
+                begin: Alignment.topLeft,
+                end: Alignment.bottomRight,
+              ),
+            ),
+            child: Column(
+              children: [
+                const SizedBox(height: 20),
+                Row(
+                  children: [
+                    const SizedBox(width: 20),
+                    Container(
+                      width: 60,
+                      height: 60,
+                      decoration: BoxDecoration(
+                        color: Colors.white,
+                        shape: BoxShape.circle,
+                        boxShadow: [
+                          BoxShadow(
+                            color: Colors.black.withOpacity(0.1),
+                            blurRadius: 8,
+                            offset: const Offset(0, 2),
+                          ),
+                        ],
+                      ),
+                      child: const Icon(
+                        Icons.assignment_turned_in,
+                        color: Colors.green,
+                        size: 30,
+                      ),
+                    ),
+                    const SizedBox(width: 15),
+                    const Expanded(
+                      child: Column(
+                        crossAxisAlignment: CrossAxisAlignment.start,
+                        children: [
+                          Text(
+                            'KEHADIRAN SANTRI',
+                            style: TextStyle(
+                              color: Colors.white,
+                              fontSize: 16,
+                              fontWeight: FontWeight.bold,
+                            ),
+                          ),
+                          Text(
+                            'Rekap kehadiran harian',
+                            style: TextStyle(
+                              color: Colors.white70,
+                              fontSize: 14,
+                            ),
+                          ),
+                        ],
+                      ),
+                    ),
+                  ],
+                ),
+                const SizedBox(height: 20),
+              ],
+            ),
+          ),
+          Expanded(
+            child: ListView.builder(
+              padding: const EdgeInsets.all(20),
+              itemCount: kehadiranData.length,
+              itemBuilder: (context, index) {
+                final kehadiran = kehadiranData[index];
+                return Container(
+                  margin: const EdgeInsets.only(bottom: 12),
+                  decoration: BoxDecoration(
+                    color: Colors.white,
+                    borderRadius: BorderRadius.circular(12),
+                    boxShadow: [
+                      BoxShadow(
+                        color: Colors.black.withOpacity(0.05),
+                        blurRadius: 8,
+                        offset: const Offset(0, 2),
+                      ),
+                    ],
+                  ),
+                  child: ListTile(
+                    contentPadding: const EdgeInsets.all(16),
+                    leading: Stack(
+                      children: [
+                        CircleAvatar(
+                          radius: 25,
+                          backgroundImage: NetworkImage(kehadiran['avatar']),
+                        ),
+                        Positioned(
+                          right: -2,
+                          bottom: -2,
+                          child: Container(
+                            padding: const EdgeInsets.all(2),
+                            decoration: BoxDecoration(
+                              color: Colors.white,
+                              shape: BoxShape.circle,
+                              border: Border.all(color: Colors.grey.shade200),
+                            ),
+                            child: Icon(
+                              _getJenisIcon(kehadiran['jenis']),
+                              color: _getJenisColor(kehadiran['jenis']),
+                              size: 16,
+                            ),
+                          ),
+                        ),
+                      ],
+                    ),
+                    title: Text(
+                      kehadiran['nama'],
+                      style: const TextStyle(
+                        fontWeight: FontWeight.bold,
+                        fontSize: 14,
+                      ),
+                    ),
+                    subtitle: Column(
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      children: [
+                        const SizedBox(height: 4),
+                        Text(
+                          kehadiran['tanggal'],
+                          style: TextStyle(
+                            color: Colors.grey.shade600,
+                            fontSize: 12,
+                          ),
+                        ),
+                        const SizedBox(height: 2),
+                        Text(
+                          kehadiran['keterangan'],
+                          style: TextStyle(
+                            color: Colors.grey.shade700,
+                            fontSize: 12,
+                          ),
+                        ),
+                      ],
+                    ),
+                    trailing: Container(
+                      padding: const EdgeInsets.symmetric(
+                          horizontal: 8, vertical: 4),
+                      decoration: BoxDecoration(
+                        color: _getJenisColor(kehadiran['jenis']),
+                        borderRadius: BorderRadius.circular(12),
+                      ),
+                      child: Text(
+                        kehadiran['jenis'],
+                        style: const TextStyle(
+                          color: Colors.white,
+                          fontSize: 10,
+                          fontWeight: FontWeight.bold,
+                        ),
+                      ),
+                    ),
+                  ),
+                );
+              },
             ),
           ),
         ],

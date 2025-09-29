@@ -14,7 +14,71 @@ class StaffScreen extends StatefulWidget {
   State<StaffScreen> createState() => _StaffScreenState();
 }
 
-class _StaffScreenState extends State<StaffScreen> {
+class _StaffScreenState extends State<StaffScreen>
+    with TickerProviderStateMixin {
+  late TabController _tabController;
+
+  @override
+  void initState() {
+    super.initState();
+    _tabController = TabController(length: 2, vsync: this);
+  }
+
+  @override
+  void dispose() {
+    _tabController.dispose();
+    super.dispose();
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    return Scaffold(
+      backgroundColor: Colors.grey.shade50,
+      appBar: AppBar(
+        title: Text(widget.title),
+        backgroundColor: Colors.blue,
+        foregroundColor: Colors.white,
+        elevation: 0,
+        bottom: TabBar(
+          controller: _tabController,
+          indicatorColor: Colors.white,
+          labelColor: Colors.white,
+          unselectedLabelColor: Colors.white.withOpacity(0.7),
+          tabs: const [
+            Tab(text: 'Daftar'),
+            Tab(text: 'Kehadiran'),
+          ],
+        ),
+      ),
+      body: TabBarView(
+        controller: _tabController,
+        children: [
+          DaftarStaffTab(
+            title: widget.title,
+            lembagaName: widget.lembagaName,
+          ),
+          KehadiranStaffTab(lembagaName: widget.lembagaName),
+        ],
+      ),
+    );
+  }
+}
+
+class DaftarStaffTab extends StatefulWidget {
+  final String title;
+  final String? lembagaName;
+
+  const DaftarStaffTab({
+    super.key,
+    required this.title,
+    this.lembagaName,
+  });
+
+  @override
+  State<DaftarStaffTab> createState() => _DaftarStaffTabState();
+}
+
+class _DaftarStaffTabState extends State<DaftarStaffTab> {
   String searchQuery = '';
   final TextEditingController _searchController = TextEditingController();
 
@@ -41,11 +105,6 @@ class _StaffScreenState extends State<StaffScreen> {
       'lulusan': 'UIN Raden Fatah Palembang',
       'statusPNS': 'PNS',
       'statusGuruTetap': 'Guru Tetap',
-      'sertifikasi': [
-        'Sertifikat Pendidik',
-        'Sertifikat Tahfidz',
-        'Sertifikat Kepemimpinan'
-      ]
     },
     {
       'nama': 'Ustadz Muhammad Hakim, S.Pd.I',
@@ -68,11 +127,6 @@ class _StaffScreenState extends State<StaffScreen> {
       'lulusan': 'IAIN Raden Fatah Palembang',
       'statusPNS': 'Non PNS',
       'statusGuruTetap': 'Guru Tetap',
-      'sertifikasi': [
-        'Sertifikat Tahfidz 30 Juz',
-        'Sertifikat Qira\'at',
-        'Pelatihan Metode Tilawah'
-      ]
     },
     {
       'nama': 'Ustadzah Khadijah, S.Pd',
@@ -95,11 +149,6 @@ class _StaffScreenState extends State<StaffScreen> {
       'lulusan': 'UNSRI Palembang',
       'statusPNS': 'Non PNS',
       'statusGuruTetap': 'Guru Tetap',
-      'sertifikasi': [
-        'Sertifikat Pendidik',
-        'Workshop Kurikulum 2013',
-        'Pelatihan Bahasa Arab'
-      ]
     },
     {
       'nama': 'Ahmad Subhan, S.Kom',
@@ -122,64 +171,6 @@ class _StaffScreenState extends State<StaffScreen> {
       'lulusan': 'STMIK MDP Palembang',
       'statusPNS': 'Non PNS',
       'statusGuruTetap': 'Non Guru',
-      'sertifikasi': [
-        'Sertifikat Microsoft Office',
-        'Pelatihan Sistem Informasi Sekolah'
-      ]
-    },
-    {
-      'nama': 'Ustadz Abdullah Yusuf, Lc',
-      'subtitle': 'Guru Bahasa Arab',
-      'avatar': 'https://i.pravatar.cc/150?img=54',
-      'lembaga': 'Taman Pendidikan Al-Quran Al-Ittifaqiah',
-      'tempatLahir': 'Palembang',
-      'tanggalLahir': '12 November 1982',
-      'gender': 'Laki-laki',
-      'agama': 'Islam',
-      'noTelephone': '0816-7890-1234',
-      'namaIbu': 'Ummu Salamah',
-      'nik': '1671051211820001',
-      'kategoriPersonil': 'Tenaga Pendidik',
-      'keteranganTugas': 'Mengajar Bahasa Arab, Fiqh',
-      'statusKepegawaian': 'Tetap',
-      'mulaiTugas': '10 Januari 2008',
-      'aktif': true,
-      'pendidikanTerakhir': 'S1',
-      'lulusan': 'Universitas Al-Azhar Kairo',
-      'statusPNS': 'Non PNS',
-      'statusGuruTetap': 'Guru Tetap',
-      'sertifikasi': [
-        'Ijazah Bahasa Arab',
-        'Sertifikat Fiqh',
-        'Sertifikat Da\'wah'
-      ]
-    },
-    {
-      'nama': 'Ustadzah Asiyah, S.Pd.I',
-      'subtitle': 'Guru Tahfidz',
-      'avatar': 'https://i.pravatar.cc/150?img=45',
-      'lembaga': 'Taman Pendidikan Al-Quran Al-Ittifaqiah',
-      'tempatLahir': 'Palembang',
-      'tanggalLahir': '18 April 1987',
-      'gender': 'Perempuan',
-      'agama': 'Islam',
-      'noTelephone': '0817-8901-2345',
-      'namaIbu': 'Hafsah',
-      'nik': '1671055804870001',
-      'kategoriPersonil': 'Tenaga Pendidik',
-      'keteranganTugas': 'Mengajar Tahfidz Al-Quran',
-      'statusKepegawaian': 'Tetap',
-      'mulaiTugas': '01 September 2011',
-      'aktif': true,
-      'pendidikanTerakhir': 'S1',
-      'lulusan': 'UIN Raden Fatah Palembang',
-      'statusPNS': 'Non PNS',
-      'statusGuruTetap': 'Guru Tetap',
-      'sertifikasi': [
-        'Hafidzah 30 Juz',
-        'Sertifikat Qira\'at Sab\'ah',
-        'Ijazah Tahfidz'
-      ]
     },
   ];
 
@@ -276,7 +267,6 @@ class _StaffScreenState extends State<StaffScreen> {
             ),
             child: Column(
               children: [
-                // Header
                 Container(
                   padding: const EdgeInsets.all(20),
                   decoration: BoxDecoration(
@@ -295,7 +285,6 @@ class _StaffScreenState extends State<StaffScreen> {
                       CircleAvatar(
                         radius: 30,
                         backgroundImage: NetworkImage(staff['avatar']),
-                        onBackgroundImageError: (exception, stackTrace) {},
                         child: staff['avatar'] == null
                             ? const Icon(Icons.person,
                                 color: Colors.white, size: 30)
@@ -306,9 +295,9 @@ class _StaffScreenState extends State<StaffScreen> {
                         child: Column(
                           crossAxisAlignment: CrossAxisAlignment.start,
                           children: [
-                            Text(
+                            const Text(
                               'Detail Staff',
-                              style: const TextStyle(
+                              style: TextStyle(
                                 color: Colors.white,
                                 fontSize: 18,
                                 fontWeight: FontWeight.bold,
@@ -316,8 +305,8 @@ class _StaffScreenState extends State<StaffScreen> {
                             ),
                             Text(
                               staff['subtitle'],
-                              style: TextStyle(
-                                color: Colors.white.withOpacity(0.9),
+                              style: const TextStyle(
+                                color: Colors.white70,
                                 fontSize: 14,
                               ),
                             ),
@@ -331,8 +320,6 @@ class _StaffScreenState extends State<StaffScreen> {
                     ],
                   ),
                 ),
-
-                // Content
                 Expanded(
                   child: SingleChildScrollView(
                     padding: const EdgeInsets.all(20),
@@ -347,12 +334,10 @@ class _StaffScreenState extends State<StaffScreen> {
                           _buildDetailRow('Jenis Kelamin', staff['gender']),
                           _buildDetailRow('Agama', staff['agama']),
                           _buildDetailRow('No. Telepon', staff['noTelephone']),
-                          _buildDetailRow('Nama Ibu', staff['namaIbu']),
                           _buildDetailRow('NIK', staff['nik']),
                         ]),
                         const SizedBox(height: 20),
                         _buildDetailSection('Data Kepegawaian', [
-                          _buildDetailRow('Lembaga', staff['lembaga']),
                           _buildDetailRow(
                               'Kategori Personil', staff['kategoriPersonil']),
                           _buildDetailRow(
@@ -363,18 +348,6 @@ class _StaffScreenState extends State<StaffScreen> {
                           _buildDetailRow('Status Aktif',
                               staff['aktif'] ? 'Aktif' : 'Tidak Aktif'),
                           _buildDetailRow('Status PNS', staff['statusPNS']),
-                          _buildDetailRow(
-                              'Status Guru Tetap', staff['statusGuruTetap']),
-                        ]),
-                        const SizedBox(height: 20),
-                        _buildDetailSection('Data Pendidikan', [
-                          _buildDetailRow('Pendidikan Terakhir',
-                              staff['pendidikanTerakhir']),
-                          _buildDetailRow('Lulusan', staff['lulusan']),
-                        ]),
-                        const SizedBox(height: 20),
-                        _buildDetailSection('Sertifikasi', [
-                          _buildSertifikasiList(staff['sertifikasi']),
                         ]),
                       ],
                     ),
@@ -390,348 +363,289 @@ class _StaffScreenState extends State<StaffScreen> {
 
   @override
   Widget build(BuildContext context) {
-    return Scaffold(
-      backgroundColor: Colors.grey.shade50,
-      appBar: AppBar(
-        title: Text(widget.title),
-        backgroundColor: Colors.blue,
-        foregroundColor: Colors.white,
-        elevation: 0,
-      ),
-      body: Column(
-        children: [
-          // Header dengan background biru
-          Container(
-            width: double.infinity,
-            decoration: BoxDecoration(
-              gradient: LinearGradient(
-                colors: [Colors.blue, Colors.blue.shade300],
-                begin: Alignment.topLeft,
-                end: Alignment.bottomRight,
-              ),
-            ),
-            child: Column(
-              children: [
-                const SizedBox(height: 20),
-                // Logo dan title
-                Row(
-                  children: [
-                    const SizedBox(width: 20),
-                    Container(
-                      width: 60,
-                      height: 60,
-                      decoration: BoxDecoration(
-                        color: Colors.white,
-                        shape: BoxShape.circle,
-                        boxShadow: [
-                          BoxShadow(
-                            color: Colors.black.withOpacity(0.1),
-                            blurRadius: 8,
-                            offset: const Offset(0, 2),
-                          ),
-                        ],
-                      ),
-                      child: const Icon(
-                        Icons.people,
-                        color: Colors.blue,
-                        size: 30,
-                      ),
-                    ),
-                    const SizedBox(width: 15),
-                    Expanded(
-                      child: Column(
-                        crossAxisAlignment: CrossAxisAlignment.start,
-                        children: [
-                          Text(
-                            widget.lembagaName ?? 'TAMAN PENDIDIKAN AL-QURAN',
-                            style: const TextStyle(
-                              color: Colors.white,
-                              fontSize: 16,
-                              fontWeight: FontWeight.bold,
-                            ),
-                          ),
-                          Text(
-                            'AL-ITTIFAQIAH',
-                            style: TextStyle(
-                              color: Colors.white.withOpacity(0.9),
-                              fontSize: 14,
-                            ),
-                          ),
-                        ],
-                      ),
-                    ),
-                  ],
-                ),
-                const SizedBox(height: 25),
-
-                // Info section dengan search
-                Container(
-                  margin: const EdgeInsets.symmetric(horizontal: 20),
-                  padding: const EdgeInsets.all(20),
-                  decoration: BoxDecoration(
-                    color: Colors.white,
-                    borderRadius: BorderRadius.circular(12),
-                    boxShadow: [
-                      BoxShadow(
-                        color: Colors.black.withOpacity(0.1),
-                        blurRadius: 10,
-                        offset: const Offset(0, 5),
-                      ),
-                    ],
-                  ),
-                  child: Row(
-                    children: [
-                      // Info Total Staff
-                      Expanded(
-                        flex: 3,
-                        child: Column(
-                          crossAxisAlignment: CrossAxisAlignment.start,
-                          children: [
-                            const Text(
-                              'Total Staff',
-                              style: TextStyle(
-                                fontSize: 12,
-                                color: Colors.grey,
-                              ),
-                            ),
-                            const SizedBox(height: 5),
-                            Container(
-                              padding: const EdgeInsets.symmetric(
-                                  horizontal: 12, vertical: 8),
-                              decoration: BoxDecoration(
-                                color: Colors.blue,
-                                borderRadius: BorderRadius.circular(8),
-                              ),
-                              child: Text(
-                                filteredStaff.length.toString(),
-                                style: const TextStyle(
-                                  color: Colors.white,
-                                  fontSize: 18,
-                                  fontWeight: FontWeight.bold,
-                                ),
-                              ),
-                            ),
-                          ],
-                        ),
-                      ),
-
-                      const SizedBox(width: 15),
-
-                      // Search Icon
-                      GestureDetector(
-                        onTap: _showSearchDialog,
-                        child: Container(
-                          padding: const EdgeInsets.all(10),
-                          decoration: BoxDecoration(
-                            color: searchQuery.isNotEmpty
-                                ? Colors.blue.shade100
-                                : Colors.grey.shade100,
-                            borderRadius: BorderRadius.circular(8),
-                          ),
-                          child: Stack(
-                            children: [
-                              Icon(
-                                Icons.search,
-                                color: searchQuery.isNotEmpty
-                                    ? Colors.blue.shade600
-                                    : Colors.grey.shade600,
-                                size: 24,
-                              ),
-                              if (searchQuery.isNotEmpty)
-                                Positioned(
-                                  right: 0,
-                                  top: 0,
-                                  child: Container(
-                                    width: 8,
-                                    height: 8,
-                                    decoration: const BoxDecoration(
-                                      color: Colors.red,
-                                      shape: BoxShape.circle,
-                                    ),
-                                  ),
-                                ),
-                            ],
-                          ),
-                        ),
-                      ),
-                    ],
-                  ),
-                ),
-                const SizedBox(height: 20),
-              ],
+    return Column(
+      children: [
+        Container(
+          width: double.infinity,
+          decoration: BoxDecoration(
+            gradient: LinearGradient(
+              colors: [Colors.blue, Colors.blue.shade300],
+              begin: Alignment.topLeft,
+              end: Alignment.bottomRight,
             ),
           ),
-
-          // List Staff
-          Expanded(
-            child: Column(
-              children: [
-                // Search indicator
-                if (searchQuery.isNotEmpty)
+          child: Column(
+            children: [
+              const SizedBox(height: 20),
+              Row(
+                children: [
+                  const SizedBox(width: 20),
                   Container(
-                    width: double.infinity,
-                    margin: const EdgeInsets.fromLTRB(20, 10, 20, 0),
-                    padding: const EdgeInsets.all(12),
+                    width: 60,
+                    height: 60,
                     decoration: BoxDecoration(
-                      color: Colors.blue.shade50,
-                      borderRadius: BorderRadius.circular(8),
-                      border: Border.all(color: Colors.blue.shade200),
-                    ),
-                    child: Row(
-                      children: [
-                        Icon(
-                          Icons.search,
-                          color: Colors.blue.shade600,
-                          size: 16,
+                      color: Colors.white,
+                      shape: BoxShape.circle,
+                      boxShadow: [
+                        BoxShadow(
+                          color: Colors.black.withOpacity(0.1),
+                          blurRadius: 8,
+                          offset: const Offset(0, 2),
                         ),
-                        const SizedBox(width: 8),
-                        Expanded(
-                          child: Text(
-                            'Mencari: "$searchQuery"',
-                            style: TextStyle(
-                              color: Colors.blue.shade700,
-                              fontSize: 14,
-                            ),
+                      ],
+                    ),
+                    child: const Icon(
+                      Icons.people,
+                      color: Colors.blue,
+                      size: 30,
+                    ),
+                  ),
+                  const SizedBox(width: 15),
+                  Expanded(
+                    child: Column(
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      children: [
+                        Text(
+                          widget.lembagaName ?? 'TAMAN PENDIDIKAN AL-QURAN',
+                          style: const TextStyle(
+                            color: Colors.white,
+                            fontSize: 16,
+                            fontWeight: FontWeight.bold,
                           ),
                         ),
-                        GestureDetector(
-                          onTap: () {
-                            setState(() {
-                              searchQuery = '';
-                              _searchController.clear();
-                            });
-                          },
-                          child: Icon(
-                            Icons.close,
-                            color: Colors.blue.shade600,
-                            size: 16,
+                        const Text(
+                          'AL-ITTIFAQIAH',
+                          style: TextStyle(
+                            color: Colors.white70,
+                            fontSize: 14,
                           ),
                         ),
                       ],
                     ),
                   ),
-
-                // Content area
-                Expanded(
-                  child: Container(
-                    color: Colors.grey.shade50,
-                    child: filteredStaff.isEmpty
-                        ? Center(
-                            child: Column(
-                              mainAxisAlignment: MainAxisAlignment.center,
-                              children: [
-                                Icon(
-                                  searchQuery.isNotEmpty
-                                      ? Icons.search_off
-                                      : Icons.people_outline,
-                                  size: 64,
-                                  color: Colors.grey,
-                                ),
-                                const SizedBox(height: 16),
-                                Text(
-                                  searchQuery.isNotEmpty
-                                      ? 'Tidak ditemukan Staff dengan kata kunci "$searchQuery"'
-                                      : 'Tidak ada data Staff',
-                                  textAlign: TextAlign.center,
-                                  style: const TextStyle(
-                                    color: Colors.grey,
-                                    fontSize: 16,
-                                  ),
-                                ),
-                              ],
+                ],
+              ),
+              const SizedBox(height: 25),
+              Container(
+                margin: const EdgeInsets.symmetric(horizontal: 20),
+                padding: const EdgeInsets.all(20),
+                decoration: BoxDecoration(
+                  color: Colors.white,
+                  borderRadius: BorderRadius.circular(12),
+                  boxShadow: [
+                    BoxShadow(
+                      color: Colors.black.withOpacity(0.1),
+                      blurRadius: 10,
+                      offset: const Offset(0, 5),
+                    ),
+                  ],
+                ),
+                child: Row(
+                  children: [
+                    Expanded(
+                      flex: 3,
+                      child: Column(
+                        crossAxisAlignment: CrossAxisAlignment.start,
+                        children: [
+                          const Text(
+                            'Total Staff',
+                            style: TextStyle(
+                              fontSize: 12,
+                              color: Colors.grey,
                             ),
-                          )
-                        : ListView.builder(
-                            padding: const EdgeInsets.all(20),
-                            itemCount: filteredStaff.length,
-                            itemBuilder: (context, index) {
-                              final staff = filteredStaff[index];
-                              return _buildStaffCard(staff, index);
-                            },
                           ),
+                          const SizedBox(height: 5),
+                          Container(
+                            padding: const EdgeInsets.symmetric(
+                                horizontal: 12, vertical: 8),
+                            decoration: BoxDecoration(
+                              color: Colors.blue,
+                              borderRadius: BorderRadius.circular(8),
+                            ),
+                            child: Text(
+                              filteredStaff.length.toString(),
+                              style: const TextStyle(
+                                color: Colors.white,
+                                fontSize: 18,
+                                fontWeight: FontWeight.bold,
+                              ),
+                            ),
+                          ),
+                        ],
+                      ),
+                    ),
+                    const SizedBox(width: 15),
+                    GestureDetector(
+                      onTap: _showSearchDialog,
+                      child: Container(
+                        padding: const EdgeInsets.all(10),
+                        decoration: BoxDecoration(
+                          color: searchQuery.isNotEmpty
+                              ? Colors.blue.shade100
+                              : Colors.grey.shade100,
+                          borderRadius: BorderRadius.circular(8),
+                        ),
+                        child: Icon(
+                          Icons.search,
+                          color: searchQuery.isNotEmpty
+                              ? Colors.blue.shade600
+                              : Colors.grey.shade600,
+                          size: 24,
+                        ),
+                      ),
+                    ),
+                  ],
+                ),
+              ),
+              const SizedBox(height: 20),
+            ],
+          ),
+        ),
+        Expanded(
+          child: Column(
+            children: [
+              if (searchQuery.isNotEmpty)
+                Container(
+                  width: double.infinity,
+                  margin: const EdgeInsets.fromLTRB(20, 10, 20, 0),
+                  padding: const EdgeInsets.all(12),
+                  decoration: BoxDecoration(
+                    color: Colors.blue.shade50,
+                    borderRadius: BorderRadius.circular(8),
+                    border: Border.all(color: Colors.blue.shade200),
+                  ),
+                  child: Row(
+                    children: [
+                      Icon(
+                        Icons.search,
+                        color: Colors.blue.shade600,
+                        size: 16,
+                      ),
+                      const SizedBox(width: 8),
+                      Expanded(
+                        child: Text(
+                          'Mencari: "$searchQuery"',
+                          style: TextStyle(
+                            color: Colors.blue.shade700,
+                            fontSize: 14,
+                          ),
+                        ),
+                      ),
+                      GestureDetector(
+                        onTap: () {
+                          setState(() {
+                            searchQuery = '';
+                            _searchController.clear();
+                          });
+                        },
+                        child: Icon(
+                          Icons.close,
+                          color: Colors.blue.shade600,
+                          size: 16,
+                        ),
+                      ),
+                    ],
                   ),
                 ),
-              ],
-            ),
-          ),
-        ],
-      ),
-    );
-  }
-
-  Widget _buildStaffCard(Map<String, dynamic> staff, int index) {
-    return Container(
-      margin: const EdgeInsets.only(bottom: 12),
-      decoration: BoxDecoration(
-        color: Colors.white,
-        borderRadius: BorderRadius.circular(12),
-        boxShadow: [
-          BoxShadow(
-            color: Colors.black.withOpacity(0.05),
-            blurRadius: 8,
-            offset: const Offset(0, 2),
-          ),
-        ],
-      ),
-      child: ListTile(
-        contentPadding: const EdgeInsets.all(16),
-        leading: CircleAvatar(
-          radius: 30,
-          backgroundImage: NetworkImage(staff['avatar']),
-          onBackgroundImageError: (exception, stackTrace) {},
-          child: staff['avatar'] == null
-              ? Icon(
-                  Icons.person,
-                  color: Colors.grey.shade400,
-                  size: 30,
-                )
-              : null,
-        ),
-        title: Text(
-          staff['nama'],
-          style: const TextStyle(
-            fontWeight: FontWeight.bold,
-            fontSize: 14,
-          ),
-        ),
-        subtitle: Column(
-          crossAxisAlignment: CrossAxisAlignment.start,
-          children: [
-            Text(
-              staff['subtitle'],
-              style: TextStyle(
-                color: Colors.grey.shade600,
-                fontSize: 12,
+              Expanded(
+                child: Container(
+                  color: Colors.grey.shade50,
+                  child: filteredStaff.isEmpty
+                      ? const Center(
+                          child: Text(
+                            'Tidak ada data Staff',
+                            style: TextStyle(color: Colors.grey, fontSize: 16),
+                          ),
+                        )
+                      : ListView.builder(
+                          padding: const EdgeInsets.all(20),
+                          itemCount: filteredStaff.length,
+                          itemBuilder: (context, index) {
+                            final staff = filteredStaff[index];
+                            return Container(
+                              margin: const EdgeInsets.only(bottom: 12),
+                              decoration: BoxDecoration(
+                                color: Colors.white,
+                                borderRadius: BorderRadius.circular(12),
+                                boxShadow: [
+                                  BoxShadow(
+                                    color: Colors.black.withOpacity(0.05),
+                                    blurRadius: 8,
+                                    offset: const Offset(0, 2),
+                                  ),
+                                ],
+                              ),
+                              child: ListTile(
+                                contentPadding: const EdgeInsets.all(16),
+                                leading: CircleAvatar(
+                                  radius: 30,
+                                  backgroundImage:
+                                      NetworkImage(staff['avatar']),
+                                  child: staff['avatar'] == null
+                                      ? Icon(
+                                          Icons.person,
+                                          color: Colors.grey.shade400,
+                                          size: 30,
+                                        )
+                                      : null,
+                                ),
+                                title: Text(
+                                  staff['nama'],
+                                  style: const TextStyle(
+                                    fontWeight: FontWeight.bold,
+                                    fontSize: 14,
+                                  ),
+                                ),
+                                subtitle: Column(
+                                  crossAxisAlignment: CrossAxisAlignment.start,
+                                  children: [
+                                    Text(
+                                      staff['subtitle'],
+                                      style: TextStyle(
+                                        color: Colors.grey.shade600,
+                                        fontSize: 12,
+                                      ),
+                                    ),
+                                    const SizedBox(height: 4),
+                                    Text(
+                                      staff['kategoriPersonil'],
+                                      style: TextStyle(
+                                        color: Colors.blue.shade600,
+                                        fontSize: 11,
+                                        fontWeight: FontWeight.w500,
+                                      ),
+                                    ),
+                                  ],
+                                ),
+                                trailing: Container(
+                                  padding: const EdgeInsets.symmetric(
+                                      horizontal: 8, vertical: 4),
+                                  decoration: BoxDecoration(
+                                    color: staff['aktif']
+                                        ? Colors.green
+                                        : Colors.red,
+                                    borderRadius: BorderRadius.circular(12),
+                                  ),
+                                  child: Text(
+                                    staff['aktif'] ? 'Aktif' : 'Non-Aktif',
+                                    style: const TextStyle(
+                                      color: Colors.white,
+                                      fontSize: 10,
+                                      fontWeight: FontWeight.bold,
+                                    ),
+                                  ),
+                                ),
+                                onTap: () => _showStaffDetail(staff),
+                              ),
+                            );
+                          },
+                        ),
+                ),
               ),
-            ),
-            const SizedBox(height: 4),
-            Text(
-              staff['kategoriPersonil'],
-              style: TextStyle(
-                color: Colors.blue.shade600,
-                fontSize: 11,
-                fontWeight: FontWeight.w500,
-              ),
-            ),
-          ],
-        ),
-        trailing: Container(
-          padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
-          decoration: BoxDecoration(
-            color: staff['aktif'] ? Colors.green : Colors.red,
-            borderRadius: BorderRadius.circular(12),
-          ),
-          child: Text(
-            staff['aktif'] ? 'Aktif' : 'Non-Aktif',
-            style: const TextStyle(
-              color: Colors.white,
-              fontSize: 10,
-              fontWeight: FontWeight.bold,
-            ),
+            ],
           ),
         ),
-        onTap: () => _showStaffDetail(staff),
-      ),
+      ],
     );
   }
 
@@ -791,28 +705,260 @@ class _StaffScreenState extends State<StaffScreen> {
       ),
     );
   }
+}
 
-  Widget _buildSertifikasiList(List<dynamic> sertifikasi) {
-    return Column(
-      crossAxisAlignment: CrossAxisAlignment.start,
-      children: sertifikasi.map((sert) {
-        return Padding(
-          padding: const EdgeInsets.only(bottom: 4),
-          child: Row(
-            crossAxisAlignment: CrossAxisAlignment.start,
-            children: [
-              const Text('• ',
-                  style: TextStyle(color: Colors.blue, fontSize: 16)),
-              Expanded(
-                child: Text(
-                  sert.toString(),
-                  style: const TextStyle(fontSize: 14, color: Colors.black87),
-                ),
+class KehadiranStaffTab extends StatelessWidget {
+  final String? lembagaName;
+
+  const KehadiranStaffTab({super.key, this.lembagaName});
+
+  // Data static kehadiran staff
+  static final List<Map<String, dynamic>> kehadiranData = [
+    {
+      'nama': 'Dr. Ahmad Fauzi, M.Pd',
+      'tanggal': '29 September 2025',
+      'keterangan': 'Hadir tepat waktu',
+      'jenis': 'Hadir',
+      'avatar': 'https://i.pravatar.cc/150?img=51',
+    },
+    {
+      'nama': 'Ustadz Muhammad Hakim, S.Pd.I',
+      'tanggal': '29 September 2025',
+      'keterangan': 'Izin rapat dinas',
+      'jenis': 'Izin',
+      'avatar': 'https://i.pravatar.cc/150?img=52',
+    },
+    {
+      'nama': 'Ustadzah Khadijah, S.Pd',
+      'tanggal': '29 September 2025',
+      'keterangan': 'Hadir, terlambat 10 menit',
+      'jenis': 'Terlambat',
+      'avatar': 'https://i.pravatar.cc/150?img=44',
+    },
+    {
+      'nama': 'Ahmad Subhan, S.Kom',
+      'tanggal': '29 September 2025',
+      'keterangan': 'Sakit flu',
+      'jenis': 'Sakit',
+      'avatar': 'https://i.pravatar.cc/150?img=53',
+    },
+    {
+      'nama': 'Ustadz Abdullah Yusuf, Lc',
+      'tanggal': '28 September 2025',
+      'keterangan': 'Hadir tepat waktu',
+      'jenis': 'Hadir',
+      'avatar': 'https://i.pravatar.cc/150?img=54',
+    },
+    {
+      'nama': 'Ustadzah Asiyah, S.Pd.I',
+      'tanggal': '28 September 2025',
+      'keterangan': 'Alpha tanpa keterangan',
+      'jenis': 'Alpha',
+      'avatar': 'https://i.pravatar.cc/150?img=45',
+    },
+  ];
+
+  Color _getJenisColor(String jenis) {
+    switch (jenis) {
+      case 'Hadir':
+        return Colors.green;
+      case 'Izin':
+        return Colors.blue;
+      case 'Sakit':
+        return Colors.orange;
+      case 'Alpha':
+        return Colors.red;
+      case 'Terlambat':
+        return Colors.purple;
+      default:
+        return Colors.grey;
+    }
+  }
+
+  IconData _getJenisIcon(String jenis) {
+    switch (jenis) {
+      case 'Hadir':
+        return Icons.check_circle;
+      case 'Izin':
+        return Icons.info;
+      case 'Sakit':
+        return Icons.local_hospital;
+      case 'Alpha':
+        return Icons.cancel;
+      case 'Terlambat':
+        return Icons.access_time;
+      default:
+        return Icons.help;
+    }
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    return Container(
+      color: Colors.grey.shade50,
+      child: Column(
+        children: [
+          Container(
+            width: double.infinity,
+            decoration: BoxDecoration(
+              gradient: LinearGradient(
+                colors: [Colors.blue, Colors.blue.shade300],
+                begin: Alignment.topLeft,
+                end: Alignment.bottomRight,
               ),
-            ],
+            ),
+            child: Column(
+              children: [
+                const SizedBox(height: 20),
+                Row(
+                  children: [
+                    const SizedBox(width: 20),
+                    Container(
+                      width: 60,
+                      height: 60,
+                      decoration: BoxDecoration(
+                        color: Colors.white,
+                        shape: BoxShape.circle,
+                        boxShadow: [
+                          BoxShadow(
+                            color: Colors.black.withOpacity(0.1),
+                            blurRadius: 8,
+                            offset: const Offset(0, 2),
+                          ),
+                        ],
+                      ),
+                      child: const Icon(
+                        Icons.assignment_turned_in,
+                        color: Colors.blue,
+                        size: 30,
+                      ),
+                    ),
+                    const SizedBox(width: 15),
+                    const Expanded(
+                      child: Column(
+                        crossAxisAlignment: CrossAxisAlignment.start,
+                        children: [
+                          Text(
+                            'KEHADIRAN STAFF',
+                            style: TextStyle(
+                              color: Colors.white,
+                              fontSize: 16,
+                              fontWeight: FontWeight.bold,
+                            ),
+                          ),
+                          Text(
+                            'Rekap kehadiran harian',
+                            style: TextStyle(
+                              color: Colors.white70,
+                              fontSize: 14,
+                            ),
+                          ),
+                        ],
+                      ),
+                    ),
+                  ],
+                ),
+                const SizedBox(height: 20),
+              ],
+            ),
           ),
-        );
-      }).toList(),
+          Expanded(
+            child: ListView.builder(
+              padding: const EdgeInsets.all(20),
+              itemCount: kehadiranData.length,
+              itemBuilder: (context, index) {
+                final kehadiran = kehadiranData[index];
+                return Container(
+                  margin: const EdgeInsets.only(bottom: 12),
+                  decoration: BoxDecoration(
+                    color: Colors.white,
+                    borderRadius: BorderRadius.circular(12),
+                    boxShadow: [
+                      BoxShadow(
+                        color: Colors.black.withOpacity(0.05),
+                        blurRadius: 8,
+                        offset: const Offset(0, 2),
+                      ),
+                    ],
+                  ),
+                  child: ListTile(
+                    contentPadding: const EdgeInsets.all(16),
+                    leading: Stack(
+                      children: [
+                        CircleAvatar(
+                          radius: 25,
+                          backgroundImage: NetworkImage(kehadiran['avatar']),
+                        ),
+                        Positioned(
+                          right: -2,
+                          bottom: -2,
+                          child: Container(
+                            padding: const EdgeInsets.all(2),
+                            decoration: BoxDecoration(
+                              color: Colors.white,
+                              shape: BoxShape.circle,
+                              border: Border.all(color: Colors.grey.shade200),
+                            ),
+                            child: Icon(
+                              _getJenisIcon(kehadiran['jenis']),
+                              color: _getJenisColor(kehadiran['jenis']),
+                              size: 16,
+                            ),
+                          ),
+                        ),
+                      ],
+                    ),
+                    title: Text(
+                      kehadiran['nama'],
+                      style: const TextStyle(
+                        fontWeight: FontWeight.bold,
+                        fontSize: 14,
+                      ),
+                    ),
+                    subtitle: Column(
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      children: [
+                        const SizedBox(height: 4),
+                        Text(
+                          kehadiran['tanggal'],
+                          style: TextStyle(
+                            color: Colors.grey.shade600,
+                            fontSize: 12,
+                          ),
+                        ),
+                        const SizedBox(height: 2),
+                        Text(
+                          kehadiran['keterangan'],
+                          style: TextStyle(
+                            color: Colors.grey.shade700,
+                            fontSize: 12,
+                          ),
+                        ),
+                      ],
+                    ),
+                    trailing: Container(
+                      padding: const EdgeInsets.symmetric(
+                          horizontal: 8, vertical: 4),
+                      decoration: BoxDecoration(
+                        color: _getJenisColor(kehadiran['jenis']),
+                        borderRadius: BorderRadius.circular(12),
+                      ),
+                      child: Text(
+                        kehadiran['jenis'],
+                        style: const TextStyle(
+                          color: Colors.white,
+                          fontSize: 10,
+                          fontWeight: FontWeight.bold,
+                        ),
+                      ),
+                    ),
+                  ),
+                );
+              },
+            ),
+          ),
+        ],
+      ),
     );
   }
 }

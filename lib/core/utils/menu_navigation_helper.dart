@@ -4,6 +4,7 @@ import '../../screens/contact_screen.dart';
 import '../../screens/bannered_detail_screen.dart';
 import '../../screens/santri_screen.dart';
 import '../../screens/staff_screen.dart';
+import '../../screens/informasi_screen.dart';
 import '../../models/profile_section.dart';
 import '../../models/lembaga_model.dart';
 import '../../repository/lembaga_repository.dart';
@@ -188,6 +189,18 @@ class MenuNavigationHelper {
         );
         break;
 
+      case 'informasi':
+        Navigator.push(
+          context,
+          MaterialPageRoute(
+            builder: (context) => InformasiScreen(
+              title: '${lembaga.nama} - Informasi',
+              lembagaName: lembaga.nama,
+            ),
+          ),
+        );
+        break;
+
       default:
         // Untuk menu lain, gunakan static content dengan banner dari API
         _navigateWithBanner(context, menuItem, lembaga.nama, lembaga.slug);
@@ -267,7 +280,15 @@ class MenuNavigationHelper {
         break;
 
       case 'informasi':
-        _showComingSoon(context, 'Informasi');
+        Navigator.push(
+          context,
+          MaterialPageRoute(
+            builder: (context) => InformasiScreen(
+              title: '$categoryTitle - Informasi',
+              lembagaName: categoryTitle,
+            ),
+          ),
+        );
         break;
 
       case 'santri':

@@ -431,12 +431,8 @@ class _DaftarSantriTabState extends State<DaftarSantriTab> {
         onTap: () {
           if (santri is Map<String, dynamic>) {
             _showSantriDetail(santri);
-          } else {
-            // For API data, you can show a different detail dialog
-            // _showSantriDetailFromModel(santri as Santri);
-            ScaffoldMessenger.of(context).showSnackBar(
-              SnackBar(content: Text('Detail untuk $nama')),
-            );
+          } else if (santri is Santri) {
+            _showSantriDetailFromModel(santri);
           }
         },
       ),
@@ -529,6 +525,142 @@ class _DaftarSantriTabState extends State<DaftarSantriTab> {
                               'Tempat Lahir', santri['tempatLahir']),
                           _buildDetailRow(
                               'Tanggal Lahir', santri['tanggalLahir']),
+                        ]),
+                      ],
+                    ),
+                  ),
+                ),
+              ],
+            ),
+          ),
+        );
+      },
+    );
+  }
+
+  void _showSantriDetailFromModel(Santri santri) {
+    showDialog(
+      context: context,
+      barrierColor: Colors.black.withOpacity(0.7),
+      builder: (BuildContext context) {
+        return Dialog(
+          backgroundColor: Colors.transparent,
+          child: Container(
+            width: MediaQuery.of(context).size.width * 0.9,
+            height: MediaQuery.of(context).size.height * 0.8,
+            decoration: BoxDecoration(
+              color: Colors.white,
+              borderRadius: BorderRadius.circular(16),
+              boxShadow: [
+                BoxShadow(
+                  color: Colors.black.withOpacity(0.3),
+                  blurRadius: 20,
+                  offset: const Offset(0, 10),
+                ),
+              ],
+            ),
+            child: Column(
+              children: [
+                // Header
+                Container(
+                  padding: const EdgeInsets.all(20),
+                  decoration: BoxDecoration(
+                    color: AppColors.primaryGreen,
+                    borderRadius: const BorderRadius.only(
+                      topLeft: Radius.circular(16),
+                      topRight: Radius.circular(16),
+                    ),
+                  ),
+                  child: Row(
+                    children: [
+                      CircleAvatar(
+                        radius: 30,
+                        backgroundColor: Colors.white,
+                        child: Icon(
+                          Icons.person,
+                          color: AppColors.primaryGreen,
+                          size: 30,
+                        ),
+                      ),
+                      const SizedBox(width: 15),
+                      Expanded(
+                        child: Column(
+                          crossAxisAlignment: CrossAxisAlignment.start,
+                          children: [
+                            const Text(
+                              'Detail Santri',
+                              style: TextStyle(
+                                color: Colors.white,
+                                fontSize: 18,
+                                fontWeight: FontWeight.bold,
+                              ),
+                            ),
+                            if (santri.kelasAktif != null)
+                              Text(
+                                santri.kelasAktif!,
+                                style: TextStyle(
+                                  color: Colors.white.withOpacity(0.9),
+                                  fontSize: 14,
+                                ),
+                              ),
+                          ],
+                        ),
+                      ),
+                      IconButton(
+                        onPressed: () => Navigator.of(context).pop(),
+                        icon: const Icon(Icons.close, color: Colors.white),
+                      ),
+                    ],
+                  ),
+                ),
+                // Content
+                Expanded(
+                  child: SingleChildScrollView(
+                    padding: const EdgeInsets.all(20),
+                    child: Column(
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      children: [
+                        // Data Pribadi
+                        _buildDetailSection('Data Pribadi', [
+                          _buildDetailRow('Nama Lengkap', santri.nama),
+                          _buildDetailRow('NISN', santri.nisn),
+                          _buildDetailRow('Jenis Kelamin',
+                              santri.gender == 'L' ? 'Laki-laki' : 'Perempuan'),
+                          _buildDetailRow('Tempat, Tanggal Lahir',
+                              '${santri.tempatLahir}, ${_formatDateString(santri.tanggalLahir)}'),
+                        ]),
+                        const SizedBox(height: 20),
+                        // Data Orang Tua
+                        _buildDetailSection('Data Orang Tua', [
+                          _buildDetailRow('Nama Ayah', santri.namaAyah),
+                          _buildDetailRow('Nama Ibu', santri.namaIbu),
+                        ]),
+                        const SizedBox(height: 20),
+                        // Alamat
+                        _buildDetailSection('Alamat', [
+                          _buildDetailRow('Kelurahan', santri.kelurahan),
+                          _buildDetailRow('Kecamatan', santri.kecamatan),
+                          _buildDetailRow('Kota', santri.kota),
+                        ]),
+                        const SizedBox(height: 20),
+                        // Data Akademik
+                        _buildDetailSection('Data Akademik', [
+                          _buildDetailRow('Tahun Masuk', santri.tahunMasuk),
+                          if (santri.kelasAktif != null)
+                            _buildDetailRow('Kelas Aktif', santri.kelasAktif!),
+                          if (santri.tahunAjaranAktif != null)
+                            _buildDetailRow(
+                                'Tahun Ajaran', santri.tahunAjaranAktif!),
+                          _buildDetailRow(
+                              'Status', santri.isAlumni ? 'Alumni' : 'Aktif'),
+                          if (santri.tahunLulus != null)
+                            _buildDetailRow('Tahun Lulus', santri.tahunLulus!),
+                          if (santri.nomorIjazah != null)
+                            _buildDetailRow(
+                                'Nomor Ijazah', santri.nomorIjazah!),
+                          if (santri.tahunIjazah != null)
+                            _buildDetailRow(
+                                'Tahun Ijazah', santri.tahunIjazah!),
                         ]),
                       ],
                     ),
@@ -848,6 +980,30 @@ class _DaftarSantriTabState extends State<DaftarSantriTab> {
         ],
       ),
     );
+  }
+
+  String _formatDateString(String dateStr) {
+    try {
+      final date = DateTime.parse(dateStr);
+      final months = [
+        '',
+        'Januari',
+        'Februari',
+        'Maret',
+        'April',
+        'Mei',
+        'Juni',
+        'Juli',
+        'Agustus',
+        'September',
+        'Oktober',
+        'November',
+        'Desember'
+      ];
+      return '${date.day} ${months[date.month]} ${date.year}';
+    } catch (e) {
+      return dateStr;
+    }
   }
 }
 

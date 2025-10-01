@@ -23,10 +23,11 @@ class StaffRepository {
       '$apiHost/api/staffs',
       queryParameters: {
         'filters[lembaga][slug][\$eq]': lembagaSlug,
-        'filters[isActive][\$eq]': true,
-        'pagination[pageSize]': pageSize ?? 25,
+        'filters[aktif][\$eq]': true,
+        'populate[lembaga]': true,
+        'sort': 'nama:asc',
+        'pagination[pageSize]': pageSize ?? 100,
         if (page != null) 'pagination[page]': page,
-        'populate': 'deep',
       },
       options: Options(
         headers: {

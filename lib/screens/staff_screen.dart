@@ -150,11 +150,33 @@ class _DaftarStaffTabState extends State<DaftarStaffTab> {
 
   Widget _buildStaffCard(dynamic staffData) {
     // Handle both API Staff object and fallback Map
-    final String nama = staffData is Staff ? staffData.nama : staffData['nama'];
-    final String subtitle = staffData is Staff
-        ? staffData.kategoriPersonil
-        : staffData['subtitle'] ?? 'Staff';
-    final String? avatarUrl = staffData is Staff ? null : staffData['avatar'];
+    String nama;
+    String? subtitle;
+    String? avatarUrl;
+    String? tugasInfo;
+    String? nipInfo;
+
+    if (staffData is Staff) {
+      // API data
+      nama = staffData.nama;
+      subtitle = staffData.kategoriPersonil;
+      avatarUrl = null;
+      tugasInfo = staffData.keteranganTugas;
+      nipInfo = staffData.nip;
+    } else if (staffData is Map<String, dynamic>) {
+      // Fallback data
+      nama = staffData['nama'] ?? '';
+      subtitle = staffData['subtitle'] ?? 'Staff';
+      avatarUrl = staffData['avatar'];
+      tugasInfo = null;
+      nipInfo = null;
+    } else {
+      nama = 'Unknown';
+      subtitle = null;
+      avatarUrl = null;
+      tugasInfo = null;
+      nipInfo = null;
+    }
 
     return Container(
       margin: const EdgeInsets.only(bottom: 12),
@@ -173,11 +195,12 @@ class _DaftarStaffTabState extends State<DaftarStaffTab> {
         contentPadding: const EdgeInsets.all(16),
         leading: CircleAvatar(
           radius: 30,
+          backgroundColor: Colors.blue.shade100,
           backgroundImage: avatarUrl != null ? NetworkImage(avatarUrl) : null,
           child: avatarUrl == null
               ? Icon(
                   Icons.person,
-                  color: Colors.grey.shade400,
+                  color: Colors.blue.shade700,
                   size: 30,
                 )
               : null,
@@ -189,19 +212,58 @@ class _DaftarStaffTabState extends State<DaftarStaffTab> {
             fontSize: 14,
           ),
         ),
-        subtitle: Text(
-          subtitle,
-          style: const TextStyle(fontSize: 12),
+        subtitle: Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            if (subtitle != null) ...[
+              const SizedBox(height: 4),
+              Text(
+                subtitle,
+                style: TextStyle(
+                  color: Colors.grey.shade600,
+                  fontSize: 12,
+                ),
+              ),
+            ],
+            if (tugasInfo != null && tugasInfo.isNotEmpty) ...[
+              const SizedBox(height: 4),
+              Text(
+                tugasInfo,
+                style: TextStyle(
+                  color: Colors.grey.shade700,
+                  fontSize: 11,
+                ),
+                maxLines: 1,
+                overflow: TextOverflow.ellipsis,
+              ),
+            ],
+            if (nipInfo != null && nipInfo.isNotEmpty) ...[
+              const SizedBox(height: 4),
+              Container(
+                padding: const EdgeInsets.symmetric(horizontal: 6, vertical: 2),
+                decoration: BoxDecoration(
+                  color: Colors.blue.shade50,
+                  borderRadius: BorderRadius.circular(4),
+                  border: Border.all(color: Colors.blue.shade200),
+                ),
+                child: Text(
+                  'NIP: $nipInfo',
+                  style: TextStyle(
+                    color: Colors.blue.shade700,
+                    fontSize: 10,
+                    fontWeight: FontWeight.w500,
+                  ),
+                ),
+              ),
+            ],
+          ],
         ),
         trailing: const Icon(Icons.chevron_right, color: Colors.grey),
         onTap: () {
           if (staffData is Map<String, dynamic>) {
             _showStaffDetail(staffData);
-          } else {
-            // For Staff model from API, we'll use showStaffDetail or show snackbar
-            ScaffoldMessenger.of(context).showSnackBar(
-              SnackBar(content: Text('Detail for ${staffData.nama}')),
-            );
+          } else if (staffData is Staff) {
+            _showStaffDetailFromModel(staffData);
           }
         },
       ),
@@ -491,6 +553,180 @@ class _DaftarStaffTabState extends State<DaftarStaffTab> {
         );
       },
     );
+  }
+
+  void _showStaffDetailFromModel(Staff staff) {
+    showDialog(
+      context: context,
+      barrierColor: Colors.black.withOpacity(0.7),
+      builder: (BuildContext context) {
+        return Dialog(
+          backgroundColor: Colors.transparent,
+          child: Container(
+            width: MediaQuery.of(context).size.width * 0.9,
+            height: MediaQuery.of(context).size.height * 0.8,
+            decoration: BoxDecoration(
+              color: Colors.white,
+              borderRadius: BorderRadius.circular(16),
+              boxShadow: [
+                BoxShadow(
+                  color: Colors.black.withOpacity(0.3),
+                  blurRadius: 20,
+                  offset: const Offset(0, 10),
+                ),
+              ],
+            ),
+            child: Column(
+              children: [
+                // Header
+                Container(
+                  padding: const EdgeInsets.all(20),
+                  decoration: const BoxDecoration(
+                    color: Colors.blue,
+                    borderRadius: BorderRadius.only(
+                      topLeft: Radius.circular(16),
+                      topRight: Radius.circular(16),
+                    ),
+                  ),
+                  child: Row(
+                    children: [
+                      CircleAvatar(
+                        radius: 30,
+                        backgroundColor: Colors.white,
+                        child: Icon(
+                          Icons.person,
+                          color: Colors.blue,
+                          size: 30,
+                        ),
+                      ),
+                      const SizedBox(width: 15),
+                      Expanded(
+                        child: Column(
+                          crossAxisAlignment: CrossAxisAlignment.start,
+                          children: [
+                            const Text(
+                              'Detail Staff',
+                              style: TextStyle(
+                                color: Colors.white,
+                                fontSize: 18,
+                                fontWeight: FontWeight.bold,
+                              ),
+                            ),
+                            if (staff.kategoriPersonil.isNotEmpty)
+                              Text(
+                                staff.kategoriPersonil,
+                                style: TextStyle(
+                                  color: Colors.white.withOpacity(0.9),
+                                  fontSize: 14,
+                                ),
+                              ),
+                          ],
+                        ),
+                      ),
+                      IconButton(
+                        onPressed: () => Navigator.of(context).pop(),
+                        icon: const Icon(Icons.close, color: Colors.white),
+                      ),
+                    ],
+                  ),
+                ),
+                // Content
+                Expanded(
+                  child: SingleChildScrollView(
+                    padding: const EdgeInsets.all(20),
+                    child: Column(
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      children: [
+                        // Data Pribadi
+                        _buildDetailSection('Data Pribadi', [
+                          _buildDetailRow('Nama Lengkap', staff.nama),
+                          _buildDetailRow('NIP', staff.nip),
+                          _buildDetailRow('NIK', staff.nik),
+                          _buildDetailRow('Tempat, Tanggal Lahir',
+                              '${staff.tempatLahir}, ${_formatDateString(staff.tanggalLahir)}'),
+                          _buildDetailRow('Jenis Kelamin',
+                              staff.gender == 'L' ? 'Laki-laki' : 'Perempuan'),
+                          _buildDetailRow('Agama', staff.agama),
+                          if (staff.noTelepon != null &&
+                              staff.noTelepon!.isNotEmpty)
+                            _buildDetailRow('No. Telepon', staff.noTelepon!),
+                          if (staff.namaIbu != null &&
+                              staff.namaIbu!.isNotEmpty)
+                            _buildDetailRow('Nama Ibu', staff.namaIbu!),
+                        ]),
+                        const SizedBox(height: 20),
+                        // Data Kepegawaian
+                        _buildDetailSection('Data Kepegawaian', [
+                          _buildDetailRow(
+                              'Kategori Personil', staff.kategoriPersonil),
+                          if (staff.keteranganTugas.isNotEmpty)
+                            _buildDetailRow(
+                                'Keterangan Tugas', staff.keteranganTugas),
+                          if (staff.statusKepegawaian != null &&
+                              staff.statusKepegawaian!.isNotEmpty)
+                            _buildDetailRow(
+                                'Status Kepegawaian', staff.statusKepegawaian!),
+                          if (staff.mulaiTugas != null)
+                            _buildDetailRow('Mulai Tugas',
+                                _formatDateString(staff.mulaiTugas!)),
+                          _buildDetailRow(
+                              'Status', staff.aktif ? 'Aktif' : 'Tidak Aktif'),
+                        ]),
+                        const SizedBox(height: 20),
+                        // Data Pendidikan
+                        _buildDetailSection('Data Pendidikan', [
+                          if (staff.pendidikanTerakhir != null &&
+                              staff.pendidikanTerakhir!.isNotEmpty)
+                            _buildDetailRow('Pendidikan Terakhir',
+                                staff.pendidikanTerakhir!),
+                          if (staff.lulusan != null &&
+                              staff.lulusan!.isNotEmpty)
+                            _buildDetailRow('Lulusan', staff.lulusan!),
+                          if (staff.statusPNS != null &&
+                              staff.statusPNS!.isNotEmpty)
+                            _buildDetailRow('Status PNS', staff.statusPNS!),
+                          if (staff.statusGuruTetap != null &&
+                              staff.statusGuruTetap!.isNotEmpty)
+                            _buildDetailRow(
+                                'Status Guru', staff.statusGuruTetap!),
+                          if (staff.sertifikasi != null &&
+                              staff.sertifikasi!.isNotEmpty)
+                            _buildDetailRow('Sertifikasi', staff.sertifikasi!),
+                        ]),
+                      ],
+                    ),
+                  ),
+                ),
+              ],
+            ),
+          ),
+        );
+      },
+    );
+  }
+
+  String _formatDateString(String dateStr) {
+    try {
+      final date = DateTime.parse(dateStr);
+      final months = [
+        '',
+        'Januari',
+        'Februari',
+        'Maret',
+        'April',
+        'Mei',
+        'Juni',
+        'Juli',
+        'Agustus',
+        'September',
+        'Oktober',
+        'November',
+        'Desember'
+      ];
+      return '${date.day} ${months[date.month]} ${date.year}';
+    } catch (e) {
+      return dateStr;
+    }
   }
 
   @override
@@ -961,6 +1197,40 @@ class _KehadiranStaffTabState extends State<KehadiranStaffTab> {
         startDate = picked.start;
         endDate = picked.end;
       });
+
+      // Fetch data with date range if using API
+      if (!_usesFallback) {
+        await _fetchKehadiranDataByDateRange();
+      }
+    }
+  }
+
+  Future<void> _fetchKehadiranDataByDateRange() async {
+    if (startDate == null || endDate == null) return;
+
+    setState(() {
+      _isLoading = true;
+      _errorMessage = null;
+    });
+
+    try {
+      final slug = _getLembagaSlug(widget.lembagaName);
+      final kehadiranList = await _kehadiranRepo.getKehadiranGuruByDateRange(
+        slug,
+        startDate!,
+        endDate!,
+      );
+
+      setState(() {
+        _kehadiranList = kehadiranList;
+        _isLoading = false;
+      });
+    } catch (e) {
+      print('Error fetching kehadiran guru by date range: $e');
+      setState(() {
+        _isLoading = false;
+        _errorMessage = 'Error loading date range data';
+      });
     }
   }
 
@@ -969,6 +1239,58 @@ class _KehadiranStaffTabState extends State<KehadiranStaffTab> {
       startDate = null;
       endDate = null;
     });
+
+    // Reload all data if using API
+    if (!_usesFallback) {
+      _fetchKehadiranData();
+    }
+  }
+
+  Color _getJenisColor(String jenis) {
+    // Normalize jenis to uppercase for consistency
+    final jenisUpper = jenis.toUpperCase();
+    switch (jenisUpper) {
+      case 'HADIR':
+        return AppColors.primaryGreen;
+      case 'IZIN':
+        return Colors.blue;
+      case 'SAKIT':
+        return Colors.orange;
+      case 'ALPHA':
+        return Colors.red;
+      case 'TERLAMBAT':
+        return Colors.purple;
+      default:
+        return Colors.grey;
+    }
+  }
+
+  IconData _getJenisIcon(String jenis) {
+    // Normalize jenis to uppercase for consistency
+    final jenisUpper = jenis.toUpperCase();
+    switch (jenisUpper) {
+      case 'HADIR':
+        return Icons.check_circle;
+      case 'IZIN':
+        return Icons.info;
+      case 'SAKIT':
+        return Icons.local_hospital;
+      case 'ALPHA':
+        return Icons.cancel;
+      case 'TERLAMBAT':
+        return Icons.access_time;
+      default:
+        return Icons.help;
+    }
+  }
+
+  String _formatTanggalKehadiran(String tanggal) {
+    try {
+      final date = DateTime.parse(tanggal);
+      return _formatDate(date);
+    } catch (e) {
+      return tanggal;
+    }
   }
 
   String _formatDate(DateTime date) {
@@ -988,40 +1310,6 @@ class _KehadiranStaffTabState extends State<KehadiranStaffTab> {
       'Desember'
     ];
     return '${date.day} ${months[date.month]} ${date.year}';
-  }
-
-  Color _getJenisColor(String jenis) {
-    switch (jenis) {
-      case 'Hadir':
-        return AppColors.primaryGreen;
-      case 'Izin':
-        return Colors.blue;
-      case 'Sakit':
-        return Colors.orange;
-      case 'Alpha':
-        return Colors.red;
-      case 'Terlambat':
-        return Colors.purple;
-      default:
-        return Colors.grey;
-    }
-  }
-
-  IconData _getJenisIcon(String jenis) {
-    switch (jenis) {
-      case 'Hadir':
-        return Icons.check_circle;
-      case 'Izin':
-        return Icons.info;
-      case 'Sakit':
-        return Icons.local_hospital;
-      case 'Alpha':
-        return Icons.cancel;
-      case 'Terlambat':
-        return Icons.access_time;
-      default:
-        return Icons.help;
-    }
   }
 
   @override
@@ -1205,6 +1493,40 @@ class _KehadiranStaffTabState extends State<KehadiranStaffTab> {
                 itemCount: filteredKehadiran.length,
                 itemBuilder: (context, index) {
                   final kehadiran = filteredKehadiran[index];
+
+                  // Handle both KehadiranGuru model and Map (fallback)
+                  String nama;
+                  String tanggal;
+                  String jenis;
+                  String keterangan;
+                  String? avatar;
+                  String? tugasInfo;
+
+                  if (kehadiran is KehadiranGuru) {
+                    // API data
+                    nama = kehadiran.namaStaff;
+                    tanggal = _formatTanggalKehadiran(kehadiran.tanggal);
+                    jenis = kehadiran.jenis;
+                    keterangan = kehadiran.keterangan;
+                    avatar = null;
+                    tugasInfo = kehadiran.staff?.keteranganTugas;
+                  } else if (kehadiran is Map<String, dynamic>) {
+                    // Fallback data
+                    nama = kehadiran['nama'] ?? '';
+                    tanggal = kehadiran['tanggal'] ?? '';
+                    jenis = kehadiran['jenis'] ?? '';
+                    keterangan = kehadiran['keterangan'] ?? '';
+                    avatar = kehadiran['avatar'];
+                    tugasInfo = null;
+                  } else {
+                    nama = 'Unknown';
+                    tanggal = '';
+                    jenis = '';
+                    keterangan = '';
+                    avatar = null;
+                    tugasInfo = null;
+                  }
+
                   return Container(
                     margin: const EdgeInsets.only(bottom: 12),
                     decoration: BoxDecoration(
@@ -1224,7 +1546,16 @@ class _KehadiranStaffTabState extends State<KehadiranStaffTab> {
                         children: [
                           CircleAvatar(
                             radius: 25,
-                            backgroundImage: NetworkImage(kehadiran['avatar']),
+                            backgroundColor: Colors.blue.shade100,
+                            backgroundImage:
+                                avatar != null ? NetworkImage(avatar) : null,
+                            child: avatar == null
+                                ? Icon(
+                                    Icons.person,
+                                    color: Colors.blue.shade700,
+                                    size: 25,
+                                  )
+                                : null,
                           ),
                           Positioned(
                             right: -2,
@@ -1237,27 +1568,53 @@ class _KehadiranStaffTabState extends State<KehadiranStaffTab> {
                                 border: Border.all(color: Colors.grey.shade200),
                               ),
                               child: Icon(
-                                _getJenisIcon(kehadiran['jenis']),
-                                color: _getJenisColor(kehadiran['jenis']),
+                                _getJenisIcon(jenis),
+                                color: _getJenisColor(jenis),
                                 size: 16,
                               ),
                             ),
                           ),
                         ],
                       ),
-                      title: Text(
-                        kehadiran['nama'],
-                        style: const TextStyle(
-                          fontWeight: FontWeight.bold,
-                          fontSize: 14,
-                        ),
+                      title: Row(
+                        children: [
+                          Expanded(
+                            child: Text(
+                              nama,
+                              style: const TextStyle(
+                                fontWeight: FontWeight.bold,
+                                fontSize: 14,
+                              ),
+                            ),
+                          ),
+                          if (tugasInfo != null && tugasInfo.isNotEmpty)
+                            Container(
+                              padding: const EdgeInsets.symmetric(
+                                  horizontal: 6, vertical: 2),
+                              decoration: BoxDecoration(
+                                color: Colors.grey.shade100,
+                                borderRadius: BorderRadius.circular(4),
+                                border: Border.all(color: Colors.grey.shade300),
+                              ),
+                              child: Text(
+                                tugasInfo,
+                                style: TextStyle(
+                                  color: Colors.grey.shade700,
+                                  fontSize: 10,
+                                  fontWeight: FontWeight.w500,
+                                ),
+                                maxLines: 1,
+                                overflow: TextOverflow.ellipsis,
+                              ),
+                            ),
+                        ],
                       ),
                       subtitle: Column(
                         crossAxisAlignment: CrossAxisAlignment.start,
                         children: [
                           const SizedBox(height: 4),
                           Text(
-                            kehadiran['tanggal'],
+                            tanggal,
                             style: TextStyle(
                               color: Colors.grey.shade600,
                               fontSize: 12,
@@ -1265,7 +1622,7 @@ class _KehadiranStaffTabState extends State<KehadiranStaffTab> {
                           ),
                           const SizedBox(height: 2),
                           Text(
-                            kehadiran['keterangan'],
+                            keterangan,
                             style: TextStyle(
                               color: Colors.grey.shade700,
                               fontSize: 12,
@@ -1277,11 +1634,11 @@ class _KehadiranStaffTabState extends State<KehadiranStaffTab> {
                         padding: const EdgeInsets.symmetric(
                             horizontal: 8, vertical: 4),
                         decoration: BoxDecoration(
-                          color: _getJenisColor(kehadiran['jenis']),
+                          color: _getJenisColor(jenis),
                           borderRadius: BorderRadius.circular(12),
                         ),
                         child: Text(
-                          kehadiran['jenis'],
+                          jenis.toUpperCase(),
                           style: const TextStyle(
                             color: Colors.white,
                             fontSize: 10,

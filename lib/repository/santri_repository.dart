@@ -50,6 +50,7 @@ class SantriRepository {
     String lembagaSlug, {
     int? page,
     int? pageSize,
+    String? tahunMasuk,
   }) async {
     final apiHost = dotenv.env['API_HOST'] ?? '';
     final apiToken = dotenv.env['API_TOKEN_READONLY'] ?? '';
@@ -59,9 +60,10 @@ class SantriRepository {
       queryParameters: {
         'filters[lembaga][slug][\$eq]': lembagaSlug,
         'filters[isAlumni][\$eq]': true,
-        'pagination[pageSize]': pageSize ?? 25,
+        if (tahunMasuk != null) 'filters[tahunMasuk][\$eq]': tahunMasuk,
+        'sort': 'tahunMasuk:desc,nama:asc',
+        'pagination[pageSize]': pageSize ?? 100,
         if (page != null) 'pagination[page]': page,
-        'populate': 'deep',
       },
       options: Options(
         headers: {

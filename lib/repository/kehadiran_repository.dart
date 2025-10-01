@@ -192,11 +192,13 @@ class KehadiranRepository {
     final response = await _dio.get(
       '$apiHost/api/kehadiran-gurus',
       queryParameters: {
-        'filters[guru][lembaga][slug][\$eq]': lembagaSlug,
-        'pagination[pageSize]': pageSize ?? 25,
-        if (page != null) 'pagination[page]': page,
-        'populate': 'deep',
+        'filters[staff][lembaga][slug][\$eq]': lembagaSlug,
+        'filters[tahunAjaran][aktif][\$eq]': true,
+        'populate[staff]': true,
+        'populate[tahunAjaran]': true,
         'sort': 'tanggal:desc',
+        'pagination[pageSize]': pageSize ?? 100,
+        if (page != null) 'pagination[page]': page,
       },
       options: Options(
         headers: {
@@ -232,13 +234,15 @@ class KehadiranRepository {
     final response = await _dio.get(
       '$apiHost/api/kehadiran-gurus',
       queryParameters: {
-        'filters[guru][lembaga][slug][\$eq]': lembagaSlug,
-        'filters[tanggal][\$gte]': startDate.toIso8601String(),
-        'filters[tanggal][\$lte]': endDate.toIso8601String(),
+        'filters[staff][lembaga][slug][\$eq]': lembagaSlug,
+        'filters[tahunAjaran][aktif][\$eq]': true,
+        'filters[tanggal][\$gte]': startDate.toIso8601String().split('T')[0],
+        'filters[tanggal][\$lte]': endDate.toIso8601String().split('T')[0],
+        'populate[staff]': true,
+        'populate[tahunAjaran]': true,
+        'sort': 'tanggal:desc',
         'pagination[pageSize]': pageSize ?? 100,
         if (page != null) 'pagination[page]': page,
-        'populate': 'deep',
-        'sort': 'tanggal:desc',
       },
       options: Options(
         headers: {

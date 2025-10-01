@@ -27,7 +27,7 @@ class _AlumniScreenState extends State<AlumniScreen> {
   List<Santri> _alumniList = [];
   bool _usesFallback = false;
 
-  String? selectedYear;
+  String? selectedYear; // This will be tahunMasuk (angkatan)
   String searchQuery = '';
   final TextEditingController _searchController = TextEditingController();
 
@@ -37,7 +37,7 @@ class _AlumniScreenState extends State<AlumniScreen> {
     _fetchAlumniData();
   }
 
-  Future<void> _fetchAlumniData() async {
+  Future<void> _fetchAlumniData({String? tahunMasuk}) async {
     setState(() {
       _isLoading = true;
       _errorMessage = null;
@@ -45,7 +45,8 @@ class _AlumniScreenState extends State<AlumniScreen> {
 
     try {
       final slug = _getLembagaSlug(widget.lembagaName);
-      final alumniList = await _santriRepo.getAlumniByLembaga(slug);
+      final alumniList =
+          await _santriRepo.getAlumniByLembaga(slug, tahunMasuk: tahunMasuk);
 
       setState(() {
         _alumniList = alumniList;
@@ -176,14 +177,11 @@ class _AlumniScreenState extends State<AlumniScreen> {
 
       return filtered;
     } else {
-      // Using API data (Santri list)
+      // Using API data (Santri list) - filter by tahunMasuk already done in API
       var filtered = _alumniList.where((alumni) {
         final matchesSearch = searchQuery.isEmpty ||
             alumni.nama.toLowerCase().contains(searchQuery.toLowerCase()) ||
             alumni.nisn.toLowerCase().contains(searchQuery.toLowerCase());
-
-        // Note: API Santri may not have tahun_lulus, so we'll skip year filter for API data
-        // final matchesYear = selectedYear == null || alumni.tahunLulus == selectedYear;
 
         return matchesSearch;
       }).toList();
@@ -193,12 +191,20 @@ class _AlumniScreenState extends State<AlumniScreen> {
   }
 
   List<String> get availableYears {
-    final years = alumniData
-        .map((alumni) => alumni['tahun_lulus'] as String)
-        .toSet()
-        .toList();
-    years.sort((a, b) => b.compareTo(a)); // Sort descending (newest first)
-    return years;
+    if (_usesFallback) {
+      final years = alumniData
+          .map((alumni) => alumni['tahun_lulus'] as String)
+          .toSet()
+          .toList();
+      years.sort((a, b) => b.compareTo(a)); // Sort descending (newest first)
+      return years;
+    } else {
+      // Get unique tahunMasuk from API data
+      final years =
+          _alumniList.map((alumni) => alumni.tahunMasuk).toSet().toList();
+      years.sort((a, b) => b.compareTo(a)); // Sort descending (newest first)
+      return years;
+    }
   }
 
   @override
@@ -400,7 +406,7 @@ class _AlumniScreenState extends State<AlumniScreen> {
           Row(
             children: [
               const Text(
-                'Filter Tahun Lulus:',
+                'Filter Angkatan:',
                 style: TextStyle(
                   fontSize: 16,
                   fontWeight: FontWeight.w500,
@@ -419,23 +425,26 @@ class _AlumniScreenState extends State<AlumniScreen> {
                   child: DropdownButtonHideUnderline(
                     child: DropdownButton<String>(
                       value: selectedYear,
-                      hint: const Text('Semua Tahun'),
+                      hint: const Text('Semua Angkatan'),
                       isExpanded: true,
                       items: [
                         const DropdownMenuItem<String>(
                           value: null,
-                          child: Text('Semua Tahun'),
+                          child: Text('Semua Angkatan'),
                         ),
                         ...availableYears
                             .map((year) => DropdownMenuItem<String>(
                                   value: year,
-                                  child: Text('Lulus $year'),
+                                  child: Text('Angkatan $year'),
                                 )),
                       ],
                       onChanged: (value) {
                         setState(() {
                           selectedYear = value;
                         });
+                        if (!_usesFallback) {
+                          _fetchAlumniData(tahunMasuk: value);
+                        }
                       },
                     ),
                   ),
@@ -450,7 +459,7 @@ class _AlumniScreenState extends State<AlumniScreen> {
 
   Widget _buildAlumniCount() {
     final count = filteredAlumni.length;
-    final totalCount = alumniData.length;
+    final totalCount = _usesFallback ? alumniData.length : _alumniList.length;
 
     return Container(
       margin: const EdgeInsets.symmetric(horizontal: 20, vertical: 10),
@@ -496,7 +505,7 @@ class _AlumniScreenState extends State<AlumniScreen> {
               crossAxisAlignment: CrossAxisAlignment.end,
               children: [
                 const Text(
-                  'Lulus Tahun',
+                  'Angkatan',
                   style: TextStyle(
                     color: Colors.white70,
                     fontSize: 14,
@@ -595,112 +604,449 @@ class _AlumniScreenState extends State<AlumniScreen> {
     // Handle both Santri model and Map (fallback data)
     final String nama = alumni is Santri ? alumni.nama : alumni['nama'];
     final String? nisn = alumni is Santri ? alumni.nisn : alumni['nisn'];
-    final String? tahunLulus = alumni is Santri ? null : alumni['tahun_lulus'];
-    final String? kelasAkhir =
-        alumni is Santri ? null : alumni['kelas_terakhir'];
+    final String? tahunMasuk =
+        alumni is Santri ? alumni.tahunMasuk : alumni['tahun_masuk'] ?? '2020';
+    final String? tahunLulus =
+        alumni is Santri ? alumni.tahunLulus : alumni['tahun_lulus'];
 
-    return Container(
-      margin: const EdgeInsets.only(bottom: 15),
-      decoration: BoxDecoration(
-        color: Colors.white,
-        borderRadius: BorderRadius.circular(15),
-        boxShadow: [
-          BoxShadow(
-            color: Colors.grey.withOpacity(0.1),
-            spreadRadius: 0,
-            blurRadius: 10,
-            offset: const Offset(0, 5),
-          ),
-        ],
-        border: Border.all(color: Colors.grey.shade200),
-      ),
-      child: ExpansionTile(
-        tilePadding: const EdgeInsets.symmetric(horizontal: 20, vertical: 5),
-        childrenPadding: const EdgeInsets.all(20),
-        leading: CircleAvatar(
-          backgroundColor: AppColors.lightGreen,
-          child: Text(
-            nama[0],
-            style: TextStyle(
-              color: AppColors.darkGreen,
-              fontWeight: FontWeight.bold,
+    return GestureDetector(
+      onTap: () {
+        if (alumni is Santri) {
+          _showAlumniDetailFromModel(alumni);
+        } else {
+          _showAlumniDetailFromMap(alumni);
+        }
+      },
+      child: Container(
+        margin: const EdgeInsets.only(bottom: 15),
+        decoration: BoxDecoration(
+          color: Colors.white,
+          borderRadius: BorderRadius.circular(15),
+          boxShadow: [
+            BoxShadow(
+              color: Colors.grey.withOpacity(0.1),
+              spreadRadius: 0,
+              blurRadius: 10,
+              offset: const Offset(0, 5),
             ),
-          ),
+          ],
+          border: Border.all(color: Colors.grey.shade200),
         ),
-        title: Text(
-          nama,
-          style: const TextStyle(
-            fontWeight: FontWeight.bold,
-            fontSize: 16,
-          ),
-        ),
-        subtitle: Column(
-          crossAxisAlignment: CrossAxisAlignment.start,
-          children: [
-            const SizedBox(height: 5),
-            Text(
-              'NISN: ${nisn ?? '-'}',
-              style: const TextStyle(
-                color: Colors.grey,
-                fontSize: 12,
+        child: Padding(
+          padding: const EdgeInsets.all(15),
+          child: Row(
+            children: [
+              CircleAvatar(
+                radius: 30,
+                backgroundColor: AppColors.lightGreen,
+                child: Text(
+                  nama[0],
+                  style: TextStyle(
+                    color: AppColors.darkGreen,
+                    fontWeight: FontWeight.bold,
+                    fontSize: 24,
+                  ),
+                ),
               ),
-            ),
-            const SizedBox(height: 2),
-            if (tahunLulus != null)
-              Row(
-                children: [
-                  Container(
-                    padding:
-                        const EdgeInsets.symmetric(horizontal: 8, vertical: 2),
-                    decoration: BoxDecoration(
-                      color: AppColors.lightGreen.withOpacity(0.3),
-                      borderRadius: BorderRadius.circular(10),
+              const SizedBox(width: 15),
+              Expanded(
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    Text(
+                      nama,
+                      style: const TextStyle(
+                        fontWeight: FontWeight.bold,
+                        fontSize: 16,
+                      ),
+                      maxLines: 2,
+                      overflow: TextOverflow.ellipsis,
                     ),
-                    child: Text(
-                      'Lulus ${tahunLulus}',
-                      style: TextStyle(
-                        color: AppColors.darkGreen,
-                        fontSize: 11,
-                        fontWeight: FontWeight.w500,
+                    const SizedBox(height: 5),
+                    Text(
+                      'NISN: ${nisn ?? '-'}',
+                      style: const TextStyle(
+                        color: Colors.grey,
+                        fontSize: 12,
                       ),
                     ),
-                  ),
-                  const SizedBox(width: 8),
-                  Text(
-                    kelasAkhir ?? '-',
-                    style: const TextStyle(
-                      color: Colors.grey,
-                      fontSize: 11,
+                    const SizedBox(height: 8),
+                    Row(
+                      children: [
+                        Container(
+                          padding: const EdgeInsets.symmetric(
+                              horizontal: 8, vertical: 4),
+                          decoration: BoxDecoration(
+                            color: Colors.blue.shade50,
+                            borderRadius: BorderRadius.circular(8),
+                          ),
+                          child: Row(
+                            mainAxisSize: MainAxisSize.min,
+                            children: [
+                              Icon(Icons.school,
+                                  size: 12, color: Colors.blue.shade700),
+                              const SizedBox(width: 4),
+                              Text(
+                                'Angkatan $tahunMasuk',
+                                style: TextStyle(
+                                  color: Colors.blue.shade700,
+                                  fontSize: 11,
+                                  fontWeight: FontWeight.w600,
+                                ),
+                              ),
+                            ],
+                          ),
+                        ),
+                        if (tahunLulus != null) ...[
+                          const SizedBox(width: 8),
+                          Container(
+                            padding: const EdgeInsets.symmetric(
+                                horizontal: 8, vertical: 4),
+                            decoration: BoxDecoration(
+                              color: AppColors.lightGreen.withOpacity(0.3),
+                              borderRadius: BorderRadius.circular(8),
+                            ),
+                            child: Text(
+                              'Lulus $tahunLulus',
+                              style: TextStyle(
+                                color: AppColors.darkGreen,
+                                fontSize: 11,
+                                fontWeight: FontWeight.w500,
+                              ),
+                            ),
+                          ),
+                        ],
+                      ],
                     ),
-                  ),
-                ],
+                  ],
+                ),
               ),
-          ],
+              Icon(Icons.chevron_right, color: Colors.grey.shade400),
+            ],
+          ),
         ),
-        children: [
-          _buildDetailInfo('Tempat, Tanggal Lahir',
-              '${alumni['tempat_lahir']}, ${alumni['tanggal_lahir']}'),
-          _buildDetailInfo('Alamat', alumni['alamat']),
-          _buildDetailInfo('Pekerjaan Saat Ini', alumni['pekerjaan']),
-          _buildDetailInfo('Institusi/Perusahaan', alumni['institusi']),
-        ],
       ),
     );
   }
 
-  Widget _buildDetailInfo(String label, String value) {
+  String _formatDateString(String dateString) {
+    try {
+      final date = DateTime.parse(dateString);
+      final monthNames = [
+        'Januari',
+        'Februari',
+        'Maret',
+        'April',
+        'Mei',
+        'Juni',
+        'Juli',
+        'Agustus',
+        'September',
+        'Oktober',
+        'November',
+        'Desember'
+      ];
+      return '${date.day} ${monthNames[date.month - 1]} ${date.year}';
+    } catch (e) {
+      return dateString;
+    }
+  }
+
+  void _showAlumniDetailFromModel(Santri alumni) {
+    showDialog(
+      context: context,
+      barrierColor: Colors.black.withOpacity(0.7),
+      builder: (BuildContext context) {
+        return Dialog(
+          backgroundColor: Colors.transparent,
+          child: Container(
+            width: MediaQuery.of(context).size.width * 0.9,
+            height: MediaQuery.of(context).size.height * 0.8,
+            decoration: BoxDecoration(
+              color: Colors.white,
+              borderRadius: BorderRadius.circular(16),
+              boxShadow: [
+                BoxShadow(
+                  color: Colors.black.withOpacity(0.3),
+                  blurRadius: 20,
+                  offset: const Offset(0, 10),
+                ),
+              ],
+            ),
+            child: Column(
+              children: [
+                // Header
+                Container(
+                  padding: const EdgeInsets.all(20),
+                  decoration: BoxDecoration(
+                    color: AppColors.primaryGreen,
+                    borderRadius: const BorderRadius.only(
+                      topLeft: Radius.circular(16),
+                      topRight: Radius.circular(16),
+                    ),
+                  ),
+                  child: Row(
+                    children: [
+                      CircleAvatar(
+                        radius: 30,
+                        backgroundColor: Colors.white,
+                        child: Icon(
+                          Icons.school,
+                          color: AppColors.primaryGreen,
+                          size: 30,
+                        ),
+                      ),
+                      const SizedBox(width: 15),
+                      Expanded(
+                        child: Column(
+                          crossAxisAlignment: CrossAxisAlignment.start,
+                          children: [
+                            const Text(
+                              'Detail Alumni',
+                              style: TextStyle(
+                                color: Colors.white,
+                                fontSize: 18,
+                                fontWeight: FontWeight.bold,
+                              ),
+                            ),
+                            Text(
+                              'Angkatan ${alumni.tahunMasuk}',
+                              style: TextStyle(
+                                color: Colors.white.withOpacity(0.9),
+                                fontSize: 14,
+                              ),
+                            ),
+                          ],
+                        ),
+                      ),
+                      IconButton(
+                        onPressed: () => Navigator.of(context).pop(),
+                        icon: const Icon(Icons.close, color: Colors.white),
+                      ),
+                    ],
+                  ),
+                ),
+                // Content
+                Expanded(
+                  child: SingleChildScrollView(
+                    padding: const EdgeInsets.all(20),
+                    child: Column(
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      children: [
+                        // Data Pribadi
+                        _buildDetailSection('Data Pribadi', [
+                          _buildDetailRow('Nama Lengkap', alumni.nama),
+                          _buildDetailRow('NISN', alumni.nisn),
+                          _buildDetailRow('Jenis Kelamin',
+                              alumni.gender == 'L' ? 'Laki-laki' : 'Perempuan'),
+                          _buildDetailRow('Tempat, Tanggal Lahir',
+                              '${alumni.tempatLahir}, ${_formatDateString(alumni.tanggalLahir)}'),
+                        ]),
+                        const SizedBox(height: 20),
+                        // Data Orang Tua
+                        _buildDetailSection('Data Orang Tua', [
+                          _buildDetailRow('Nama Ayah', alumni.namaAyah),
+                          _buildDetailRow('Nama Ibu', alumni.namaIbu),
+                        ]),
+                        const SizedBox(height: 20),
+                        // Alamat
+                        _buildDetailSection('Alamat', [
+                          _buildDetailRow('Kelurahan', alumni.kelurahan),
+                          _buildDetailRow('Kecamatan', alumni.kecamatan),
+                          _buildDetailRow('Kota', alumni.kota),
+                        ]),
+                        const SizedBox(height: 20),
+                        // Data Alumni
+                        _buildDetailSection('Data Alumni', [
+                          _buildDetailRow('Tahun Masuk', alumni.tahunMasuk),
+                          if (alumni.tahunLulus != null)
+                            _buildDetailRow('Tahun Lulus', alumni.tahunLulus!),
+                          if (alumni.kelasAktif != null)
+                            _buildDetailRow(
+                                'Kelas Terakhir', alumni.kelasAktif!),
+                          if (alumni.nomorIjazah != null)
+                            _buildDetailRow(
+                                'Nomor Ijazah', alumni.nomorIjazah!),
+                          if (alumni.tahunIjazah != null)
+                            _buildDetailRow(
+                                'Tahun Ijazah', alumni.tahunIjazah!),
+                        ]),
+                      ],
+                    ),
+                  ),
+                ),
+              ],
+            ),
+          ),
+        );
+      },
+    );
+  }
+
+  void _showAlumniDetailFromMap(Map<String, dynamic> alumni) {
+    showDialog(
+      context: context,
+      barrierColor: Colors.black.withOpacity(0.7),
+      builder: (BuildContext context) {
+        return Dialog(
+          backgroundColor: Colors.transparent,
+          child: Container(
+            width: MediaQuery.of(context).size.width * 0.9,
+            height: MediaQuery.of(context).size.height * 0.8,
+            decoration: BoxDecoration(
+              color: Colors.white,
+              borderRadius: BorderRadius.circular(16),
+              boxShadow: [
+                BoxShadow(
+                  color: Colors.black.withOpacity(0.3),
+                  blurRadius: 20,
+                  offset: const Offset(0, 10),
+                ),
+              ],
+            ),
+            child: Column(
+              children: [
+                // Header
+                Container(
+                  padding: const EdgeInsets.all(20),
+                  decoration: BoxDecoration(
+                    color: AppColors.primaryGreen,
+                    borderRadius: const BorderRadius.only(
+                      topLeft: Radius.circular(16),
+                      topRight: Radius.circular(16),
+                    ),
+                  ),
+                  child: Row(
+                    children: [
+                      CircleAvatar(
+                        radius: 30,
+                        backgroundColor: Colors.white,
+                        child: Icon(
+                          Icons.school,
+                          color: AppColors.primaryGreen,
+                          size: 30,
+                        ),
+                      ),
+                      const SizedBox(width: 15),
+                      Expanded(
+                        child: Column(
+                          crossAxisAlignment: CrossAxisAlignment.start,
+                          children: [
+                            const Text(
+                              'Detail Alumni',
+                              style: TextStyle(
+                                color: Colors.white,
+                                fontSize: 18,
+                                fontWeight: FontWeight.bold,
+                              ),
+                            ),
+                            Text(
+                              alumni['kelas_terakhir'] ?? '-',
+                              style: TextStyle(
+                                color: Colors.white.withOpacity(0.9),
+                                fontSize: 14,
+                              ),
+                            ),
+                          ],
+                        ),
+                      ),
+                      IconButton(
+                        onPressed: () => Navigator.of(context).pop(),
+                        icon: const Icon(Icons.close, color: Colors.white),
+                      ),
+                    ],
+                  ),
+                ),
+                // Content
+                Expanded(
+                  child: SingleChildScrollView(
+                    padding: const EdgeInsets.all(20),
+                    child: Column(
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      children: [
+                        // Data Pribadi
+                        _buildDetailSection('Data Pribadi', [
+                          _buildDetailRow('Nama Lengkap', alumni['nama']),
+                          _buildDetailRow('NISN', alumni['nisn']),
+                          _buildDetailRow('Tempat, Tanggal Lahir',
+                              '${alumni['tempat_lahir']}, ${alumni['tanggal_lahir']}'),
+                        ]),
+                        const SizedBox(height: 20),
+                        // Alamat
+                        _buildDetailSection('Alamat', [
+                          _buildDetailRow('Alamat', alumni['alamat']),
+                        ]),
+                        const SizedBox(height: 20),
+                        // Data Alumni
+                        _buildDetailSection('Data Alumni', [
+                          _buildDetailRow(
+                              'Tahun Lulus', alumni['tahun_lulus'] ?? '-'),
+                          _buildDetailRow('Kelas Terakhir',
+                              alumni['kelas_terakhir'] ?? '-'),
+                        ]),
+                        const SizedBox(height: 20),
+                        // Karir
+                        _buildDetailSection('Karir', [
+                          _buildDetailRow(
+                              'Pekerjaan Saat Ini', alumni['pekerjaan'] ?? '-'),
+                          _buildDetailRow('Institusi/Perusahaan',
+                              alumni['institusi'] ?? '-'),
+                        ]),
+                      ],
+                    ),
+                  ),
+                ),
+              ],
+            ),
+          ),
+        );
+      },
+    );
+  }
+
+  Widget _buildDetailSection(String title, List<Widget> children) {
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [
+        Text(
+          title,
+          style: TextStyle(
+            fontSize: 16,
+            fontWeight: FontWeight.bold,
+            color: AppColors.primaryGreen,
+          ),
+        ),
+        const SizedBox(height: 12),
+        Container(
+          width: double.infinity,
+          padding: const EdgeInsets.all(15),
+          decoration: BoxDecoration(
+            color: Colors.grey.shade50,
+            borderRadius: BorderRadius.circular(10),
+            border: Border.all(color: Colors.grey.shade200),
+          ),
+          child: Column(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: children,
+          ),
+        ),
+      ],
+    );
+  }
+
+  Widget _buildDetailRow(String label, String value) {
     return Padding(
       padding: const EdgeInsets.only(bottom: 12),
       child: Row(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
           SizedBox(
-            width: 120,
+            width: 140,
             child: Text(
               label,
               style: TextStyle(
-                color: Colors.grey.shade600,
-                fontSize: 12,
+                color: Colors.grey.shade700,
+                fontSize: 13,
                 fontWeight: FontWeight.w500,
               ),
             ),
@@ -710,8 +1056,9 @@ class _AlumniScreenState extends State<AlumniScreen> {
             child: Text(
               value,
               style: const TextStyle(
-                fontSize: 12,
-                fontWeight: FontWeight.w500,
+                fontSize: 13,
+                fontWeight: FontWeight.w600,
+                color: Colors.black87,
               ),
             ),
           ),

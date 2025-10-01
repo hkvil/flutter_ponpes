@@ -5,8 +5,8 @@ import 'package:pesantren_app/models/lembaga_model.dart';
 class LembagaRepository {
   final Dio _dio = Dio(
     BaseOptions(
-      connectTimeout: const Duration(seconds: 10),
-      receiveTimeout: const Duration(seconds: 10),
+      connectTimeout: const Duration(seconds: 15),
+      receiveTimeout: const Duration(seconds: 15),
     ),
   );
 
@@ -45,10 +45,6 @@ class LembagaRepository {
     final apiHost = dotenv.env['API_HOST'] ?? '';
     final apiToken = dotenv.env['API_TOKEN_READONLY'] ?? '';
 
-    print('🔧 [LEMBAGA_API] API Host: $apiHost');
-    print(
-        '🔧 [LEMBAGA_API] API Token: ${apiToken.isNotEmpty ? "Present (${apiToken.length} chars)" : "Missing"}');
-
     try {
       // Strapi v5 dengan plugin: populate=all untuk mendapatkan semua field termasuk deep populate
       final response = await _dio.get(
@@ -67,9 +63,6 @@ class LembagaRepository {
 
       print(
           '🔧 [API_DEBUG] URL called with populate=all (plugin untuk deep populate)');
-
-      // Print URL untuk debugging
-      print('🌐 Final URL: ${response.realUri}');
 
       // ===== API RESPONSE TRACKING =====
       print('\n✅ [LEMBAGA_API] Response received');

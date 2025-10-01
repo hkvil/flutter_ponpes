@@ -1,5 +1,12 @@
 import 'package:flutter/material.dart';
 import '../core/theme/app_colors.dart';
+import '../core/utils/menu_slug_mapper.dart';
+import '../repository/staff_repository.dart';
+import '../repository/kehadiran_repository.dart';
+import '../models/staff.dart';
+import '../models/kehadiran_guru.dart';
+import '../data/fallback/staff_fallback.dart';
+import '../data/fallback/kehadiran_fallback.dart';
 
 class StaffScreen extends StatefulWidget {
   final String title;
@@ -18,11 +25,21 @@ class StaffScreen extends StatefulWidget {
 class _StaffScreenState extends State<StaffScreen>
     with TickerProviderStateMixin {
   late TabController _tabController;
+  bool _kehadiranTabInitialized = false;
 
   @override
   void initState() {
     super.initState();
     _tabController = TabController(length: 2, vsync: this);
+
+    // Listen to tab changes to lazy-load second tab
+    _tabController.addListener(() {
+      if (_tabController.index == 1 && !_kehadiranTabInitialized) {
+        _kehadiranTabInitialized = true;
+        // Trigger rebuild so Kehadiran tab can initialize
+        setState(() {});
+      }
+    });
   }
 
   @override
@@ -80,8 +97,116 @@ class DaftarStaffTab extends StatefulWidget {
 }
 
 class _DaftarStaffTabState extends State<DaftarStaffTab> {
+  final StaffRepository _staffRepo = StaffRepository();
+
+  bool _isLoading = true;
+  String? _errorMessage;
+  List<Staff> _staffList = [];
+  bool _usesFallback = false;
+
   String searchQuery = '';
   final TextEditingController _searchController = TextEditingController();
+
+  @override
+  void initState() {
+    super.initState();
+    _fetchStaffData();
+  }
+
+  Future<void> _fetchStaffData() async {
+    setState(() {
+      _isLoading = true;
+      _errorMessage = null;
+    });
+
+    try {
+      final slug = _getLembagaSlug(widget.lembagaName);
+      final staffList = await _staffRepo.getStaffByLembaga(slug);
+
+      setState(() {
+        _staffList = staffList;
+        _usesFallback = false;
+        _isLoading = false;
+      });
+    } catch (e) {
+      print('Error fetching staff: $e');
+      // Use fallback data
+      setState(() {
+        _staffList =
+            fallbackStaffData.map((json) => Staff.fromJson(json)).toList();
+        _usesFallback = true;
+        _errorMessage = 'Using offline data';
+        _isLoading = false;
+      });
+    }
+  }
+
+  String _getLembagaSlug(String? lembagaName) {
+    if (lembagaName == null) return '';
+
+    final slug = MenuSlugMapper.getSlugByMenuTitle(lembagaName);
+    return slug ?? ''; // Return empty string if no mapping found
+  }
+
+  Widget _buildStaffCard(dynamic staffData) {
+    // Handle both API Staff object and fallback Map
+    final String nama = staffData is Staff ? staffData.nama : staffData['nama'];
+    final String subtitle = staffData is Staff
+        ? staffData.kategoriPersonil
+        : staffData['subtitle'] ?? 'Staff';
+    final String? avatarUrl = staffData is Staff ? null : staffData['avatar'];
+
+    return Container(
+      margin: const EdgeInsets.only(bottom: 12),
+      decoration: BoxDecoration(
+        color: Colors.white,
+        borderRadius: BorderRadius.circular(12),
+        boxShadow: [
+          BoxShadow(
+            color: Colors.black.withOpacity(0.05),
+            blurRadius: 8,
+            offset: const Offset(0, 2),
+          ),
+        ],
+      ),
+      child: ListTile(
+        contentPadding: const EdgeInsets.all(16),
+        leading: CircleAvatar(
+          radius: 30,
+          backgroundImage: avatarUrl != null ? NetworkImage(avatarUrl) : null,
+          child: avatarUrl == null
+              ? Icon(
+                  Icons.person,
+                  color: Colors.grey.shade400,
+                  size: 30,
+                )
+              : null,
+        ),
+        title: Text(
+          nama,
+          style: const TextStyle(
+            fontWeight: FontWeight.bold,
+            fontSize: 14,
+          ),
+        ),
+        subtitle: Text(
+          subtitle,
+          style: const TextStyle(fontSize: 12),
+        ),
+        trailing: const Icon(Icons.chevron_right, color: Colors.grey),
+        onTap: () {
+          if (staffData is Map<String, dynamic>) {
+            _showStaffDetail(staffData);
+          } else {
+            // For Staff model from API, we'll use showStaffDetail or show snackbar
+            ScaffoldMessenger.of(context).showSnackBar(
+              SnackBar(content: Text('Detail for ${staffData.nama}')),
+            );
+          }
+        },
+      ),
+    );
+  }
 
   // Data static Staff
   final List<Map<String, dynamic>> staffData = [
@@ -175,26 +300,36 @@ class _DaftarStaffTabState extends State<DaftarStaffTab> {
     },
   ];
 
-  List<Map<String, dynamic>> get filteredStaff {
+  List<dynamic> get filteredStaff {
     if (searchQuery.isEmpty) {
-      return staffData;
+      return _usesFallback ? staffData : _staffList;
     }
 
-    return staffData
-        .where((staff) =>
-            staff['nama']
-                .toString()
-                .toLowerCase()
-                .contains(searchQuery.toLowerCase()) ||
-            staff['subtitle']
-                .toString()
-                .toLowerCase()
-                .contains(searchQuery.toLowerCase()) ||
-            staff['kategoriPersonil']
-                .toString()
-                .toLowerCase()
-                .contains(searchQuery.toLowerCase()))
-        .toList();
+    if (_usesFallback) {
+      return staffData
+          .where((staff) =>
+              staff['nama']
+                  .toString()
+                  .toLowerCase()
+                  .contains(searchQuery.toLowerCase()) ||
+              staff['subtitle']
+                  .toString()
+                  .toLowerCase()
+                  .contains(searchQuery.toLowerCase()) ||
+              staff['kategoriPersonil']
+                  .toString()
+                  .toLowerCase()
+                  .contains(searchQuery.toLowerCase()))
+          .toList();
+    } else {
+      return _staffList
+          .where((staff) =>
+              staff.nama.toLowerCase().contains(searchQuery.toLowerCase()) ||
+              staff.kategoriPersonil
+                  .toLowerCase()
+                  .contains(searchQuery.toLowerCase()))
+          .toList();
+    }
   }
 
   @override
@@ -360,8 +495,36 @@ class _DaftarStaffTabState extends State<DaftarStaffTab> {
 
   @override
   Widget build(BuildContext context) {
+    if (_isLoading) {
+      return const Center(
+        child: CircularProgressIndicator(),
+      );
+    }
+
     return Column(
       children: [
+        if (_errorMessage != null)
+          Container(
+            width: double.infinity,
+            padding: const EdgeInsets.all(12),
+            color: Colors.orange.shade100,
+            child: Row(
+              children: [
+                Icon(Icons.info_outline,
+                    color: Colors.orange.shade700, size: 20),
+                const SizedBox(width: 8),
+                Expanded(
+                  child: Text(
+                    _errorMessage!,
+                    style:
+                        TextStyle(color: Colors.orange.shade900, fontSize: 12),
+                    maxLines: 2,
+                    overflow: TextOverflow.ellipsis,
+                  ),
+                ),
+              ],
+            ),
+          ),
         Container(
           width: double.infinity,
           decoration: BoxDecoration(
@@ -550,88 +713,16 @@ class _DaftarStaffTabState extends State<DaftarStaffTab> {
                             style: TextStyle(color: Colors.grey, fontSize: 16),
                           ),
                         )
-                      : ListView.builder(
-                          padding: const EdgeInsets.all(20),
-                          itemCount: filteredStaff.length,
-                          itemBuilder: (context, index) {
-                            final staff = filteredStaff[index];
-                            return Container(
-                              margin: const EdgeInsets.only(bottom: 12),
-                              decoration: BoxDecoration(
-                                color: Colors.white,
-                                borderRadius: BorderRadius.circular(12),
-                                boxShadow: [
-                                  BoxShadow(
-                                    color: Colors.black.withOpacity(0.05),
-                                    blurRadius: 8,
-                                    offset: const Offset(0, 2),
-                                  ),
-                                ],
-                              ),
-                              child: ListTile(
-                                contentPadding: const EdgeInsets.all(16),
-                                leading: CircleAvatar(
-                                  radius: 30,
-                                  backgroundImage:
-                                      NetworkImage(staff['avatar']),
-                                  child: staff['avatar'] == null
-                                      ? Icon(
-                                          Icons.person,
-                                          color: Colors.grey.shade400,
-                                          size: 30,
-                                        )
-                                      : null,
-                                ),
-                                title: Text(
-                                  staff['nama'],
-                                  style: const TextStyle(
-                                    fontWeight: FontWeight.bold,
-                                    fontSize: 14,
-                                  ),
-                                ),
-                                subtitle: Column(
-                                  crossAxisAlignment: CrossAxisAlignment.start,
-                                  children: [
-                                    Text(
-                                      staff['subtitle'],
-                                      style: TextStyle(
-                                        color: Colors.grey.shade600,
-                                        fontSize: 12,
-                                      ),
-                                    ),
-                                    const SizedBox(height: 4),
-                                    Text(
-                                      staff['kategoriPersonil'],
-                                      style: TextStyle(
-                                        color: Colors.blue.shade600,
-                                        fontSize: 11,
-                                        fontWeight: FontWeight.w500,
-                                      ),
-                                    ),
-                                  ],
-                                ),
-                                trailing: Container(
-                                  padding: const EdgeInsets.symmetric(
-                                      horizontal: 8, vertical: 4),
-                                  decoration: BoxDecoration(
-                                    color: staff['aktif']
-                                        ? AppColors.primaryGreen
-                                        : Colors.red,
-                                    borderRadius: BorderRadius.circular(12),
-                                  ),
-                                  child: Text(
-                                    staff['aktif'] ? 'Aktif' : 'Non-Aktif',
-                                    style: const TextStyle(
-                                      color: Colors.white,
-                                      fontSize: 10,
-                                      fontWeight: FontWeight.bold,
-                                    ),
-                                  ),
-                                ),
-                                onTap: () => _showStaffDetail(staff),
-                              ),
-                            );
-                          },
+                      : RefreshIndicator(
+                          onRefresh: _fetchStaffData,
+                          child: ListView.builder(
+                            padding: const EdgeInsets.all(20),
+                            itemCount: filteredStaff.length,
+                            itemBuilder: (context, index) {
+                              final staff = filteredStaff[index];
+                              return _buildStaffCard(staff);
+                            },
+                          ),
                         ),
                 ),
               ),
@@ -710,8 +801,57 @@ class KehadiranStaffTab extends StatefulWidget {
 }
 
 class _KehadiranStaffTabState extends State<KehadiranStaffTab> {
+  final KehadiranRepository _kehadiranRepo = KehadiranRepository();
+
+  bool _isLoading = true;
+  String? _errorMessage;
+  List<KehadiranGuru> _kehadiranList = [];
+  bool _usesFallback = false;
+
   DateTime? startDate;
   DateTime? endDate;
+
+  @override
+  void initState() {
+    super.initState();
+    _fetchKehadiranData();
+  }
+
+  Future<void> _fetchKehadiranData() async {
+    setState(() {
+      _isLoading = true;
+      _errorMessage = null;
+    });
+
+    try {
+      final slug = _getLembagaSlug(widget.lembagaName);
+      final kehadiranList =
+          await _kehadiranRepo.getKehadiranGuruByLembaga(slug);
+
+      setState(() {
+        _kehadiranList = kehadiranList;
+        _usesFallback = false;
+        _isLoading = false;
+      });
+    } catch (e) {
+      print('Error fetching kehadiran guru: $e');
+      setState(() {
+        _kehadiranList = fallbackKehadiranGuruData
+            .map((json) => KehadiranGuru.fromJson(json))
+            .toList();
+        _usesFallback = true;
+        _errorMessage = 'Using offline data';
+        _isLoading = false;
+      });
+    }
+  }
+
+  String _getLembagaSlug(String? lembagaName) {
+    if (lembagaName == null) return '';
+
+    final slug = MenuSlugMapper.getSlugByMenuTitle(lembagaName);
+    return slug ?? ''; // Return empty string if no mapping found
+  }
 
   // Data static kehadiran staff
   final List<Map<String, dynamic>> kehadiranData = [
@@ -781,16 +921,29 @@ class _KehadiranStaffTabState extends State<KehadiranStaffTab> {
     },
   ];
 
-  List<Map<String, dynamic>> get filteredKehadiran {
-    if (startDate == null || endDate == null) {
-      return kehadiranData;
-    }
+  List<dynamic> get filteredKehadiran {
+    if (_usesFallback) {
+      if (startDate == null || endDate == null) {
+        return kehadiranData;
+      }
 
-    return kehadiranData.where((kehadiran) {
-      final tanggal = kehadiran['tanggalObj'] as DateTime;
-      return tanggal.isAfter(startDate!.subtract(const Duration(days: 1))) &&
-          tanggal.isBefore(endDate!.add(const Duration(days: 1)));
-    }).toList();
+      return kehadiranData.where((kehadiran) {
+        final tanggal = kehadiran['tanggalObj'] as DateTime;
+        return tanggal.isAfter(startDate!.subtract(const Duration(days: 1))) &&
+            tanggal.isBefore(endDate!.add(const Duration(days: 1)));
+      }).toList();
+    } else {
+      // Using API data
+      if (startDate == null || endDate == null) {
+        return _kehadiranList;
+      }
+
+      return _kehadiranList.where((kehadiran) {
+        final tanggal = DateTime.parse(kehadiran.tanggal);
+        return tanggal.isAfter(startDate!.subtract(const Duration(days: 1))) &&
+            tanggal.isBefore(endDate!.add(const Duration(days: 1)));
+      }).toList();
+    }
   }
 
   Future<void> _selectDateRange() async {
@@ -873,10 +1026,36 @@ class _KehadiranStaffTabState extends State<KehadiranStaffTab> {
 
   @override
   Widget build(BuildContext context) {
+    if (_isLoading) {
+      return const Center(child: CircularProgressIndicator());
+    }
+
     return Container(
       color: Colors.grey.shade50,
       child: Column(
         children: [
+          if (_errorMessage != null)
+            Container(
+              width: double.infinity,
+              padding: const EdgeInsets.all(12),
+              color: Colors.orange.shade100,
+              child: Row(
+                children: [
+                  Icon(Icons.info_outline,
+                      color: Colors.orange.shade700, size: 20),
+                  const SizedBox(width: 8),
+                  Expanded(
+                    child: Text(
+                      _errorMessage!,
+                      style: TextStyle(
+                          color: Colors.orange.shade900, fontSize: 12),
+                      maxLines: 2,
+                      overflow: TextOverflow.ellipsis,
+                    ),
+                  ),
+                ],
+              ),
+            ),
           Container(
             width: double.infinity,
             decoration: BoxDecoration(
@@ -1019,98 +1198,101 @@ class _KehadiranStaffTabState extends State<KehadiranStaffTab> {
               ),
             ),
           Expanded(
-            child: ListView.builder(
-              padding: const EdgeInsets.all(20),
-              itemCount: filteredKehadiran.length,
-              itemBuilder: (context, index) {
-                final kehadiran = filteredKehadiran[index];
-                return Container(
-                  margin: const EdgeInsets.only(bottom: 12),
-                  decoration: BoxDecoration(
-                    color: Colors.white,
-                    borderRadius: BorderRadius.circular(12),
-                    boxShadow: [
-                      BoxShadow(
-                        color: Colors.black.withOpacity(0.05),
-                        blurRadius: 8,
-                        offset: const Offset(0, 2),
-                      ),
-                    ],
-                  ),
-                  child: ListTile(
-                    contentPadding: const EdgeInsets.all(16),
-                    leading: Stack(
-                      children: [
-                        CircleAvatar(
-                          radius: 25,
-                          backgroundImage: NetworkImage(kehadiran['avatar']),
-                        ),
-                        Positioned(
-                          right: -2,
-                          bottom: -2,
-                          child: Container(
-                            padding: const EdgeInsets.all(2),
-                            decoration: BoxDecoration(
-                              color: Colors.white,
-                              shape: BoxShape.circle,
-                              border: Border.all(color: Colors.grey.shade200),
-                            ),
-                            child: Icon(
-                              _getJenisIcon(kehadiran['jenis']),
-                              color: _getJenisColor(kehadiran['jenis']),
-                              size: 16,
-                            ),
-                          ),
+            child: RefreshIndicator(
+              onRefresh: _fetchKehadiranData,
+              child: ListView.builder(
+                padding: const EdgeInsets.all(20),
+                itemCount: filteredKehadiran.length,
+                itemBuilder: (context, index) {
+                  final kehadiran = filteredKehadiran[index];
+                  return Container(
+                    margin: const EdgeInsets.only(bottom: 12),
+                    decoration: BoxDecoration(
+                      color: Colors.white,
+                      borderRadius: BorderRadius.circular(12),
+                      boxShadow: [
+                        BoxShadow(
+                          color: Colors.black.withOpacity(0.05),
+                          blurRadius: 8,
+                          offset: const Offset(0, 2),
                         ),
                       ],
                     ),
-                    title: Text(
-                      kehadiran['nama'],
-                      style: const TextStyle(
-                        fontWeight: FontWeight.bold,
-                        fontSize: 14,
-                      ),
-                    ),
-                    subtitle: Column(
-                      crossAxisAlignment: CrossAxisAlignment.start,
-                      children: [
-                        const SizedBox(height: 4),
-                        Text(
-                          kehadiran['tanggal'],
-                          style: TextStyle(
-                            color: Colors.grey.shade600,
-                            fontSize: 12,
+                    child: ListTile(
+                      contentPadding: const EdgeInsets.all(16),
+                      leading: Stack(
+                        children: [
+                          CircleAvatar(
+                            radius: 25,
+                            backgroundImage: NetworkImage(kehadiran['avatar']),
                           ),
-                        ),
-                        const SizedBox(height: 2),
-                        Text(
-                          kehadiran['keterangan'],
-                          style: TextStyle(
-                            color: Colors.grey.shade700,
-                            fontSize: 12,
+                          Positioned(
+                            right: -2,
+                            bottom: -2,
+                            child: Container(
+                              padding: const EdgeInsets.all(2),
+                              decoration: BoxDecoration(
+                                color: Colors.white,
+                                shape: BoxShape.circle,
+                                border: Border.all(color: Colors.grey.shade200),
+                              ),
+                              child: Icon(
+                                _getJenisIcon(kehadiran['jenis']),
+                                color: _getJenisColor(kehadiran['jenis']),
+                                size: 16,
+                              ),
+                            ),
                           ),
-                        ),
-                      ],
-                    ),
-                    trailing: Container(
-                      padding: const EdgeInsets.symmetric(
-                          horizontal: 8, vertical: 4),
-                      decoration: BoxDecoration(
-                        color: _getJenisColor(kehadiran['jenis']),
-                        borderRadius: BorderRadius.circular(12),
+                        ],
                       ),
-                      child: Text(
-                        kehadiran['jenis'],
+                      title: Text(
+                        kehadiran['nama'],
                         style: const TextStyle(
-                          color: Colors.white,
-                          fontSize: 10,
                           fontWeight: FontWeight.bold,
+                          fontSize: 14,
+                        ),
+                      ),
+                      subtitle: Column(
+                        crossAxisAlignment: CrossAxisAlignment.start,
+                        children: [
+                          const SizedBox(height: 4),
+                          Text(
+                            kehadiran['tanggal'],
+                            style: TextStyle(
+                              color: Colors.grey.shade600,
+                              fontSize: 12,
+                            ),
+                          ),
+                          const SizedBox(height: 2),
+                          Text(
+                            kehadiran['keterangan'],
+                            style: TextStyle(
+                              color: Colors.grey.shade700,
+                              fontSize: 12,
+                            ),
+                          ),
+                        ],
+                      ),
+                      trailing: Container(
+                        padding: const EdgeInsets.symmetric(
+                            horizontal: 8, vertical: 4),
+                        decoration: BoxDecoration(
+                          color: _getJenisColor(kehadiran['jenis']),
+                          borderRadius: BorderRadius.circular(12),
+                        ),
+                        child: Text(
+                          kehadiran['jenis'],
+                          style: const TextStyle(
+                            color: Colors.white,
+                            fontSize: 10,
+                            fontWeight: FontWeight.bold,
+                          ),
                         ),
                       ),
                     ),
-                  ),
-                );
-              },
+                  );
+                },
+              ),
             ),
           ),
         ],

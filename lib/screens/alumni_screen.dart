@@ -1,5 +1,9 @@
 import 'package:flutter/material.dart';
 import '../core/theme/app_colors.dart';
+import '../core/utils/menu_slug_mapper.dart';
+import '../repository/santri_repository.dart';
+import '../models/models.dart';
+import '../data/fallback/santri_fallback.dart';
 
 class AlumniScreen extends StatefulWidget {
   final String title;
@@ -16,9 +20,54 @@ class AlumniScreen extends StatefulWidget {
 }
 
 class _AlumniScreenState extends State<AlumniScreen> {
+  final SantriRepository _santriRepo = SantriRepository();
+
+  bool _isLoading = true;
+  String? _errorMessage;
+  List<Santri> _alumniList = [];
+  bool _usesFallback = false;
+
   String? selectedYear;
   String searchQuery = '';
   final TextEditingController _searchController = TextEditingController();
+
+  @override
+  void initState() {
+    super.initState();
+    _fetchAlumniData();
+  }
+
+  Future<void> _fetchAlumniData() async {
+    setState(() {
+      _isLoading = true;
+      _errorMessage = null;
+    });
+
+    try {
+      final slug = _getLembagaSlug(widget.lembagaName);
+      final alumniList = await _santriRepo.getAlumniByLembaga(slug);
+
+      setState(() {
+        _alumniList = alumniList;
+        _usesFallback = false;
+        _isLoading = false;
+      });
+    } catch (e) {
+      print('Error fetching alumni: $e');
+      setState(() {
+        _alumniList =
+            fallbackSantriData.map((json) => Santri.fromJson(json)).toList();
+        _usesFallback = true;
+        _errorMessage = 'Using offline data';
+        _isLoading = false;
+      });
+    }
+  }
+
+  String _getLembagaSlug(String lembagaName) {
+    final slug = MenuSlugMapper.getSlugByMenuTitle(lembagaName);
+    return slug ?? ''; // Return empty string if no mapping found
+  }
 
   // Static data alumni dengan tahun lulus
   final List<Map<String, dynamic>> alumniData = [
@@ -112,19 +161,35 @@ class _AlumniScreenState extends State<AlumniScreen> {
     },
   ];
 
-  List<Map<String, dynamic>> get filteredAlumni {
-    var filtered = alumniData.where((alumni) {
-      final matchesSearch = searchQuery.isEmpty ||
-          alumni['nama'].toLowerCase().contains(searchQuery.toLowerCase()) ||
-          alumni['nisn'].toLowerCase().contains(searchQuery.toLowerCase());
+  List<dynamic> get filteredAlumni {
+    if (_usesFallback) {
+      var filtered = alumniData.where((alumni) {
+        final matchesSearch = searchQuery.isEmpty ||
+            alumni['nama'].toLowerCase().contains(searchQuery.toLowerCase()) ||
+            alumni['nisn'].toLowerCase().contains(searchQuery.toLowerCase());
 
-      final matchesYear =
-          selectedYear == null || alumni['tahun_lulus'] == selectedYear;
+        final matchesYear =
+            selectedYear == null || alumni['tahun_lulus'] == selectedYear;
 
-      return matchesSearch && matchesYear;
-    }).toList();
+        return matchesSearch && matchesYear;
+      }).toList();
 
-    return filtered;
+      return filtered;
+    } else {
+      // Using API data (Santri list)
+      var filtered = _alumniList.where((alumni) {
+        final matchesSearch = searchQuery.isEmpty ||
+            alumni.nama.toLowerCase().contains(searchQuery.toLowerCase()) ||
+            alumni.nisn.toLowerCase().contains(searchQuery.toLowerCase());
+
+        // Note: API Santri may not have tahun_lulus, so we'll skip year filter for API data
+        // final matchesYear = selectedYear == null || alumni.tahunLulus == selectedYear;
+
+        return matchesSearch;
+      }).toList();
+
+      return filtered;
+    }
   }
 
   List<String> get availableYears {
@@ -144,10 +209,38 @@ class _AlumniScreenState extends State<AlumniScreen> {
 
   @override
   Widget build(BuildContext context) {
+    if (_isLoading) {
+      return const Scaffold(
+        body: Center(child: CircularProgressIndicator()),
+      );
+    }
+
     return Scaffold(
       backgroundColor: AppColors.primaryGreen,
       body: Column(
         children: [
+          if (_errorMessage != null)
+            Container(
+              width: double.infinity,
+              padding: const EdgeInsets.all(12),
+              color: Colors.orange.shade100,
+              child: Row(
+                children: [
+                  Icon(Icons.info_outline,
+                      color: Colors.orange.shade700, size: 20),
+                  const SizedBox(width: 8),
+                  Expanded(
+                    child: Text(
+                      _errorMessage!,
+                      style: TextStyle(
+                          color: Colors.orange.shade900, fontSize: 12),
+                      maxLines: 2,
+                      overflow: TextOverflow.ellipsis,
+                    ),
+                  ),
+                ],
+              ),
+            ),
           _buildHeader(),
           Expanded(
             child: Container(
@@ -451,12 +544,15 @@ class _AlumniScreenState extends State<AlumniScreen> {
           Expanded(
             child: filteredAlumni.isEmpty
                 ? _buildEmptyState()
-                : ListView.builder(
-                    itemCount: filteredAlumni.length,
-                    itemBuilder: (context, index) {
-                      final alumni = filteredAlumni[index];
-                      return _buildAlumniCard(alumni, index);
-                    },
+                : RefreshIndicator(
+                    onRefresh: _fetchAlumniData,
+                    child: ListView.builder(
+                      itemCount: filteredAlumni.length,
+                      itemBuilder: (context, index) {
+                        final alumni = filteredAlumni[index];
+                        return _buildAlumniCard(alumni, index);
+                      },
+                    ),
                   ),
           ),
         ],
@@ -495,7 +591,14 @@ class _AlumniScreenState extends State<AlumniScreen> {
     );
   }
 
-  Widget _buildAlumniCard(Map<String, dynamic> alumni, int index) {
+  Widget _buildAlumniCard(dynamic alumni, int index) {
+    // Handle both Santri model and Map (fallback data)
+    final String nama = alumni is Santri ? alumni.nama : alumni['nama'];
+    final String? nisn = alumni is Santri ? alumni.nisn : alumni['nisn'];
+    final String? tahunLulus = alumni is Santri ? null : alumni['tahun_lulus'];
+    final String? kelasAkhir =
+        alumni is Santri ? null : alumni['kelas_terakhir'];
+
     return Container(
       margin: const EdgeInsets.only(bottom: 15),
       decoration: BoxDecoration(
@@ -517,7 +620,7 @@ class _AlumniScreenState extends State<AlumniScreen> {
         leading: CircleAvatar(
           backgroundColor: AppColors.lightGreen,
           child: Text(
-            alumni['nama'][0],
+            nama[0],
             style: TextStyle(
               color: AppColors.darkGreen,
               fontWeight: FontWeight.bold,
@@ -525,7 +628,7 @@ class _AlumniScreenState extends State<AlumniScreen> {
           ),
         ),
         title: Text(
-          alumni['nama'],
+          nama,
           style: const TextStyle(
             fontWeight: FontWeight.bold,
             fontSize: 16,
@@ -536,41 +639,42 @@ class _AlumniScreenState extends State<AlumniScreen> {
           children: [
             const SizedBox(height: 5),
             Text(
-              'NISN: ${alumni['nisn']}',
+              'NISN: ${nisn ?? '-'}',
               style: const TextStyle(
                 color: Colors.grey,
                 fontSize: 12,
               ),
             ),
             const SizedBox(height: 2),
-            Row(
-              children: [
-                Container(
-                  padding:
-                      const EdgeInsets.symmetric(horizontal: 8, vertical: 2),
-                  decoration: BoxDecoration(
-                    color: AppColors.lightGreen.withOpacity(0.3),
-                    borderRadius: BorderRadius.circular(10),
-                  ),
-                  child: Text(
-                    'Lulus ${alumni['tahun_lulus']}',
-                    style: TextStyle(
-                      color: AppColors.darkGreen,
-                      fontSize: 11,
-                      fontWeight: FontWeight.w500,
+            if (tahunLulus != null)
+              Row(
+                children: [
+                  Container(
+                    padding:
+                        const EdgeInsets.symmetric(horizontal: 8, vertical: 2),
+                    decoration: BoxDecoration(
+                      color: AppColors.lightGreen.withOpacity(0.3),
+                      borderRadius: BorderRadius.circular(10),
+                    ),
+                    child: Text(
+                      'Lulus ${tahunLulus}',
+                      style: TextStyle(
+                        color: AppColors.darkGreen,
+                        fontSize: 11,
+                        fontWeight: FontWeight.w500,
+                      ),
                     ),
                   ),
-                ),
-                const SizedBox(width: 8),
-                Text(
-                  alumni['kelas_terakhir'],
-                  style: const TextStyle(
-                    color: Colors.grey,
-                    fontSize: 11,
+                  const SizedBox(width: 8),
+                  Text(
+                    kelasAkhir ?? '-',
+                    style: const TextStyle(
+                      color: Colors.grey,
+                      fontSize: 11,
+                    ),
                   ),
-                ),
-              ],
-            ),
+                ],
+              ),
           ],
         ),
         children: [

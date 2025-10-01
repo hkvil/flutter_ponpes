@@ -1,5 +1,12 @@
 import 'package:flutter/material.dart';
 import '../core/theme/app_colors.dart';
+import '../core/utils/menu_slug_mapper.dart';
+import '../repository/santri_repository.dart';
+import '../repository/kelas_repository.dart';
+import '../repository/kehadiran_repository.dart';
+import '../models/models.dart';
+import '../data/fallback/santri_fallback.dart';
+import '../data/fallback/kehadiran_fallback.dart';
 
 class SantriScreen extends StatefulWidget {
   final String title;
@@ -18,11 +25,21 @@ class SantriScreen extends StatefulWidget {
 class _SantriScreenState extends State<SantriScreen>
     with TickerProviderStateMixin {
   late TabController _tabController;
+  bool _kehadiranTabInitialized = false;
 
   @override
   void initState() {
     super.initState();
     _tabController = TabController(length: 2, vsync: this);
+
+    // Listen to tab changes to lazy-load second tab
+    _tabController.addListener(() {
+      if (_tabController.index == 1 && !_kehadiranTabInitialized) {
+        _kehadiranTabInitialized = true;
+        // Trigger rebuild so Kehadiran tab can initialize
+        setState(() {});
+      }
+    });
   }
 
   @override
@@ -80,76 +97,66 @@ class DaftarSantriTab extends StatefulWidget {
 }
 
 class _DaftarSantriTabState extends State<DaftarSantriTab> {
-  String selectedKelas = 'Kelas 1';
-  int jumlahSantri = 12;
+  final SantriRepository _santriRepo = SantriRepository();
+  final KelasRepository _kelasRepo = KelasRepository();
+
+  String selectedKelas = 'Semua Kelas';
+  int jumlahSantri = 0;
   String searchQuery = '';
   final TextEditingController _searchController = TextEditingController();
 
-  final List<String> kelasList = [
-    'Kelas 1',
-    'Kelas 2',
-    'Kelas 3',
-    'Kelas 4',
-    'Kelas 5',
-    'Kelas 6'
-  ];
+  // State management untuk API
+  bool _isLoading = false;
+  String? _errorMessage;
+  List<Santri> _santriList = [];
+  bool _usesFallback = false;
 
-  // Data static santri
-  final List<Map<String, dynamic>> santriData = [
-    {
-      'nama': 'Muhammad Arkia Bin Wazdan',
-      'subtitle': 'Inaralaya Ujian Ilir Sumasel',
-      'avatar': 'https://i.pravatar.cc/150?img=1',
-      'kelas': 'Kelas 1',
-      'nisn': '0123456789',
-      'lembaga': 'Taman Pendidikan Al-Quran Al-Ittifaqiah',
-      'gender': 'Laki-laki',
-      'tempatLahir': 'Palembang',
-      'tanggalLahir': '15 Januari 2010',
-      'namaAyah': 'Wazdan Bin Abdullah',
-      'namaIbu': 'Siti Fatimah',
-      'kelurahan': 'Inaralaya',
-      'kecamatan': 'Ujian Ilir',
-      'kota': 'Palembang',
-      'nomorIjazah': 'IJ-2024-001',
-      'tahunIjazah': '2024'
-    },
-    {
-      'nama': 'Ahmad Fadhil Bin Ibrahim',
-      'subtitle': 'Inaralaya Ujian Ilir Sumasel',
-      'avatar': 'https://i.pravatar.cc/150?img=13',
-      'kelas': 'Kelas 2',
-      'nisn': '0123456813',
-      'lembaga': 'Taman Pendidikan Al-Quran Al-Ittifaqiah',
-      'gender': 'Laki-laki',
-      'tempatLahir': 'Palembang',
-      'tanggalLahir': '12 April 2009',
-      'namaAyah': 'Ibrahim Bin Yusuf',
-      'namaIbu': 'Maryam',
-      'kelurahan': 'Inaralaya',
-      'kecamatan': 'Ujian Ilir',
-      'kota': 'Palembang',
-      'nomorIjazah': 'IJ-2023-013',
-      'tahunIjazah': '2023'
-    },
-  ];
+  // State untuk kelas dari API
+  List<String> kelasList = ['Semua Kelas'];
+  bool _isLoadingKelas = false;
 
-  List<Map<String, dynamic>> get filteredSantri {
-    var filtered =
-        santriData.where((santri) => santri['kelas'] == selectedKelas).toList();
+  List<dynamic> get filteredSantri {
+    List<dynamic> filtered;
 
-    if (searchQuery.isNotEmpty) {
-      filtered = filtered
-          .where((santri) =>
-              santri['nama']
-                  .toString()
-                  .toLowerCase()
-                  .contains(searchQuery.toLowerCase()) ||
-              santri['subtitle']
-                  .toString()
-                  .toLowerCase()
-                  .contains(searchQuery.toLowerCase()))
-          .toList();
+    if (_usesFallback) {
+      // Use fallback data
+      if (selectedKelas == 'Semua Kelas') {
+        filtered = fallbackSantriData.toList();
+      } else {
+        filtered = fallbackSantriData
+            .where((santri) => santri['kelas'] == selectedKelas)
+            .toList();
+      }
+
+      if (searchQuery.isNotEmpty) {
+        filtered = filtered
+            .where((santri) =>
+                santri['nama']
+                    .toString()
+                    .toLowerCase()
+                    .contains(searchQuery.toLowerCase()) ||
+                santri['subtitle']
+                    .toString()
+                    .toLowerCase()
+                    .contains(searchQuery.toLowerCase()))
+            .toList();
+      }
+    } else {
+      // Use API data - santri.kelasAktif contains class name
+      filtered = _santriList.where((santri) {
+        // Filter by kelas name
+        bool matchesKelas = selectedKelas == 'Semua Kelas' ||
+            (santri.kelasAktif == selectedKelas);
+
+        // Filter by search query
+        bool matchesSearch = searchQuery.isEmpty ||
+            santri.nama.toLowerCase().contains(searchQuery.toLowerCase()) ||
+            (santri.alamatLengkap
+                .toLowerCase()
+                .contains(searchQuery.toLowerCase()));
+
+        return matchesKelas && matchesSearch;
+      }).toList();
     }
 
     return filtered;
@@ -158,7 +165,101 @@ class _DaftarSantriTabState extends State<DaftarSantriTab> {
   @override
   void initState() {
     super.initState();
-    _updateJumlahSantri();
+    _initializeData();
+  }
+
+  // Initialize data sequentially to avoid overwhelming server
+  Future<void> _initializeData() async {
+    await _fetchKelasData(); // Fetch kelas first
+    await _fetchSantriData(); // Then fetch santri
+  }
+
+  Future<void> _fetchKelasData() async {
+    setState(() {
+      _isLoadingKelas = true;
+    });
+
+    try {
+      final lembagaSlug = _getLembagaSlug();
+      if (lembagaSlug.isEmpty) {
+        // No slug, keep default kelas list
+        setState(() {
+          _isLoadingKelas = false;
+        });
+        return;
+      }
+
+      // Fetch kelas from API
+      final kelasList = await _kelasRepo.getKelasByLembaga(
+        lembagaSlug,
+        pageSize: 100,
+      );
+
+      setState(() {
+        // Extract kelas names from API response
+        final kelasNames = kelasList
+            .map((kelas) => kelas.kelas) // Use 'kelas' property
+            .toSet() // Remove duplicates
+            .toList();
+
+        // Sort alphabetically
+        kelasNames.sort();
+
+        // Add "Semua Kelas" as first option
+        this.kelasList = ['Semua Kelas', ...kelasNames];
+        _isLoadingKelas = false;
+      });
+
+      print('✅ [KELAS] Loaded ${kelasList.length - 1} kelas from API');
+    } catch (e) {
+      print('❌ [KELAS] Error fetching kelas: $e');
+      // Keep default kelas list on error
+      setState(() {
+        _isLoadingKelas = false;
+      });
+    }
+  }
+
+  Future<void> _fetchSantriData() async {
+    setState(() {
+      _isLoading = true;
+      _errorMessage = null;
+    });
+
+    try {
+      // Get lembaga slug from widget or use default
+      final lembagaSlug = _getLembagaSlug();
+
+      // Fetch santri data from API
+      final santriList = await _santriRepo.getSantriByLembaga(
+        lembagaSlug,
+        pageSize: 100, // Get more data
+      );
+
+      setState(() {
+        _santriList = santriList;
+        _usesFallback = false;
+        _isLoading = false;
+        _updateJumlahSantri();
+      });
+    } catch (e) {
+      print('Error fetching santri data: $e');
+      // Fallback to static data
+      setState(() {
+        _usesFallback = true;
+        _isLoading = false;
+        _errorMessage = 'Menggunakan data offline';
+        _updateJumlahSantri();
+      });
+    }
+  }
+
+  String _getLembagaSlug() {
+    // Use MenuSlugMapper for consistent slug mapping
+    if (widget.lembagaName == null) return '';
+
+    final slug = MenuSlugMapper.getSlugByMenuTitle(widget.lembagaName!);
+    return slug ?? ''; // Return empty string if no mapping found
   }
 
   @override
@@ -214,6 +315,93 @@ class _DaftarSantriTabState extends State<DaftarSantriTab> {
           ],
         );
       },
+    );
+  }
+
+  Widget _buildSantriCard(dynamic santri, int index) {
+    // Handle both Santri model and Map (fallback data)
+    String nama;
+    String? subtitle;
+    String? avatar;
+
+    if (santri is Santri) {
+      // API data
+      nama = santri.namaLengkap;
+      subtitle = santri.alamatLengkap;
+      avatar = null; // API doesn't have avatar yet
+    } else if (santri is Map<String, dynamic>) {
+      // Fallback data
+      nama = santri['nama'] ?? '';
+      subtitle = santri['subtitle'];
+      avatar = santri['avatar'];
+    } else {
+      nama = 'Unknown';
+      subtitle = null;
+      avatar = null;
+    }
+
+    return Container(
+      margin: const EdgeInsets.only(bottom: 12),
+      decoration: BoxDecoration(
+        color: Colors.white,
+        borderRadius: BorderRadius.circular(12),
+        boxShadow: [
+          BoxShadow(
+            color: Colors.black.withOpacity(0.05),
+            blurRadius: 8,
+            offset: const Offset(0, 2),
+          ),
+        ],
+      ),
+      child: ListTile(
+        contentPadding: const EdgeInsets.all(16),
+        leading: CircleAvatar(
+          radius: 30,
+          backgroundImage: avatar != null ? NetworkImage(avatar) : null,
+          child: avatar == null
+              ? Icon(
+                  Icons.person,
+                  color: Colors.grey.shade400,
+                  size: 30,
+                )
+              : null,
+        ),
+        title: Text(
+          nama,
+          style: const TextStyle(
+            fontWeight: FontWeight.bold,
+            fontSize: 14,
+          ),
+        ),
+        subtitle: subtitle != null
+            ? Text(
+                subtitle,
+                style: TextStyle(
+                  color: Colors.grey.shade600,
+                  fontSize: 12,
+                ),
+              )
+            : null,
+        trailing: Container(
+          width: 8,
+          height: 8,
+          decoration: BoxDecoration(
+            color: index.isEven ? Colors.red : Colors.blue,
+            shape: BoxShape.circle,
+          ),
+        ),
+        onTap: () {
+          if (santri is Map<String, dynamic>) {
+            _showSantriDetail(santri);
+          } else {
+            // For API data, you can show a different detail dialog
+            // _showSantriDetailFromModel(santri as Santri);
+            ScaffoldMessenger.of(context).showSnackBar(
+              SnackBar(content: Text('Detail untuk $nama')),
+            );
+          }
+        },
+      ),
     );
   }
 
@@ -491,70 +679,75 @@ class _DaftarSantriTabState extends State<DaftarSantriTab> {
         Expanded(
           child: Container(
             color: Colors.grey.shade50,
-            child: filteredSantri.isEmpty
+            child: _isLoading
                 ? const Center(
-                    child: Text(
-                      'Tidak ada santri di kelas ini',
-                      style: TextStyle(color: Colors.grey, fontSize: 16),
-                    ),
+                    child: CircularProgressIndicator(),
                   )
-                : ListView.builder(
-                    padding: const EdgeInsets.all(20),
-                    itemCount: filteredSantri.length,
-                    itemBuilder: (context, index) {
-                      final santri = filteredSantri[index];
-                      return Container(
-                        margin: const EdgeInsets.only(bottom: 12),
-                        decoration: BoxDecoration(
-                          color: Colors.white,
-                          borderRadius: BorderRadius.circular(12),
-                          boxShadow: [
-                            BoxShadow(
-                              color: Colors.black.withOpacity(0.05),
-                              blurRadius: 8,
-                              offset: const Offset(0, 2),
+                : Column(
+                    children: [
+                      // Show error message if using fallback
+                      if (_errorMessage != null)
+                        Container(
+                          margin: const EdgeInsets.fromLTRB(20, 10, 20, 0),
+                          padding: const EdgeInsets.all(12),
+                          decoration: BoxDecoration(
+                            color: Colors.orange.shade50,
+                            borderRadius: BorderRadius.circular(8),
+                            border: Border.all(
+                              color: Colors.orange.shade200,
                             ),
-                          ],
+                          ),
+                          child: Row(
+                            children: [
+                              Icon(
+                                Icons.info_outline,
+                                color: Colors.orange.shade700,
+                                size: 20,
+                              ),
+                              const SizedBox(width: 10),
+                              Expanded(
+                                child: Text(
+                                  _errorMessage!,
+                                  style: TextStyle(
+                                    color: Colors.orange.shade700,
+                                    fontSize: 12,
+                                  ),
+                                  maxLines: 2,
+                                  overflow: TextOverflow.ellipsis,
+                                ),
+                              ),
+                              IconButton(
+                                icon: const Icon(Icons.refresh, size: 20),
+                                onPressed: _fetchSantriData,
+                                color: Colors.orange.shade700,
+                                padding: EdgeInsets.zero,
+                                constraints: const BoxConstraints(),
+                              ),
+                            ],
+                          ),
                         ),
-                        child: ListTile(
-                          contentPadding: const EdgeInsets.all(16),
-                          leading: CircleAvatar(
-                            radius: 30,
-                            backgroundImage: NetworkImage(santri['avatar']),
-                            child: santri['avatar'] == null
-                                ? Icon(
-                                    Icons.person,
-                                    color: Colors.grey.shade400,
-                                    size: 30,
-                                  )
-                                : null,
-                          ),
-                          title: Text(
-                            santri['nama'],
-                            style: const TextStyle(
-                              fontWeight: FontWeight.bold,
-                              fontSize: 14,
-                            ),
-                          ),
-                          subtitle: Text(
-                            santri['subtitle'],
-                            style: TextStyle(
-                              color: Colors.grey.shade600,
-                              fontSize: 12,
-                            ),
-                          ),
-                          trailing: Container(
-                            width: 8,
-                            height: 8,
-                            decoration: BoxDecoration(
-                              color: index.isEven ? Colors.red : Colors.blue,
-                              shape: BoxShape.circle,
-                            ),
-                          ),
-                          onTap: () => _showSantriDetail(santri),
-                        ),
-                      );
-                    },
+                      Expanded(
+                        child: filteredSantri.isEmpty
+                            ? const Center(
+                                child: Text(
+                                  'Tidak ada santri di kelas ini',
+                                  style: TextStyle(
+                                      color: Colors.grey, fontSize: 16),
+                                ),
+                              )
+                            : RefreshIndicator(
+                                onRefresh: _fetchSantriData,
+                                child: ListView.builder(
+                                  padding: const EdgeInsets.all(20),
+                                  itemCount: filteredSantri.length,
+                                  itemBuilder: (context, index) {
+                                    final santri = filteredSantri[index];
+                                    return _buildSantriCard(santri, index);
+                                  },
+                                ),
+                              ),
+                      ),
+                    ],
                   ),
           ),
         ),
@@ -630,8 +823,57 @@ class KehadiranSantriTab extends StatefulWidget {
 }
 
 class _KehadiranSantriTabState extends State<KehadiranSantriTab> {
+  final KehadiranRepository _kehadiranRepo = KehadiranRepository();
+
+  bool _isLoading = true;
+  String? _errorMessage;
+  List<KehadiranSantri> _kehadiranList = [];
+  bool _usesFallback = false;
+
   DateTime? startDate;
   DateTime? endDate;
+
+  @override
+  void initState() {
+    super.initState();
+    _fetchKehadiranData();
+  }
+
+  Future<void> _fetchKehadiranData() async {
+    setState(() {
+      _isLoading = true;
+      _errorMessage = null;
+    });
+
+    try {
+      final slug = _getLembagaSlug(widget.lembagaName);
+      final kehadiranList =
+          await _kehadiranRepo.getKehadiranSantriByLembaga(slug);
+
+      setState(() {
+        _kehadiranList = kehadiranList;
+        _usesFallback = false;
+        _isLoading = false;
+      });
+    } catch (e) {
+      print('Error fetching kehadiran: $e');
+      setState(() {
+        _kehadiranList = fallbackKehadiranSantriData
+            .map((json) => KehadiranSantri.fromJson(json))
+            .toList();
+        _usesFallback = true;
+        _errorMessage = 'Using offline data';
+        _isLoading = false;
+      });
+    }
+  }
+
+  String _getLembagaSlug(String? lembagaName) {
+    if (lembagaName == null) return '';
+
+    final slug = MenuSlugMapper.getSlugByMenuTitle(lembagaName);
+    return slug ?? ''; // Return empty string if no mapping found
+  }
 
   // Data static kehadiran
   final List<Map<String, dynamic>> kehadiranData = [
@@ -733,16 +975,29 @@ class _KehadiranSantriTabState extends State<KehadiranSantriTab> {
     },
   ];
 
-  List<Map<String, dynamic>> get filteredKehadiran {
-    if (startDate == null || endDate == null) {
-      return kehadiranData;
-    }
+  List<dynamic> get filteredKehadiran {
+    if (_usesFallback) {
+      if (startDate == null || endDate == null) {
+        return kehadiranData;
+      }
 
-    return kehadiranData.where((kehadiran) {
-      final tanggal = kehadiran['tanggalObj'] as DateTime;
-      return tanggal.isAfter(startDate!.subtract(const Duration(days: 1))) &&
-          tanggal.isBefore(endDate!.add(const Duration(days: 1)));
-    }).toList();
+      return kehadiranData.where((kehadiran) {
+        final tanggal = kehadiran['tanggalObj'] as DateTime;
+        return tanggal.isAfter(startDate!.subtract(const Duration(days: 1))) &&
+            tanggal.isBefore(endDate!.add(const Duration(days: 1)));
+      }).toList();
+    } else {
+      // Using API data
+      if (startDate == null || endDate == null) {
+        return _kehadiranList;
+      }
+
+      return _kehadiranList.where((kehadiran) {
+        final tanggal = DateTime.parse(kehadiran.tanggal);
+        return tanggal.isAfter(startDate!.subtract(const Duration(days: 1))) &&
+            tanggal.isBefore(endDate!.add(const Duration(days: 1)));
+      }).toList();
+    }
   }
 
   Future<void> _selectDateRange() async {
@@ -825,10 +1080,36 @@ class _KehadiranSantriTabState extends State<KehadiranSantriTab> {
 
   @override
   Widget build(BuildContext context) {
+    if (_isLoading) {
+      return const Center(child: CircularProgressIndicator());
+    }
+
     return Container(
       color: Colors.grey.shade50,
       child: Column(
         children: [
+          if (_errorMessage != null)
+            Container(
+              width: double.infinity,
+              padding: const EdgeInsets.all(12),
+              color: Colors.orange.shade100,
+              child: Row(
+                children: [
+                  Icon(Icons.info_outline,
+                      color: Colors.orange.shade700, size: 20),
+                  const SizedBox(width: 8),
+                  Expanded(
+                    child: Text(
+                      _errorMessage!,
+                      style: TextStyle(
+                          color: Colors.orange.shade900, fontSize: 12),
+                      maxLines: 2,
+                      overflow: TextOverflow.ellipsis,
+                    ),
+                  ),
+                ],
+              ),
+            ),
           Container(
             width: double.infinity,
             decoration: BoxDecoration(
@@ -971,98 +1252,101 @@ class _KehadiranSantriTabState extends State<KehadiranSantriTab> {
               ),
             ),
           Expanded(
-            child: ListView.builder(
-              padding: const EdgeInsets.all(20),
-              itemCount: filteredKehadiran.length,
-              itemBuilder: (context, index) {
-                final kehadiran = filteredKehadiran[index];
-                return Container(
-                  margin: const EdgeInsets.only(bottom: 12),
-                  decoration: BoxDecoration(
-                    color: Colors.white,
-                    borderRadius: BorderRadius.circular(12),
-                    boxShadow: [
-                      BoxShadow(
-                        color: Colors.black.withOpacity(0.05),
-                        blurRadius: 8,
-                        offset: const Offset(0, 2),
-                      ),
-                    ],
-                  ),
-                  child: ListTile(
-                    contentPadding: const EdgeInsets.all(16),
-                    leading: Stack(
-                      children: [
-                        CircleAvatar(
-                          radius: 25,
-                          backgroundImage: NetworkImage(kehadiran['avatar']),
-                        ),
-                        Positioned(
-                          right: -2,
-                          bottom: -2,
-                          child: Container(
-                            padding: const EdgeInsets.all(2),
-                            decoration: BoxDecoration(
-                              color: Colors.white,
-                              shape: BoxShape.circle,
-                              border: Border.all(color: Colors.grey.shade200),
-                            ),
-                            child: Icon(
-                              _getJenisIcon(kehadiran['jenis']),
-                              color: _getJenisColor(kehadiran['jenis']),
-                              size: 16,
-                            ),
-                          ),
+            child: RefreshIndicator(
+              onRefresh: _fetchKehadiranData,
+              child: ListView.builder(
+                padding: const EdgeInsets.all(20),
+                itemCount: filteredKehadiran.length,
+                itemBuilder: (context, index) {
+                  final kehadiran = filteredKehadiran[index];
+                  return Container(
+                    margin: const EdgeInsets.only(bottom: 12),
+                    decoration: BoxDecoration(
+                      color: Colors.white,
+                      borderRadius: BorderRadius.circular(12),
+                      boxShadow: [
+                        BoxShadow(
+                          color: Colors.black.withOpacity(0.05),
+                          blurRadius: 8,
+                          offset: const Offset(0, 2),
                         ),
                       ],
                     ),
-                    title: Text(
-                      kehadiran['nama'],
-                      style: const TextStyle(
-                        fontWeight: FontWeight.bold,
-                        fontSize: 14,
-                      ),
-                    ),
-                    subtitle: Column(
-                      crossAxisAlignment: CrossAxisAlignment.start,
-                      children: [
-                        const SizedBox(height: 4),
-                        Text(
-                          kehadiran['tanggal'],
-                          style: TextStyle(
-                            color: Colors.grey.shade600,
-                            fontSize: 12,
+                    child: ListTile(
+                      contentPadding: const EdgeInsets.all(16),
+                      leading: Stack(
+                        children: [
+                          CircleAvatar(
+                            radius: 25,
+                            backgroundImage: NetworkImage(kehadiran['avatar']),
                           ),
-                        ),
-                        const SizedBox(height: 2),
-                        Text(
-                          kehadiran['keterangan'],
-                          style: TextStyle(
-                            color: Colors.grey.shade700,
-                            fontSize: 12,
+                          Positioned(
+                            right: -2,
+                            bottom: -2,
+                            child: Container(
+                              padding: const EdgeInsets.all(2),
+                              decoration: BoxDecoration(
+                                color: Colors.white,
+                                shape: BoxShape.circle,
+                                border: Border.all(color: Colors.grey.shade200),
+                              ),
+                              child: Icon(
+                                _getJenisIcon(kehadiran['jenis']),
+                                color: _getJenisColor(kehadiran['jenis']),
+                                size: 16,
+                              ),
+                            ),
                           ),
-                        ),
-                      ],
-                    ),
-                    trailing: Container(
-                      padding: const EdgeInsets.symmetric(
-                          horizontal: 8, vertical: 4),
-                      decoration: BoxDecoration(
-                        color: _getJenisColor(kehadiran['jenis']),
-                        borderRadius: BorderRadius.circular(12),
+                        ],
                       ),
-                      child: Text(
-                        kehadiran['jenis'],
+                      title: Text(
+                        kehadiran['nama'],
                         style: const TextStyle(
-                          color: Colors.white,
-                          fontSize: 10,
                           fontWeight: FontWeight.bold,
+                          fontSize: 14,
+                        ),
+                      ),
+                      subtitle: Column(
+                        crossAxisAlignment: CrossAxisAlignment.start,
+                        children: [
+                          const SizedBox(height: 4),
+                          Text(
+                            kehadiran['tanggal'],
+                            style: TextStyle(
+                              color: Colors.grey.shade600,
+                              fontSize: 12,
+                            ),
+                          ),
+                          const SizedBox(height: 2),
+                          Text(
+                            kehadiran['keterangan'],
+                            style: TextStyle(
+                              color: Colors.grey.shade700,
+                              fontSize: 12,
+                            ),
+                          ),
+                        ],
+                      ),
+                      trailing: Container(
+                        padding: const EdgeInsets.symmetric(
+                            horizontal: 8, vertical: 4),
+                        decoration: BoxDecoration(
+                          color: _getJenisColor(kehadiran['jenis']),
+                          borderRadius: BorderRadius.circular(12),
+                        ),
+                        child: Text(
+                          kehadiran['jenis'],
+                          style: const TextStyle(
+                            color: Colors.white,
+                            fontSize: 10,
+                            fontWeight: FontWeight.bold,
+                          ),
                         ),
                       ),
                     ),
-                  ),
-                );
-              },
+                  );
+                },
+              ),
             ),
           ),
         ],

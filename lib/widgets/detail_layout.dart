@@ -140,7 +140,8 @@ class DetailLayout extends StatelessWidget {
       children: List.generate(
         maxImages,
         (index) => Container(
-          margin: EdgeInsets.only(bottom: imageSpacing),
+          margin:
+              EdgeInsets.only(bottom: index < maxImages - 1 ? imageSpacing : 0),
           child: ClipRRect(
             borderRadius: BorderRadius.circular(borderRadius),
             child: Container(

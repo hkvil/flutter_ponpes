@@ -26,10 +26,12 @@ class KehadiranRepository {
       '$apiHost/api/kehadiran-santris',
       queryParameters: {
         'filters[santri][lembaga][slug][\$eq]': lembagaSlug,
-        'pagination[pageSize]': pageSize ?? 25,
-        if (page != null) 'pagination[page]': page,
-        'populate': 'deep',
+        'filters[riwayatKelas][tahunAjaran][aktif][\$eq]': true,
+        'populate[santri]': true,
+        'populate[riwayatKelas][populate][tahunAjaran]': true,
         'sort': 'tanggal:desc',
+        'pagination[pageSize]': pageSize ?? 100,
+        if (page != null) 'pagination[page]': page,
       },
       options: Options(
         headers: {
@@ -66,12 +68,14 @@ class KehadiranRepository {
       '$apiHost/api/kehadiran-santris',
       queryParameters: {
         'filters[santri][lembaga][slug][\$eq]': lembagaSlug,
-        'filters[tanggal][\$gte]': startDate.toIso8601String(),
-        'filters[tanggal][\$lte]': endDate.toIso8601String(),
+        'filters[riwayatKelas][tahunAjaran][aktif][\$eq]': true,
+        'filters[tanggal][\$gte]': startDate.toIso8601String().split('T')[0],
+        'filters[tanggal][\$lte]': endDate.toIso8601String().split('T')[0],
+        'populate[santri]': true,
+        'populate[riwayatKelas][populate][tahunAjaran]': true,
+        'sort': 'tanggal:desc',
         'pagination[pageSize]': pageSize ?? 100,
         if (page != null) 'pagination[page]': page,
-        'populate': 'deep',
-        'sort': 'tanggal:desc',
       },
       options: Options(
         headers: {

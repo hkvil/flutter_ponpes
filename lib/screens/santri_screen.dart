@@ -1209,6 +1209,40 @@ class _KehadiranSantriTabState extends State<KehadiranSantriTab> {
         startDate = picked.start;
         endDate = picked.end;
       });
+
+      // Fetch data with date range if using API
+      if (!_usesFallback) {
+        await _fetchKehadiranDataByDateRange();
+      }
+    }
+  }
+
+  Future<void> _fetchKehadiranDataByDateRange() async {
+    if (startDate == null || endDate == null) return;
+
+    setState(() {
+      _isLoading = true;
+      _errorMessage = null;
+    });
+
+    try {
+      final slug = _getLembagaSlug(widget.lembagaName);
+      final kehadiranList = await _kehadiranRepo.getKehadiranSantriByDateRange(
+        slug,
+        startDate!,
+        endDate!,
+      );
+
+      setState(() {
+        _kehadiranList = kehadiranList;
+        _isLoading = false;
+      });
+    } catch (e) {
+      print('Error fetching kehadiran by date range: $e');
+      setState(() {
+        _isLoading = false;
+        _errorMessage = 'Error loading date range data';
+      });
     }
   }
 
@@ -1217,6 +1251,11 @@ class _KehadiranSantriTabState extends State<KehadiranSantriTab> {
       startDate = null;
       endDate = null;
     });
+
+    // Reload all data if using API
+    if (!_usesFallback) {
+      _fetchKehadiranData();
+    }
   }
 
   String _formatDate(DateTime date) {
@@ -1239,16 +1278,18 @@ class _KehadiranSantriTabState extends State<KehadiranSantriTab> {
   }
 
   Color _getJenisColor(String jenis) {
-    switch (jenis) {
-      case 'Hadir':
+    // Normalize jenis to uppercase for consistency
+    final jenisUpper = jenis.toUpperCase();
+    switch (jenisUpper) {
+      case 'HADIR':
         return AppColors.primaryGreen;
-      case 'Izin':
+      case 'IZIN':
         return Colors.blue;
-      case 'Sakit':
+      case 'SAKIT':
         return Colors.orange;
-      case 'Alpha':
+      case 'ALPHA':
         return Colors.red;
-      case 'Terlambat':
+      case 'TERLAMBAT':
         return Colors.purple;
       default:
         return Colors.grey;
@@ -1256,19 +1297,30 @@ class _KehadiranSantriTabState extends State<KehadiranSantriTab> {
   }
 
   IconData _getJenisIcon(String jenis) {
-    switch (jenis) {
-      case 'Hadir':
+    // Normalize jenis to uppercase for consistency
+    final jenisUpper = jenis.toUpperCase();
+    switch (jenisUpper) {
+      case 'HADIR':
         return Icons.check_circle;
-      case 'Izin':
+      case 'IZIN':
         return Icons.info;
-      case 'Sakit':
+      case 'SAKIT':
         return Icons.local_hospital;
-      case 'Alpha':
+      case 'ALPHA':
         return Icons.cancel;
-      case 'Terlambat':
+      case 'TERLAMBAT':
         return Icons.access_time;
       default:
         return Icons.help;
+    }
+  }
+
+  String _formatTanggalKehadiran(String tanggal) {
+    try {
+      final date = DateTime.parse(tanggal);
+      return _formatDate(date);
+    } catch (e) {
+      return tanggal;
     }
   }
 
@@ -1453,6 +1505,40 @@ class _KehadiranSantriTabState extends State<KehadiranSantriTab> {
                 itemCount: filteredKehadiran.length,
                 itemBuilder: (context, index) {
                   final kehadiran = filteredKehadiran[index];
+
+                  // Handle both KehadiranSantri model and Map (fallback)
+                  String nama;
+                  String tanggal;
+                  String jenis;
+                  String keterangan;
+                  String? avatar;
+                  String? kelasInfo;
+
+                  if (kehadiran is KehadiranSantri) {
+                    // API data
+                    nama = kehadiran.namaSantri;
+                    tanggal = _formatTanggalKehadiran(kehadiran.tanggal);
+                    jenis = kehadiran.jenis;
+                    keterangan = kehadiran.keterangan;
+                    avatar = null;
+                    kelasInfo = kehadiran.santri?.kelasAktif;
+                  } else if (kehadiran is Map<String, dynamic>) {
+                    // Fallback data
+                    nama = kehadiran['nama'] ?? '';
+                    tanggal = kehadiran['tanggal'] ?? '';
+                    jenis = kehadiran['jenis'] ?? '';
+                    keterangan = kehadiran['keterangan'] ?? '';
+                    avatar = kehadiran['avatar'];
+                    kelasInfo = null;
+                  } else {
+                    nama = 'Unknown';
+                    tanggal = '';
+                    jenis = '';
+                    keterangan = '';
+                    avatar = null;
+                    kelasInfo = null;
+                  }
+
                   return Container(
                     margin: const EdgeInsets.only(bottom: 12),
                     decoration: BoxDecoration(
@@ -1472,7 +1558,15 @@ class _KehadiranSantriTabState extends State<KehadiranSantriTab> {
                         children: [
                           CircleAvatar(
                             radius: 25,
-                            backgroundImage: NetworkImage(kehadiran['avatar']),
+                            backgroundImage:
+                                avatar != null ? NetworkImage(avatar) : null,
+                            child: avatar == null
+                                ? Icon(
+                                    Icons.person,
+                                    color: Colors.grey.shade400,
+                                    size: 25,
+                                  )
+                                : null,
                           ),
                           Positioned(
                             right: -2,
@@ -1485,27 +1579,51 @@ class _KehadiranSantriTabState extends State<KehadiranSantriTab> {
                                 border: Border.all(color: Colors.grey.shade200),
                               ),
                               child: Icon(
-                                _getJenisIcon(kehadiran['jenis']),
-                                color: _getJenisColor(kehadiran['jenis']),
+                                _getJenisIcon(jenis),
+                                color: _getJenisColor(jenis),
                                 size: 16,
                               ),
                             ),
                           ),
                         ],
                       ),
-                      title: Text(
-                        kehadiran['nama'],
-                        style: const TextStyle(
-                          fontWeight: FontWeight.bold,
-                          fontSize: 14,
-                        ),
+                      title: Row(
+                        children: [
+                          Expanded(
+                            child: Text(
+                              nama,
+                              style: const TextStyle(
+                                fontWeight: FontWeight.bold,
+                                fontSize: 14,
+                              ),
+                            ),
+                          ),
+                          if (kelasInfo != null)
+                            Container(
+                              padding: const EdgeInsets.symmetric(
+                                  horizontal: 6, vertical: 2),
+                              decoration: BoxDecoration(
+                                color: Colors.grey.shade100,
+                                borderRadius: BorderRadius.circular(4),
+                                border: Border.all(color: Colors.grey.shade300),
+                              ),
+                              child: Text(
+                                kelasInfo,
+                                style: TextStyle(
+                                  color: Colors.grey.shade700,
+                                  fontSize: 10,
+                                  fontWeight: FontWeight.w500,
+                                ),
+                              ),
+                            ),
+                        ],
                       ),
                       subtitle: Column(
                         crossAxisAlignment: CrossAxisAlignment.start,
                         children: [
                           const SizedBox(height: 4),
                           Text(
-                            kehadiran['tanggal'],
+                            tanggal,
                             style: TextStyle(
                               color: Colors.grey.shade600,
                               fontSize: 12,
@@ -1513,7 +1631,7 @@ class _KehadiranSantriTabState extends State<KehadiranSantriTab> {
                           ),
                           const SizedBox(height: 2),
                           Text(
-                            kehadiran['keterangan'],
+                            keterangan,
                             style: TextStyle(
                               color: Colors.grey.shade700,
                               fontSize: 12,
@@ -1525,11 +1643,11 @@ class _KehadiranSantriTabState extends State<KehadiranSantriTab> {
                         padding: const EdgeInsets.symmetric(
                             horizontal: 8, vertical: 4),
                         decoration: BoxDecoration(
-                          color: _getJenisColor(kehadiran['jenis']),
+                          color: _getJenisColor(jenis),
                           borderRadius: BorderRadius.circular(12),
                         ),
                         child: Text(
-                          kehadiran['jenis'],
+                          jenis.toUpperCase(),
                           style: const TextStyle(
                             color: Colors.white,
                             fontSize: 10,

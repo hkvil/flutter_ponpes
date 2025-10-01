@@ -323,21 +323,33 @@ class _DaftarSantriTabState extends State<DaftarSantriTab> {
     String nama;
     String? subtitle;
     String? avatar;
+    String? kelasInfo;
 
     if (santri is Santri) {
       // API data
       nama = santri.namaLengkap;
       subtitle = santri.alamatLengkap;
       avatar = null; // API doesn't have avatar yet
+
+      // Tambahkan info kelas
+      if (santri.kelasAktif != null && santri.kelasAktif!.isNotEmpty) {
+        kelasInfo = santri.kelasAktif;
+        if (santri.tahunAjaranAktif != null &&
+            santri.tahunAjaranAktif!.isNotEmpty) {
+          kelasInfo = '$kelasInfo • ${santri.tahunAjaranAktif}';
+        }
+      }
     } else if (santri is Map<String, dynamic>) {
       // Fallback data
       nama = santri['nama'] ?? '';
       subtitle = santri['subtitle'];
       avatar = santri['avatar'];
+      kelasInfo = null;
     } else {
       nama = 'Unknown';
       subtitle = null;
       avatar = null;
+      kelasInfo = null;
     }
 
     return Container(
@@ -373,15 +385,41 @@ class _DaftarSantriTabState extends State<DaftarSantriTab> {
             fontSize: 14,
           ),
         ),
-        subtitle: subtitle != null
-            ? Text(
+        subtitle: Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            if (subtitle != null)
+              Text(
                 subtitle,
                 style: TextStyle(
                   color: Colors.grey.shade600,
                   fontSize: 12,
                 ),
-              )
-            : null,
+              ),
+            if (kelasInfo != null) ...[
+              const SizedBox(height: 4),
+              Container(
+                padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
+                decoration: BoxDecoration(
+                  color: Colors.blue.shade50,
+                  borderRadius: BorderRadius.circular(6),
+                  border: Border.all(
+                    color: Colors.blue.shade200,
+                    width: 1,
+                  ),
+                ),
+                child: Text(
+                  kelasInfo,
+                  style: TextStyle(
+                    color: Colors.blue.shade700,
+                    fontSize: 11,
+                    fontWeight: FontWeight.w500,
+                  ),
+                ),
+              ),
+            ],
+          ],
+        ),
         trailing: Container(
           width: 8,
           height: 8,

@@ -24,9 +24,6 @@ class SantriRepository {
       queryParameters: {
         'filters[lembaga][slug][\$eq]': lembagaSlug,
         'filters[riwayatKelas][tahunAjaran][aktif][\$eq]': true,
-        'pagination[pageSize]': pageSize ?? 25,
-        if (page != null) 'pagination[page]': page,
-        'populate': 'deep',
       },
       options: Options(
         headers: {

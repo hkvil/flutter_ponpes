@@ -2,7 +2,6 @@ import 'package:flutter/material.dart';
 import 'package:intl/date_symbol_data_local.dart';
 import 'package:intl/intl.dart';
 import 'package:flutter_dotenv/flutter_dotenv.dart';
-import 'package:pesantren_app/screens/debug_screen.dart';
 import 'core/utils/auth_utils.dart';
 import 'core/theme/app_colors.dart';
 import 'core/router/app_router.dart';

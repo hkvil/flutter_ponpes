@@ -10,11 +10,13 @@ class PrestasiRepository {
     ),
   );
 
-  /// Get all prestasi by lembaga
+  /// Get all prestasi by lembaga (filter by santri's lembaga)
   Future<List<Prestasi>> getPrestasiByLembaga(
     String lembagaSlug, {
     int? page,
     int? pageSize,
+    String? tahun,
+    String? tingkat,
   }) async {
     final apiHost = dotenv.env['API_HOST'] ?? '';
     final apiToken = dotenv.env['API_TOKEN_READONLY'] ?? '';
@@ -22,11 +24,13 @@ class PrestasiRepository {
     final response = await _dio.get(
       '$apiHost/api/prestasis',
       queryParameters: {
-        'filters[lembaga][slug][\$eq]': lembagaSlug,
-        'pagination[pageSize]': pageSize ?? 25,
+        'filters[santri][lembaga][slug][\$eq]': lembagaSlug,
+        if (tahun != null) 'filters[tahun][\$eq]': tahun,
+        if (tingkat != null) 'filters[tingkat][\$eq]': tingkat,
+        'populate[santri]': true,
+        'sort': 'tahun:desc',
+        'pagination[pageSize]': pageSize ?? 100,
         if (page != null) 'pagination[page]': page,
-        'populate': 'deep',
-        'sort': 'tanggal:desc',
       },
       options: Options(
         headers: {

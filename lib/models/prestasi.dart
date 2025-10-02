@@ -10,6 +10,7 @@ class Prestasi {
   final DateTime createdAt;
   final DateTime updatedAt;
   final DateTime publishedAt;
+  final PrestasiSantriData? santri;
 
   Prestasi({
     required this.id,
@@ -23,6 +24,7 @@ class Prestasi {
     required this.createdAt,
     required this.updatedAt,
     required this.publishedAt,
+    this.santri,
   });
 
   factory Prestasi.fromJson(Map<String, dynamic> json) {
@@ -38,6 +40,9 @@ class Prestasi {
       createdAt: DateTime.parse(json['createdAt'] as String),
       updatedAt: DateTime.parse(json['updatedAt'] as String),
       publishedAt: DateTime.parse(json['publishedAt'] as String),
+      santri: json['santri'] != null
+          ? PrestasiSantriData.fromJson(json['santri'] as Map<String, dynamic>)
+          : null,
     );
   }
 
@@ -54,10 +59,14 @@ class Prestasi {
       'createdAt': createdAt.toIso8601String(),
       'updatedAt': updatedAt.toIso8601String(),
       'publishedAt': publishedAt.toIso8601String(),
+      if (santri != null) 'santri': santri!.toJson(),
     };
   }
 
   // Helper getters
+  String get namaSantri => santri?.nama ?? '-';
+  String get kelasSantri => santri?.kelasAktif ?? '-';
+
   bool get isJuara1 =>
       peringkat.contains('1') || peringkat.toLowerCase().contains('juara 1');
   bool get isNasional => tingkat == 'Nasional';
@@ -75,5 +84,49 @@ class Prestasi {
     if (peringkat.toLowerCase().contains('harapan 2')) return 5;
     if (peringkat.toLowerCase().contains('harapan 3')) return 6;
     return 99; // Other rankings
+  }
+}
+
+class PrestasiSantriData {
+  final int id;
+  final String documentId;
+  final String nama;
+  final String nisn;
+  final String gender;
+  final String? kelasAktif;
+  final String? tahunAjaranAktif;
+
+  PrestasiSantriData({
+    required this.id,
+    required this.documentId,
+    required this.nama,
+    required this.nisn,
+    required this.gender,
+    this.kelasAktif,
+    this.tahunAjaranAktif,
+  });
+
+  factory PrestasiSantriData.fromJson(Map<String, dynamic> json) {
+    return PrestasiSantriData(
+      id: json['id'] as int,
+      documentId: json['documentId'] as String,
+      nama: json['nama'] as String,
+      nisn: json['nisn'] as String,
+      gender: json['gender'] as String,
+      kelasAktif: json['kelasAktif'] as String?,
+      tahunAjaranAktif: json['tahunAjaranAktif'] as String?,
+    );
+  }
+
+  Map<String, dynamic> toJson() {
+    return {
+      'id': id,
+      'documentId': documentId,
+      'nama': nama,
+      'nisn': nisn,
+      'gender': gender,
+      'kelasAktif': kelasAktif,
+      'tahunAjaranAktif': tahunAjaranAktif,
+    };
   }
 }

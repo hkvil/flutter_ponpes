@@ -1,5 +1,9 @@
 import 'package:flutter/material.dart';
 import '../core/theme/app_colors.dart';
+import '../core/utils/menu_slug_mapper.dart';
+import '../repository/prestasi_repository.dart';
+import '../models/models.dart';
+import '../data/fallback/prestasi_fallback.dart';
 
 class PrestasiSantriScreen extends StatefulWidget {
   final String title;
@@ -16,137 +20,126 @@ class PrestasiSantriScreen extends StatefulWidget {
 }
 
 class _PrestasiSantriScreenState extends State<PrestasiSantriScreen> {
+  final PrestasiRepository _prestasiRepo = PrestasiRepository();
+
+  bool _isLoading = true;
+  String? _errorMessage;
+  List<Prestasi> _prestasiList = [];
+  bool _usesFallback = false;
+
   String? selectedYear;
   String? selectedTingkat;
   String searchQuery = '';
   final TextEditingController _searchController = TextEditingController();
 
-  // Static data prestasi santri
-  final List<Map<String, dynamic>> prestasiData = [
-    {
-      'namaLomba': 'Olimpiade Matematika Nasional',
-      'bidang': 'Matematika',
-      'tingkat': 'Nasional',
-      'penyelenggara': 'Kemendikbud RI',
-      'peringkat': 'Juara 1',
-      'tahun': '2024',
-      'namaSantri': 'Ahmad Fauzi',
-      'kelas': 'XII IPA 1',
-    },
-    {
-      'namaLomba': 'Lomba Tahfidz Al-Quran',
-      'bidang': 'Agama',
-      'tingkat': 'Provinsi',
-      'penyelenggara': 'Kemenag Jawa Barat',
-      'peringkat': 'Juara 2',
-      'tahun': '2024',
-      'namaSantri': 'Siti Nurhaliza',
-      'kelas': 'XI IPS 1',
-    },
-    {
-      'namaLomba': 'Kompetisi Sains Nasional (KSN)',
-      'bidang': 'Fisika',
-      'tingkat': 'Nasional',
-      'penyelenggara': 'Kemendikbud RI',
-      'peringkat': 'Juara 3',
-      'tahun': '2023',
-      'namaSantri': 'Muhammad Rizki',
-      'kelas': 'XII IPA 2',
-    },
-    {
-      'namaLomba': 'Festival Nasyid Pelajar',
-      'bidang': 'Seni',
-      'tingkat': 'Kabupaten/Kota',
-      'penyelenggara': 'OSIS SMA Se-Kabupaten',
-      'peringkat': 'Juara 1',
-      'tahun': '2024',
-      'namaSantri': 'Fatimah Az-Zahra',
-      'kelas': 'X IPS 2',
-    },
-    {
-      'namaLomba': 'Lomba Debat Bahasa Arab',
-      'bidang': 'Bahasa',
-      'tingkat': 'Internasional',
-      'penyelenggara':
-          'Islamic World Educational, Scientific and Cultural Organization (ISESCO)',
-      'peringkat': 'Juara 2',
-      'tahun': '2023',
-      'namaSantri': 'Abdul Rahman',
-      'kelas': 'XI IPA 1',
-    },
-    {
-      'namaLomba': 'Olimpiade Biologi',
-      'bidang': 'Biologi',
-      'tingkat': 'Provinsi',
-      'penyelenggara': 'Dinas Pendidikan Jabar',
-      'peringkat': 'Juara 3',
-      'tahun': '2024',
-      'namaSantri': 'Khadijah Binti Ali',
-      'kelas': 'XI IPA 2',
-    },
-    {
-      'namaLomba': 'Lomba Pidato 3 Bahasa',
-      'bidang': 'Bahasa',
-      'tingkat': 'Kecamatan',
-      'penyelenggara': 'Forum Komunikasi Pondok Pesantren Kecamatan Cijeruk',
-      'peringkat': 'Juara 1',
-      'tahun': '2023',
-      'namaSantri': 'Ibrahim Khalil',
-      'kelas': 'XII IPS 1',
-    },
-    {
-      'namaLomba': 'Lomba Kaligrafi Al-Quran',
-      'bidang': 'Seni',
-      'tingkat': 'Kelurahan',
-      'penyelenggara': 'Takmir Masjid Al-Hidayah',
-      'peringkat': 'Juara 2',
-      'tahun': '2023',
-      'namaSantri': 'Aisyah Ummu Salamah',
-      'kelas': 'X IPA 1',
-    },
-    {
-      'namaLomba': 'Lomba Tartil Al-Quran',
-      'bidang': 'Agama',
-      'tingkat': 'Sekolah',
-      'penyelenggara': 'MA Al-Ittifaqiah',
-      'peringkat': 'Juara 1',
-      'tahun': '2024',
-      'namaSantri': 'Umar bin Khattab',
-      'kelas': 'X IPA 3',
-    },
-  ];
+  @override
+  void initState() {
+    super.initState();
+    _fetchPrestasiData();
+  }
 
-  List<Map<String, dynamic>> get filteredPrestasi {
-    var filtered = prestasiData.where((prestasi) {
-      final matchesSearch = searchQuery.isEmpty ||
-          prestasi['namaLomba']
-              .toLowerCase()
-              .contains(searchQuery.toLowerCase()) ||
-          prestasi['namaSantri']
-              .toLowerCase()
-              .contains(searchQuery.toLowerCase()) ||
-          prestasi['bidang'].toLowerCase().contains(searchQuery.toLowerCase());
-
-      final matchesYear =
-          selectedYear == null || prestasi['tahun'] == selectedYear;
-      final matchesTingkat =
-          selectedTingkat == null || prestasi['tingkat'] == selectedTingkat;
-
-      return matchesSearch && matchesYear && matchesTingkat;
-    }).toList();
-
-    // Sort by year (newest first) then by ranking
-    filtered.sort((a, b) {
-      final yearComparison = b['tahun'].compareTo(a['tahun']);
-      if (yearComparison != 0) return yearComparison;
-
-      // Sort by ranking (Juara 1, 2, 3)
-      final rankA = _getRankingOrder(a['peringkat']);
-      final rankB = _getRankingOrder(b['peringkat']);
-      return rankA.compareTo(rankB);
+  Future<void> _fetchPrestasiData({String? tahun, String? tingkat}) async {
+    setState(() {
+      _isLoading = true;
+      _errorMessage = null;
     });
 
-    return filtered;
+    try {
+      final slug = _getLembagaSlug(widget.lembagaName);
+      final prestasiList = await _prestasiRepo.getPrestasiByLembaga(
+        slug,
+        tahun: tahun,
+        tingkat: tingkat,
+      );
+
+      setState(() {
+        _prestasiList = prestasiList;
+        _usesFallback = false;
+        _isLoading = false;
+      });
+    } catch (e) {
+      print('Error fetching prestasi: $e');
+      // Convert fallback data to empty list since we can't convert Map to Prestasi easily
+      // User will need to see the fallback prestasiData in the UI
+      setState(() {
+        _prestasiList = [];
+        _usesFallback = true;
+        _errorMessage = 'Using offline data';
+        _isLoading = false;
+      });
+    }
+  }
+
+  String _getLembagaSlug(String lembagaName) {
+    final slug = MenuSlugMapper.getSlugByMenuTitle(lembagaName);
+    return slug ?? '';
+  }
+
+  // Use fallback data when API fails
+  List<Map<String, dynamic>> get prestasiData => fallbackPrestasiData;
+
+  List<dynamic> get filteredPrestasi {
+    if (_usesFallback) {
+      var filtered = prestasiData.where((prestasi) {
+        final namaLomba = prestasi['namaLomba'] ?? '';
+        final namaSantri = prestasi['santri'] ?? prestasi['namaSantri'] ?? '';
+        final bidang = prestasi['bidang'] ?? prestasi['keterangan'] ?? '';
+
+        final matchesSearch = searchQuery.isEmpty ||
+            namaLomba.toLowerCase().contains(searchQuery.toLowerCase()) ||
+            namaSantri.toLowerCase().contains(searchQuery.toLowerCase()) ||
+            bidang.toLowerCase().contains(searchQuery.toLowerCase());
+
+        final tahunStr = prestasi['tahun'].toString();
+        final matchesYear = selectedYear == null || tahunStr == selectedYear;
+
+        final tingkatStr = (prestasi['tingkat'] ?? '').toString().toUpperCase();
+        final selectedTingkatUpper = selectedTingkat?.toUpperCase();
+        final matchesTingkat = selectedTingkat == null ||
+            tingkatStr == selectedTingkatUpper ||
+            tingkatStr.contains(selectedTingkatUpper ?? '');
+
+        return matchesSearch && matchesYear && matchesTingkat;
+      }).toList();
+
+      // Sort by year (newest first) then by ranking
+      filtered.sort((a, b) {
+        final yearA = a['tahun'].toString();
+        final yearB = b['tahun'].toString();
+        final yearComparison = yearB.compareTo(yearA);
+        if (yearComparison != 0) return yearComparison;
+
+        // Sort by ranking (Juara 1, 2, 3)
+        final rankA = _getRankingOrder(a['peringkat'] ?? '');
+        final rankB = _getRankingOrder(b['peringkat'] ?? '');
+        return rankA.compareTo(rankB);
+      });
+
+      return filtered;
+    } else {
+      // Using API data (Prestasi list) - filter already done in API for year and tingkat
+      var filtered = _prestasiList.where((prestasi) {
+        final matchesSearch = searchQuery.isEmpty ||
+            prestasi.namaLomba
+                .toLowerCase()
+                .contains(searchQuery.toLowerCase()) ||
+            prestasi.namaSantri
+                .toLowerCase()
+                .contains(searchQuery.toLowerCase()) ||
+            prestasi.bidang.toLowerCase().contains(searchQuery.toLowerCase());
+
+        return matchesSearch;
+      }).toList();
+
+      // Sort by year (newest first) then by ranking
+      filtered.sort((a, b) {
+        final yearComparison = b.tahun.compareTo(a.tahun);
+        if (yearComparison != 0) return yearComparison;
+        return a.rankingOrder.compareTo(b.rankingOrder);
+      });
+
+      return filtered;
+    }
   }
 
   int _getRankingOrder(String peringkat) {
@@ -157,20 +150,36 @@ class _PrestasiSantriScreenState extends State<PrestasiSantriScreen> {
   }
 
   List<String> get availableYears {
-    final years = prestasiData
-        .map((prestasi) => prestasi['tahun'] as String)
-        .toSet()
-        .toList();
-    years.sort((a, b) => b.compareTo(a)); // Sort descending (newest first)
-    return years;
+    if (_usesFallback) {
+      final years = prestasiData
+          .map((prestasi) => prestasi['tahun'].toString())
+          .toSet()
+          .toList();
+      years.sort((a, b) => b.compareTo(a)); // Sort descending (newest first)
+      return years;
+    } else {
+      // Get unique years from API data
+      final years =
+          _prestasiList.map((prestasi) => prestasi.tahun).toSet().toList();
+      years.sort((a, b) => b.compareTo(a));
+      return years;
+    }
   }
 
   List<String> get availableTingkat {
-    final tingkat = prestasiData
-        .map((prestasi) => prestasi['tingkat'] as String)
-        .toSet()
-        .toList();
-    return tingkat..sort();
+    if (_usesFallback) {
+      final tingkat = prestasiData
+          .map((prestasi) => (prestasi['tingkat'] as String?) ?? '')
+          .where((t) => t.isNotEmpty)
+          .toSet()
+          .toList();
+      return tingkat..sort();
+    } else {
+      // Get unique tingkat from API data
+      final tingkat =
+          _prestasiList.map((prestasi) => prestasi.tingkat).toSet().toList();
+      return tingkat..sort();
+    }
   }
 
   @override
@@ -181,10 +190,40 @@ class _PrestasiSantriScreenState extends State<PrestasiSantriScreen> {
 
   @override
   Widget build(BuildContext context) {
+    if (_isLoading) {
+      return Scaffold(
+        backgroundColor: AppColors.primaryGreen,
+        body:
+            const Center(child: CircularProgressIndicator(color: Colors.white)),
+      );
+    }
+
     return Scaffold(
       backgroundColor: AppColors.primaryGreen,
       body: Column(
         children: [
+          if (_errorMessage != null)
+            Container(
+              width: double.infinity,
+              padding: const EdgeInsets.all(12),
+              color: Colors.orange.shade100,
+              child: Row(
+                children: [
+                  Icon(Icons.info_outline,
+                      color: Colors.orange.shade700, size: 20),
+                  const SizedBox(width: 8),
+                  Expanded(
+                    child: Text(
+                      _errorMessage!,
+                      style: TextStyle(
+                          color: Colors.orange.shade900, fontSize: 12),
+                      maxLines: 2,
+                      overflow: TextOverflow.ellipsis,
+                    ),
+                  ),
+                ],
+              ),
+            ),
           _buildHeader(),
           Expanded(
             child: Container(
@@ -383,6 +422,10 @@ class _PrestasiSantriScreenState extends State<PrestasiSantriScreen> {
                             setState(() {
                               selectedYear = value;
                             });
+                            if (!_usesFallback) {
+                              _fetchPrestasiData(
+                                  tahun: value, tingkat: selectedTingkat);
+                            }
                           },
                         ),
                       ),
@@ -431,6 +474,10 @@ class _PrestasiSantriScreenState extends State<PrestasiSantriScreen> {
                             setState(() {
                               selectedTingkat = value;
                             });
+                            if (!_usesFallback) {
+                              _fetchPrestasiData(
+                                  tahun: selectedYear, tingkat: value);
+                            }
                           },
                         ),
                       ),
@@ -447,12 +494,26 @@ class _PrestasiSantriScreenState extends State<PrestasiSantriScreen> {
 
   Widget _buildStats() {
     final filteredCount = filteredPrestasi.length;
-    final juara1Count =
-        filteredPrestasi.where((p) => p['peringkat'].contains('1')).length;
-    final nasionalCount =
-        filteredPrestasi.where((p) => p['tingkat'] == 'Nasional').length;
-    final internasionalCount =
-        filteredPrestasi.where((p) => p['tingkat'] == 'Internasional').length;
+
+    int juara1Count;
+    int nasionalCount;
+    int internasionalCount;
+
+    if (_usesFallback) {
+      juara1Count =
+          filteredPrestasi.where((p) => p['peringkat'].contains('1')).length;
+      nasionalCount =
+          filteredPrestasi.where((p) => p['tingkat'] == 'Nasional').length;
+      internasionalCount =
+          filteredPrestasi.where((p) => p['tingkat'] == 'Internasional').length;
+    } else {
+      juara1Count =
+          filteredPrestasi.where((p) => (p as Prestasi).isJuara1).length;
+      nasionalCount =
+          filteredPrestasi.where((p) => (p as Prestasi).isNasional).length;
+      internasionalCount =
+          filteredPrestasi.where((p) => (p as Prestasi).isInternasional).length;
+    }
 
     return Container(
       margin: const EdgeInsets.symmetric(horizontal: 20, vertical: 10),
@@ -561,12 +622,16 @@ class _PrestasiSantriScreenState extends State<PrestasiSantriScreen> {
           Expanded(
             child: filteredPrestasi.isEmpty
                 ? _buildEmptyState()
-                : ListView.builder(
-                    itemCount: filteredPrestasi.length,
-                    itemBuilder: (context, index) {
-                      final prestasi = filteredPrestasi[index];
-                      return _buildPrestasiCard(prestasi, index);
-                    },
+                : RefreshIndicator(
+                    onRefresh: () => _fetchPrestasiData(
+                        tahun: selectedYear, tingkat: selectedTingkat),
+                    child: ListView.builder(
+                      itemCount: filteredPrestasi.length,
+                      itemBuilder: (context, index) {
+                        final prestasi = filteredPrestasi[index];
+                        return _buildPrestasiCard(prestasi, index);
+                      },
+                    ),
                   ),
           ),
         ],
@@ -605,7 +670,38 @@ class _PrestasiSantriScreenState extends State<PrestasiSantriScreen> {
     );
   }
 
-  Widget _buildPrestasiCard(Map<String, dynamic> prestasi, int index) {
+  Widget _buildPrestasiCard(dynamic prestasi, int index) {
+    // Handle both Prestasi model and Map (fallback data)
+    String namaLomba,
+        bidang,
+        penyelenggara,
+        tingkat,
+        peringkat,
+        tahun,
+        namaSantri,
+        kelas;
+
+    if (prestasi is Prestasi) {
+      namaLomba = prestasi.namaLomba;
+      bidang = prestasi.bidang;
+      penyelenggara = prestasi.penyelenggara;
+      tingkat = prestasi.tingkat;
+      peringkat = prestasi.peringkat;
+      tahun = prestasi.tahun;
+      namaSantri = prestasi.namaSantri;
+      kelas = prestasi.kelasSantri;
+    } else {
+      // Fallback Map data
+      namaLomba = prestasi['namaLomba'] ?? '-';
+      bidang = prestasi['bidang'] ?? prestasi['keterangan'] ?? '-';
+      penyelenggara = prestasi['penyelenggara'] ?? '-';
+      tingkat = prestasi['tingkat'] ?? '-';
+      peringkat = prestasi['peringkat'] ?? '-';
+      tahun = prestasi['tahun']?.toString() ?? '-';
+      namaSantri = prestasi['santri'] ?? prestasi['namaSantri'] ?? '-';
+      kelas = prestasi['kelas'] ?? '-';
+    }
+
     return Container(
       margin: const EdgeInsets.only(bottom: 15),
       decoration: BoxDecoration(
@@ -627,17 +723,17 @@ class _PrestasiSantriScreenState extends State<PrestasiSantriScreen> {
         leading: Container(
           padding: const EdgeInsets.all(8),
           decoration: BoxDecoration(
-            color: _getRankingColor(prestasi['peringkat']).withOpacity(0.2),
+            color: _getRankingColor(peringkat).withOpacity(0.2),
             borderRadius: BorderRadius.circular(10),
           ),
           child: Icon(
-            _getRankingIcon(prestasi['peringkat']),
-            color: _getRankingColor(prestasi['peringkat']),
+            _getRankingIcon(peringkat),
+            color: _getRankingColor(peringkat),
             size: 20,
           ),
         ),
         title: Text(
-          prestasi['namaLomba'],
+          namaLomba,
           style: const TextStyle(
             fontWeight: FontWeight.bold,
             fontSize: 16,
@@ -653,11 +749,11 @@ class _PrestasiSantriScreenState extends State<PrestasiSantriScreen> {
                   padding:
                       const EdgeInsets.symmetric(horizontal: 8, vertical: 2),
                   decoration: BoxDecoration(
-                    color: _getRankingColor(prestasi['peringkat']),
+                    color: _getRankingColor(peringkat),
                     borderRadius: BorderRadius.circular(10),
                   ),
                   child: Text(
-                    prestasi['peringkat'],
+                    peringkat,
                     style: const TextStyle(
                       color: Colors.white,
                       fontSize: 11,
@@ -670,14 +766,13 @@ class _PrestasiSantriScreenState extends State<PrestasiSantriScreen> {
                   padding:
                       const EdgeInsets.symmetric(horizontal: 8, vertical: 2),
                   decoration: BoxDecoration(
-                    color:
-                        _getTingkatColor(prestasi['tingkat']).withOpacity(0.2),
+                    color: _getTingkatColor(tingkat).withOpacity(0.2),
                     borderRadius: BorderRadius.circular(10),
                   ),
                   child: Text(
-                    prestasi['tingkat'],
+                    tingkat,
                     style: TextStyle(
-                      color: _getTingkatColor(prestasi['tingkat']),
+                      color: _getTingkatColor(tingkat),
                       fontSize: 11,
                       fontWeight: FontWeight.w500,
                     ),
@@ -685,7 +780,7 @@ class _PrestasiSantriScreenState extends State<PrestasiSantriScreen> {
                 ),
                 const Spacer(),
                 Text(
-                  prestasi['tahun'],
+                  tahun,
                   style: const TextStyle(
                     color: Colors.grey,
                     fontSize: 12,
@@ -696,7 +791,7 @@ class _PrestasiSantriScreenState extends State<PrestasiSantriScreen> {
             ),
             const SizedBox(height: 5),
             Text(
-              '${prestasi['namaSantri']} - ${prestasi['kelas']}',
+              '$namaSantri - $kelas',
               style: const TextStyle(
                 color: Colors.grey,
                 fontSize: 13,
@@ -705,13 +800,13 @@ class _PrestasiSantriScreenState extends State<PrestasiSantriScreen> {
           ],
         ),
         children: [
-          _buildDetailRow('Bidang', prestasi['bidang']),
-          _buildDetailRow('Penyelenggara', prestasi['penyelenggara']),
-          _buildDetailRow('Tingkat', prestasi['tingkat']),
-          _buildDetailRow('Peringkat', prestasi['peringkat']),
-          _buildDetailRow('Tahun', prestasi['tahun']),
-          _buildDetailRow('Nama Santri', prestasi['namaSantri']),
-          _buildDetailRow('Kelas', prestasi['kelas']),
+          _buildDetailRow('Bidang', bidang),
+          _buildDetailRow('Penyelenggara', penyelenggara),
+          _buildDetailRow('Tingkat', tingkat),
+          _buildDetailRow('Peringkat', peringkat),
+          _buildDetailRow('Tahun', tahun),
+          _buildDetailRow('Nama Santri', namaSantri),
+          _buildDetailRow('Kelas', kelas),
         ],
       ),
     );
@@ -765,12 +860,22 @@ class _PrestasiSantriScreenState extends State<PrestasiSantriScreen> {
 
   Color _getTingkatColor(String tingkat) {
     switch (tingkat.toLowerCase()) {
+      case 'internasional':
+        return Colors.purple.shade600;
       case 'nasional':
         return Colors.red.shade600;
       case 'provinsi':
         return Colors.blue.shade600;
+      case 'kabupaten/kota':
       case 'kabupaten':
+      case 'kota':
         return AppColors.primaryGreen;
+      case 'kecamatan':
+        return Colors.orange.shade600;
+      case 'kelurahan':
+        return Colors.teal.shade600;
+      case 'sekolah':
+        return Colors.grey.shade600;
       default:
         return Colors.grey.shade600;
     }

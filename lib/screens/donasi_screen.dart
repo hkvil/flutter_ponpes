@@ -78,7 +78,7 @@ class _DonationScreenState extends State<DonationScreen> {
             fontWeight: FontWeight.bold,
           ),
         ),
-        centerTitle: true,
+        centerTitle: false,
       ),
       body: RefreshIndicator(
         onRefresh: _loadDonations,

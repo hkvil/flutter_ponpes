@@ -1,18 +1,24 @@
 import 'package:flutter/material.dart';
+import 'package:cached_network_image/cached_network_image.dart';
 
 import '../core/theme/app_colors.dart';
 
 /// Container for displaying a banner with rounded corners.
 ///
-/// The banner can optionally display an image specified via [assetPath]. If
-/// no image is provided or if it fails to load, a fallback placeholder
-/// text will be shown. Use this at the top of screens to display
-/// promotional or informational images.
+/// The banner can display an image from URL (imageUrl) or local asset (assetPath).
+/// Priority: imageUrl > assetPath > fallback placeholder.
+/// Use this at the top of screens to display promotional or informational images.
 class TopBanner extends StatelessWidget {
   final String? assetPath;
+  final String? imageUrl; // URL from API
   final double height;
 
-  const TopBanner({super.key, this.assetPath, this.height = 148});
+  const TopBanner({
+    super.key,
+    this.assetPath,
+    this.imageUrl,
+    this.height = 148,
+  });
 
   @override
   Widget build(BuildContext context) {
@@ -27,15 +33,40 @@ class TopBanner extends StatelessWidget {
           // borderRadius: BorderRadius.circular(16),
         ),
         clipBehavior: Clip.antiAlias,
-        child: assetPath != null
-            ? Image.asset(
-                assetPath!,
-                fit: BoxFit.fill,
-                errorBuilder: (_, __, ___) => const _Fallback(),
-              )
-            : const _Fallback(),
+        child: _buildBannerImage(),
       ),
     );
+  }
+
+  Widget _buildBannerImage() {
+    // Priority: imageUrl (from API) > assetPath (local) > fallback
+    if (imageUrl != null && imageUrl!.isNotEmpty) {
+      return CachedNetworkImage(
+        imageUrl: imageUrl!,
+        fit: BoxFit.fill,
+        placeholder: (context, url) => const _Fallback(),
+        errorWidget: (context, url, error) => _buildAssetFallback(),
+      );
+    } else if (assetPath != null) {
+      return Image.asset(
+        assetPath!,
+        fit: BoxFit.fill,
+        errorBuilder: (_, __, ___) => const _Fallback(),
+      );
+    } else {
+      return const _Fallback();
+    }
+  }
+
+  Widget _buildAssetFallback() {
+    if (assetPath != null) {
+      return Image.asset(
+        assetPath!,
+        fit: BoxFit.fill,
+        errorBuilder: (_, __, ___) => const _Fallback(),
+      );
+    }
+    return const _Fallback();
   }
 }
 

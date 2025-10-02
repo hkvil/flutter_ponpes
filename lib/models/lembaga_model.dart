@@ -33,6 +33,8 @@ class Lembaga {
   final List<FrontImageItem> frontImages; // Foto untuk halaman depan
   final ImageItem? topBanner; // Banner atas untuk semua menu lembaga
   final ImageItem? botBanner; // Banner bawah untuk semua menu lembaga
+  final List<NewsItem> news; // Berita/artikel lembaga
+  final List<FileItem> files; // Dokumen/file lembaga
 
   Lembaga({
     required this.id,
@@ -50,6 +52,8 @@ class Lembaga {
     this.frontImages = const [],
     this.topBanner,
     this.botBanner,
+    this.news = const [],
+    this.files = const [],
   });
 
   /// Menerima JSON **flat** (seperti contohmu) atau **envelope Strapi** ({id, attributes:{...}}).
@@ -96,6 +100,8 @@ class Lembaga {
       videos: _list(attrs['videos'], VideoItem.fromAny),
       kontak: _list(attrs['kontak'], KontakItem.fromAny),
       frontImages: _list(attrs['frontImages'], FrontImageItem.fromAny),
+      news: _list(attrs['news'], NewsItem.fromAny),
+      files: _list(attrs['files'], FileItem.fromAny),
       topBanner: attrs['topBanner'] != null
           ? ImageItem.fromAny(attrs['topBanner'])
           : null,
@@ -298,5 +304,141 @@ class FrontImageItem {
     }
 
     return FrontImageItem();
+  }
+}
+
+class NewsItem {
+  final int? id;
+  final String title;
+  final String? thumbnail; // URL thumbnail dari media Strapi
+  final String content; // Markdown content
+
+  NewsItem({
+    this.id,
+    required this.title,
+    this.thumbnail,
+    required this.content,
+  });
+
+  String get resolvedThumbnail => _absoluteUrl(thumbnail ?? '');
+
+  /// Parse dari Strapi news object
+  /// Struktur: { id, title, thumbnail: { url, ... }, content }
+  /// atau: { id, title, thumbnail: { data: { attributes: { url } } }, content }
+  /// CATATAN: API mungkin salah ketik "thubmnail" - kita handle kedua versi
+  static NewsItem fromAny(dynamic any) {
+    if (any is Map) {
+      final m = any.cast<String, dynamic>();
+
+      // Ekstrak thumbnail URL dari media Strapi
+      // Handle typo: cek 'thubmnail' dulu, baru 'thumbnail'
+      String? thumbnailUrl;
+      final thumbnailData = m['thubmnail'] ?? m['thumbnail'];
+
+      if (thumbnailData is Map) {
+        // Format v5: { url, formats: {...} }
+        thumbnailUrl = thumbnailData['url'] as String?;
+
+        // Fallback ke formats jika url kosong (prioritas: small > medium > thumbnail)
+        if (thumbnailUrl == null || thumbnailUrl.isEmpty) {
+          final formats = thumbnailData['formats'] as Map<String, dynamic>?;
+          if (formats != null) {
+            thumbnailUrl = formats['small']?['url'] as String? ??
+                formats['medium']?['url'] as String? ??
+                formats['thumbnail']?['url'] as String?;
+          }
+        }
+
+        // Format v4: { data: { attributes: { url } } }
+        if (thumbnailUrl == null && thumbnailData['data'] is Map) {
+          final data = thumbnailData['data'] as Map;
+          if (data['attributes'] is Map) {
+            final attrs = data['attributes'] as Map<String, dynamic>;
+            thumbnailUrl = attrs['url'] as String?;
+
+            // Fallback ke formats
+            if (thumbnailUrl == null || thumbnailUrl.isEmpty) {
+              final formats = attrs['formats'] as Map<String, dynamic>?;
+              if (formats != null) {
+                thumbnailUrl = formats['small']?['url'] as String? ??
+                    formats['medium']?['url'] as String? ??
+                    formats['thumbnail']?['url'] as String?;
+              }
+            }
+          }
+        }
+      } else if (thumbnailData is String) {
+        thumbnailUrl = thumbnailData;
+      }
+
+      print(
+          '🔧 [NEWS_ITEM] Parsing - ID: ${m['id']}, Title: ${m['title']}, Thumbnail URL: $thumbnailUrl');
+
+      return NewsItem(
+        id: m['id'] as int?,
+        title: (m['title'] ?? '') as String,
+        thumbnail: thumbnailUrl,
+        content: (m['content'] ?? '') as String,
+      );
+    }
+    return NewsItem(title: '', content: '');
+  }
+}
+
+class FileItem {
+  final int? id;
+  final String nama;
+  final String url; // URL file untuk diunduh
+
+  FileItem({
+    this.id,
+    required this.nama,
+    required this.url,
+  });
+
+  String get resolvedUrl => _absoluteUrl(url);
+
+  /// Parse dari Strapi file object
+  /// Struktur: { id, nama, url }
+  /// atau dengan media: { id, nama, file: { url } }
+  /// atau dengan media v4: { id, nama, file: { data: { attributes: { url } } } }
+  static FileItem fromAny(dynamic any) {
+    if (any is Map) {
+      final m = any.cast<String, dynamic>();
+
+      // Ekstrak URL dari berbagai struktur
+      String? fileUrl;
+
+      // Coba ambil dari field 'url' langsung
+      fileUrl = m['url'] as String?;
+
+      // Jika tidak ada, coba dari field 'file'
+      if (fileUrl == null || fileUrl.isEmpty) {
+        final fileData = m['file'];
+
+        if (fileData is Map) {
+          // Format v5: { url }
+          fileUrl = fileData['url'] as String?;
+
+          // Format v4: { data: { attributes: { url } } }
+          if (fileUrl == null && fileData['data'] is Map) {
+            final data = fileData['data'] as Map;
+            if (data['attributes'] is Map) {
+              final attrs = data['attributes'] as Map<String, dynamic>;
+              fileUrl = attrs['url'] as String?;
+            }
+          }
+        } else if (fileData is String) {
+          fileUrl = fileData;
+        }
+      }
+
+      return FileItem(
+        id: m['id'] as int?,
+        nama: (m['nama'] ?? m['name'] ?? 'File') as String,
+        url: fileUrl ?? '',
+      );
+    }
+    return FileItem(nama: '', url: '');
   }
 }

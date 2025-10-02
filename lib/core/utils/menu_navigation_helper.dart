@@ -198,6 +198,7 @@ class MenuNavigationHelper {
             builder: (context) => InformasiScreen(
               title: '${lembaga.nama} - Informasi',
               lembagaName: lembaga.nama,
+              lembaga: lembaga,
             ),
           ),
         );

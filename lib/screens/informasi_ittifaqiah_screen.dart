@@ -216,6 +216,7 @@ class InformasiIttifaqiahScreen extends StatelessWidget {
                             title: 'Galeri Luar Negeri Al-Ittifaqiah',
                             lembaga: _createGaleriLuarNegeriData(),
                             crossAxisCount: 2,
+                            showTabs: false,
                           ),
                         ),
                       );
@@ -233,6 +234,7 @@ class InformasiIttifaqiahScreen extends StatelessWidget {
                             title: 'Galeri Tamu VIP Al-Ittifaqiah',
                             lembaga: _createGaleriTamuData(),
                             crossAxisCount: 2,
+                            showTabs: false,
                           ),
                         ),
                       );

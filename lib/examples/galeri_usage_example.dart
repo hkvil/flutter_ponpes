@@ -28,6 +28,16 @@ class GaleriExampleUsage {
     );
   }
 
+  // Contoh 3: Galeri tanpa tab (hanya foto)
+  static Widget galeriTanpaTabs(BuildContext context) {
+    return GaleriScreen(
+      title: 'Galeri Foto Saja',
+      lembaga: _createSampleData(),
+      crossAxisCount: 2,
+      showTabs: false, // Tidak ada tab foto/video
+    );
+  }
+
   // Sample data untuk demo
   static Lembaga _createSampleData() {
     return Lembaga(
@@ -86,6 +96,19 @@ Navigator.push(
   ),
 );
 
+3. UNTUK GALERI TANPA TAB (HANYA FOTO):
+Navigator.push(
+  context,
+  MaterialPageRoute(
+    builder: (context) => GaleriScreen(
+      title: 'Judul Galeri',
+      lembaga: dataLembaga,
+      crossAxisCount: 2,
+      showTabs: false, // Tanpa tab foto/video
+    ),
+  ),
+);
+
 KEUNTUNGAN 2 KOLOM:
 - Lebih banyak gambar terlihat dalam satu layar
 - Cocok untuk overview/daftar foto
@@ -96,4 +119,11 @@ KEUNTUNGAN 1 KOLOM:
 - Lebih fokus per foto
 - Cocok untuk showcase/portfolio
 - childAspectRatio otomatis menjadi 1.2 (lebih landscape)
+
+KEUNTUNGAN TANPA TAB (showTabs: false):
+- UI lebih sederhana dan clean
+- Fokus hanya pada foto tanpa distraksi
+- Cocok untuk galeri statis seperti Galeri Luar Negeri/Tamu
+- Tidak ada tab Video yang kosong
+- Loading lebih cepat karena tidak init TabController
 */

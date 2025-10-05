@@ -8,12 +8,14 @@ class GaleriScreen extends StatefulWidget {
   final String title;
   final Lembaga? lembaga; // Optional API data
   final int crossAxisCount; // Number of columns in grid (1 or 2)
+  final bool showTabs; // Whether to show photo/video tabs or photo only
 
   const GaleriScreen({
     super.key,
     required this.title,
     this.lembaga,
     this.crossAxisCount = 2, // Default 2 columns
+    this.showTabs = true, // Default show tabs
   });
 
   @override
@@ -22,17 +24,20 @@ class GaleriScreen extends StatefulWidget {
 
 class _GaleriScreenState extends State<GaleriScreen>
     with SingleTickerProviderStateMixin {
-  late TabController _tabController;
+  TabController? _tabController;
 
   @override
   void initState() {
     super.initState();
-    _tabController = TabController(length: 2, vsync: this);
+    // Only initialize TabController if tabs are needed
+    if (widget.showTabs) {
+      _tabController = TabController(length: 2, vsync: this);
+    }
   }
 
   @override
   void dispose() {
-    _tabController.dispose();
+    _tabController?.dispose();
     super.dispose();
   }
 
@@ -91,32 +96,39 @@ class _GaleriScreenState extends State<GaleriScreen>
           title: Text(widget.title),
           backgroundColor: Colors.green.shade700,
           foregroundColor: Colors.white,
-          bottom: TabBar(
-            controller: _tabController,
-            labelColor: Colors.white,
-            unselectedLabelColor: Colors.white70,
-            indicatorColor: Colors.white,
-            indicatorWeight: 3,
-            tabs: const [
-              Tab(
-                icon: Icon(Icons.photo_library),
-                text: 'Foto',
-              ),
-              Tab(
-                icon: Icon(Icons.video_library),
-                text: 'Video',
-              ),
-            ],
-          ),
+          // Only show TabBar if showTabs is true
+          bottom: widget.showTabs
+              ? TabBar(
+                  controller: _tabController!,
+                  labelColor: Colors.white,
+                  unselectedLabelColor: Colors.white70,
+                  indicatorColor: Colors.white,
+                  indicatorWeight: 3,
+                  tabs: const [
+                    Tab(
+                      icon: Icon(Icons.photo_library),
+                      text: 'Foto',
+                    ),
+                    Tab(
+                      icon: Icon(Icons.video_library),
+                      text: 'Video',
+                    ),
+                  ],
+                )
+              : null,
         ),
-        body: TabBarView(
-          controller: _tabController,
-          children: [
-            _FotoTab(
+        body: widget.showTabs
+            ? TabBarView(
+                controller: _tabController!,
+                children: [
+                  _FotoTab(
+                      lembaga: widget.lembaga,
+                      crossAxisCount: widget.crossAxisCount),
+                  _VideoTab(lembaga: widget.lembaga),
+                ],
+              )
+            : _FotoTab(
                 lembaga: widget.lembaga, crossAxisCount: widget.crossAxisCount),
-            _VideoTab(lembaga: widget.lembaga),
-          ],
-        ),
       ),
     );
   }

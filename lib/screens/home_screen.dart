@@ -162,6 +162,9 @@ class HomeScreen extends StatelessWidget {
                                 if (title == 'DONASI') {
                                   Navigator.pushNamed(
                                       context, AppRouter.donasi);
+                                } else if (title == 'INFORMASI') {
+                                  Navigator.pushNamed(
+                                      context, AppRouter.informasi);
                                 } else {
                                   Navigator.pushNamed(
                                     context,

@@ -7,11 +7,13 @@ import '../models/lembaga_model.dart';
 class GaleriScreen extends StatefulWidget {
   final String title;
   final Lembaga? lembaga; // Optional API data
+  final int crossAxisCount; // Number of columns in grid (1 or 2)
 
   const GaleriScreen({
     super.key,
     required this.title,
     this.lembaga,
+    this.crossAxisCount = 2, // Default 2 columns
   });
 
   @override
@@ -110,7 +112,8 @@ class _GaleriScreenState extends State<GaleriScreen>
         body: TabBarView(
           controller: _tabController,
           children: [
-            _FotoTab(lembaga: widget.lembaga),
+            _FotoTab(
+                lembaga: widget.lembaga, crossAxisCount: widget.crossAxisCount),
             _VideoTab(lembaga: widget.lembaga),
           ],
         ),
@@ -122,8 +125,9 @@ class _GaleriScreenState extends State<GaleriScreen>
 // Tab Foto
 class _FotoTab extends StatelessWidget {
   final Lembaga? lembaga;
+  final int crossAxisCount;
 
-  const _FotoTab({this.lembaga});
+  const _FotoTab({this.lembaga, this.crossAxisCount = 2});
 
   @override
   Widget build(BuildContext context) {
@@ -207,11 +211,11 @@ class _FotoTab extends StatelessWidget {
         Expanded(
           child: GridView.builder(
             padding: const EdgeInsets.all(16),
-            gridDelegate: const SliverGridDelegateWithFixedCrossAxisCount(
-              crossAxisCount: 2,
+            gridDelegate: SliverGridDelegateWithFixedCrossAxisCount(
+              crossAxisCount: crossAxisCount,
               crossAxisSpacing: 12,
               mainAxisSpacing: 12,
-              childAspectRatio: 0.8,
+              childAspectRatio: crossAxisCount == 1 ? 1.2 : 0.8,
             ),
             itemCount: lembaga!.images.length,
             itemBuilder: (context, index) {

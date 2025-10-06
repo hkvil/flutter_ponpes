@@ -21,17 +21,23 @@ class HomeScreen extends StatefulWidget {
   const HomeScreen({super.key});
 
   /// List of menu items: each entry holds a title and the path to its icon.
-  static const List<(String, String)> _menuItems = [
-    ('PPI', 'assets/icons/ppi.png'),
-    ('YALQI', 'assets/icons/yalqi.png'),
-    ('IAIQI', 'assets/icons/iaiqi.png'),
-    ('PANTI', 'assets/icons/panti.png'),
-    ('BMT', 'assets/icons/bmt.png'),
-    ('BUMY', 'assets/icons/bumy.png'),
-    ('KOPERASI', 'assets/icons/koperasi.png'),
-    ('PPDB', 'assets/icons/ppdb.png'),
-    ('DONASI', 'assets/icons/donasi.png'),
-    ('INFORMASI', 'assets/icons/informasi.png'),
+  static const List<({String title, String? iconPath, IconData? iconData})>
+      _menuItems = [
+    (title: 'PPI', iconPath: 'assets/icons/ppi.png', iconData: null),
+    (title: 'YALQI', iconPath: 'assets/icons/yalqi.png', iconData: null),
+    (title: 'IAIQI', iconPath: 'assets/icons/iaiqi.png', iconData: null),
+    (title: 'PANTI', iconPath: 'assets/icons/panti.png', iconData: null),
+    (title: 'BMT', iconPath: 'assets/icons/bmt.png', iconData: null),
+    (title: 'BUMY', iconPath: 'assets/icons/bumy.png', iconData: null),
+    (title: 'KOPERASI', iconPath: 'assets/icons/koperasi.png', iconData: null),
+    (title: 'PPDB', iconPath: 'assets/icons/ppdb.png', iconData: null),
+    (title: 'DONASI', iconPath: 'assets/icons/donasi.png', iconData: null),
+    (
+      title: 'INFORMASI',
+      iconPath: 'assets/icons/informasi.png',
+      iconData: null
+    ),
+    (title: 'AKUN', iconPath: null, iconData: Icons.account_circle_outlined),
   ];
 
   @override
@@ -122,102 +128,108 @@ class _HomeScreenState extends State<HomeScreen> {
           automaticallyImplyLeading: false,
           isHomeScreen: true,
         ),
-        body: Column(
+        body: ListView(
           children: [
             // Carousel dengan Provider
             _buildSlider(),
-            Expanded(
-              child: Column(
-                children: [
-                  Padding(
-                    padding:
-                        const EdgeInsets.symmetric(horizontal: 1, vertical: 1),
-                    child: Material(
-                      elevation: 12,
-                      borderRadius: BorderRadius.circular(12),
-                      child: Container(
-                        padding: const EdgeInsets.symmetric(vertical: 24),
-                        child: Column(
-                          crossAxisAlignment: CrossAxisAlignment.center,
-                          children: [
-                            MenuRow(
-                              items: [HomeScreen._menuItems[0]],
-                              buttonSize: 48,
-                              onTap: (title) {
-                                Navigator.pushNamed(
-                                  context,
-                                  AppRouter.menu,
-                                  arguments: MenuScreenArgs(title: title),
-                                );
-                              },
-                            ),
-                            SizedBox(height: 8),
-                            MenuRow(
-                              items: HomeScreen._menuItems.sublist(1, 4),
-                              buttonSize: 48,
-                              onTap: (title) {
-                                Navigator.pushNamed(
-                                  context,
-                                  AppRouter.menu,
-                                  arguments: MenuScreenArgs(title: title),
-                                );
-                              },
-                            ),
-                            SizedBox(height: 8),
-                            MenuRow(
-                              items: HomeScreen._menuItems.sublist(4, 7),
-                              buttonSize: 48,
-                              onTap: (title) {
-                                Navigator.pushNamed(
-                                  context,
-                                  AppRouter.menu,
-                                  arguments: MenuScreenArgs(title: title),
-                                );
-                              },
-                            ),
-                            SizedBox(height: 8),
-                            MenuRow(
-                              items: HomeScreen._menuItems.sublist(7, 10),
-                              buttonSize: 48,
-                              onTap: (title) {
-                                if (title == 'DONASI') {
-                                  Navigator.pushNamed(
-                                      context, AppRouter.donasi);
-                                } else if (title == 'INFORMASI') {
-                                  Navigator.pushNamed(
-                                      context, AppRouter.informasi);
-                                } else {
-                                  Navigator.pushNamed(
-                                    context,
-                                    AppRouter.menu,
-                                    arguments: MenuScreenArgs(title: title),
-                                  );
-                                }
-                              },
-                            ),
-                          ],
-                        ),
+            Padding(
+              padding: const EdgeInsets.symmetric(horizontal: 1, vertical: 1),
+              child: Material(
+                elevation: 12,
+                borderRadius: BorderRadius.circular(12),
+                child: Container(
+                  padding: const EdgeInsets.symmetric(vertical: 24),
+                  child: Column(
+                    crossAxisAlignment: CrossAxisAlignment.center,
+                    children: [
+                      MenuRow(
+                        items: [HomeScreen._menuItems[0]],
+                        buttonSize: 48,
+                        onTap: (title) {
+                          Navigator.pushNamed(
+                            context,
+                            AppRouter.menu,
+                            arguments: MenuScreenArgs(title: title),
+                          );
+                        },
                       ),
-                    ),
-                  ),
-                  Padding(
-                    padding: const EdgeInsets.fromLTRB(16, 8, 16, 6),
-                    child: Align(
-                      alignment: Alignment.centerLeft,
-                      child: SectionHeader(
-                        title: 'Prestasi dan Penghargaan',
-                        backgroundColor: Colors.green.shade700,
-                        textColor: Colors.white,
+                      const SizedBox(height: 8),
+                      MenuRow(
+                        items: HomeScreen._menuItems.sublist(1, 4),
+                        buttonSize: 48,
+                        onTap: (title) {
+                          Navigator.pushNamed(
+                            context,
+                            AppRouter.menu,
+                            arguments: MenuScreenArgs(title: title),
+                          );
+                        },
                       ),
-                    ),
+                      const SizedBox(height: 8),
+                      MenuRow(
+                        items: HomeScreen._menuItems.sublist(4, 7),
+                        buttonSize: 48,
+                        onTap: (title) {
+                          Navigator.pushNamed(
+                            context,
+                            AppRouter.menu,
+                            arguments: MenuScreenArgs(title: title),
+                          );
+                        },
+                      ),
+                      const SizedBox(height: 8),
+                      MenuRow(
+                        items: HomeScreen._menuItems.sublist(7, 10),
+                        buttonSize: 48,
+                        onTap: (title) {
+                          if (title == 'DONASI') {
+                            Navigator.pushNamed(context, AppRouter.donasi);
+                          } else if (title == 'INFORMASI') {
+                            Navigator.pushNamed(context, AppRouter.informasi);
+                          } else {
+                            Navigator.pushNamed(
+                              context,
+                              AppRouter.menu,
+                              arguments: MenuScreenArgs(title: title),
+                            );
+                          }
+                        },
+                      ),
+                      const SizedBox(height: 8),
+                      MenuRow(
+                        items: [HomeScreen._menuItems[10]],
+                        buttonSize: 48,
+                        alignment: MainAxisAlignment.center,
+                        onTap: (title) {
+                          if (title == 'AKUN') {
+                            Navigator.pushNamed(context, AppRouter.account);
+                          } else {
+                            Navigator.pushNamed(
+                              context,
+                              AppRouter.menu,
+                              arguments: MenuScreenArgs(title: title),
+                            );
+                          }
+                        },
+                      ),
+                    ],
                   ),
-                  // Achievement section dengan API call
-                  const Expanded(
-                    child: AchievementSection(),
-                  ),
-                ],
+                ),
               ),
             ),
+            Padding(
+              padding: const EdgeInsets.fromLTRB(16, 8, 16, 6),
+              child: Align(
+                alignment: Alignment.centerLeft,
+                child: SectionHeader(
+                  title: 'Prestasi dan Penghargaan',
+                  backgroundColor: Colors.green.shade700,
+                  textColor: Colors.white,
+                ),
+              ),
+            ),
+            // Achievement section dengan API call
+            const AchievementSection(),
           ],
         ),
         bottomNavigationBar:
@@ -228,7 +240,7 @@ class _HomeScreenState extends State<HomeScreen> {
 }
 
 class MenuRow extends StatelessWidget {
-  final List<(String, String)> items;
+  final List<({String title, String? iconPath, IconData? iconData})> items;
   final void Function(String title) onTap;
   final double buttonSize;
   final MainAxisAlignment alignment;
@@ -246,10 +258,11 @@ class MenuRow extends StatelessWidget {
       children: [
         for (final item in items)
           MenuButton(
-            title: item.$1,
-            iconPath: item.$2,
+            title: item.title,
+            iconPath: item.iconPath,
+            iconData: item.iconData,
             buttonSize: buttonSize,
-            onTap: () => onTap(item.$1),
+            onTap: () => onTap(item.title),
           ),
       ],
     );

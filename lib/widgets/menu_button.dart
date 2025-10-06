@@ -9,17 +9,22 @@ import '../core/theme/app_colors.dart';
 /// design. An error icon appears if the provided image cannot be loaded.
 class MenuButton extends StatelessWidget {
   final String title;
-  final String iconPath;
+  final String? iconPath;
+  final IconData? iconData;
   final VoidCallback onTap;
   final double buttonSize;
 
   const MenuButton({
     super.key,
     required this.title,
-    required this.iconPath,
+    this.iconPath,
+    this.iconData,
     required this.onTap,
     this.buttonSize = 48,
-  });
+  })  : assert(iconPath != null || iconData != null,
+            'Either iconPath or iconData must be provided.'),
+        assert(iconPath == null || iconData == null,
+            'Cannot provide both iconPath and iconData.');
 
   @override
   Widget build(BuildContext context) {
@@ -41,13 +46,20 @@ class MenuButton extends StatelessWidget {
                     Border.all(color: AppColors.primaryGreen.withOpacity(.3)),
               ),
               alignment: Alignment.center,
-              child: Image.asset(
-                iconPath,
-                height: buttonSize * 0.75,
-                width: buttonSize * 0.75,
-                errorBuilder: (_, __, ___) => const Icon(Icons.apps),
-              ),
+              child: iconPath != null
+                  ? Image.asset(
+                      iconPath!,
+                      height: buttonSize * 0.75,
+                      width: buttonSize * 0.75,
+                      errorBuilder: (_, __, ___) => const Icon(Icons.apps),
+                    )
+                  : Icon(
+                      iconData,
+                      size: buttonSize * 0.75,
+                      color: AppColors.primaryGreen,
+                    ),
             ),
+            const SizedBox(height: 4),
             Text(
               title,
               textAlign: TextAlign.center,

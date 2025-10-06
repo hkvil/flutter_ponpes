@@ -43,7 +43,7 @@ class KelasProvider extends ChangeNotifier {
         pageSize: pageSize,
       );
       final kelasNames = result
-          .map((kelas) => kelas.namaKelas)
+          .map((kelas) => kelas.kelas)
           .where((name) => name.isNotEmpty)
           .toList();
       state.setData(List.unmodifiable(kelasNames));

@@ -33,9 +33,7 @@ class _MenuScreenState extends State<MenuScreen> {
   void initState() {
     super.initState();
     WidgetsBinding.instance.addPostFrameCallback((_) {
-      context
-          .read<BannerMenuUtamaProvider>()
-          .fetchBanner(widget.args.title);
+      context.read<BannerMenuUtamaProvider>().fetchBanner(widget.args.title);
     });
   }
 
@@ -45,7 +43,8 @@ class _MenuScreenState extends State<MenuScreen> {
     final bannerProvider = context.watch<BannerMenuUtamaProvider>();
     final bannerState = bannerProvider.bannerState(widget.args.title);
     final BannerMenuUtama? banner = bannerState.data;
-    final bool isLoadingBanner = bannerState.isLoading && !bannerState.hasLoaded;
+    final bool isLoadingBanner =
+        bannerState.isLoading && !bannerState.hasLoaded;
 
     return ResponsiveWrapper(
       child: Scaffold(
@@ -189,7 +188,7 @@ class _MenuScreenState extends State<MenuScreen> {
           ],
         ),
         bottomNavigationBar: BottomBanner(
-          imageUrl: _banner?.resolvedBottomBannerUrl,
+          imageUrl: banner?.resolvedBottomBannerUrl,
           assetPath: 'assets/banners/bottom.png', // Fallback
         ),
       ),

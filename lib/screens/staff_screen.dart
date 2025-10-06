@@ -1,10 +1,12 @@
 import 'package:flutter/material.dart';
+import 'package:provider/provider.dart';
+
 import '../core/theme/app_colors.dart';
 import '../core/utils/menu_slug_mapper.dart';
-import '../repository/staff_repository.dart';
-import '../repository/kehadiran_repository.dart';
 import '../models/staff.dart';
 import '../models/kehadiran_guru.dart';
+import '../providers/staff_provider.dart';
+import '../providers/kehadiran_provider.dart';
 import '../data/fallback/staff_fallback.dart';
 import '../data/fallback/kehadiran_fallback.dart';
 
@@ -97,8 +99,6 @@ class DaftarStaffTab extends StatefulWidget {
 }
 
 class _DaftarStaffTabState extends State<DaftarStaffTab> {
-  final StaffRepository _staffRepo = StaffRepository();
-
   bool _isLoading = true;
   String? _errorMessage;
   List<Staff> _staffList = [];
@@ -121,13 +121,32 @@ class _DaftarStaffTabState extends State<DaftarStaffTab> {
 
     try {
       final slug = _getLembagaSlug(widget.lembagaName);
-      final staffList = await _staffRepo.getStaffByLembaga(slug);
+      if (slug.isEmpty) {
+        throw Exception('Slug lembaga tidak ditemukan');
+      }
 
-      setState(() {
-        _staffList = staffList;
-        _usesFallback = false;
-        _isLoading = false;
-      });
+      final provider = context.read<StaffProvider>();
+      final staffList = await provider.fetchStaffByLembaga(
+        slug,
+        forceRefresh: true,
+      );
+      final state = provider.staffState(slug);
+
+      if (state.errorMessage != null && staffList.isEmpty) {
+        setState(() {
+          _staffList =
+              fallbackStaffData.map((json) => Staff.fromJson(json)).toList();
+          _usesFallback = true;
+          _errorMessage = state.errorMessage;
+          _isLoading = false;
+        });
+      } else {
+        setState(() {
+          _staffList = staffList;
+          _usesFallback = false;
+          _isLoading = false;
+        });
+      }
     } catch (e) {
       print('Error fetching staff: $e');
       // Use fallback data
@@ -1037,8 +1056,6 @@ class KehadiranStaffTab extends StatefulWidget {
 }
 
 class _KehadiranStaffTabState extends State<KehadiranStaffTab> {
-  final KehadiranRepository _kehadiranRepo = KehadiranRepository();
-
   bool _isLoading = true;
   String? _errorMessage;
   List<KehadiranGuru> _kehadiranList = [];
@@ -1061,14 +1078,33 @@ class _KehadiranStaffTabState extends State<KehadiranStaffTab> {
 
     try {
       final slug = _getLembagaSlug(widget.lembagaName);
-      final kehadiranList =
-          await _kehadiranRepo.getKehadiranGuruByLembaga(slug);
+      if (slug.isEmpty) {
+        throw Exception('Slug lembaga tidak ditemukan');
+      }
 
-      setState(() {
-        _kehadiranList = kehadiranList;
-        _usesFallback = false;
-        _isLoading = false;
-      });
+      final provider = context.read<KehadiranProvider>();
+      final kehadiranList = await provider.fetchGuruByLembaga(
+        slug,
+        forceRefresh: true,
+      );
+      final state = provider.guruState(slug);
+
+      if (state.errorMessage != null && kehadiranList.isEmpty) {
+        setState(() {
+          _kehadiranList = fallbackKehadiranGuruData
+              .map((json) => KehadiranGuru.fromJson(json))
+              .toList();
+          _usesFallback = true;
+          _errorMessage = state.errorMessage;
+          _isLoading = false;
+        });
+      } else {
+        setState(() {
+          _kehadiranList = kehadiranList;
+          _usesFallback = false;
+          _isLoading = false;
+        });
+      }
     } catch (e) {
       print('Error fetching kehadiran guru: $e');
       setState(() {
@@ -1215,16 +1251,39 @@ class _KehadiranStaffTabState extends State<KehadiranStaffTab> {
 
     try {
       final slug = _getLembagaSlug(widget.lembagaName);
-      final kehadiranList = await _kehadiranRepo.getKehadiranGuruByDateRange(
+      if (slug.isEmpty) {
+        throw Exception('Slug lembaga tidak ditemukan');
+      }
+
+      final provider = context.read<KehadiranProvider>();
+      final kehadiranList = await provider.fetchGuruByDateRange(
         slug,
         startDate!,
         endDate!,
+        forceRefresh: true,
+      );
+      final state = provider.guruState(
+        slug,
+        startDate: startDate,
+        endDate: endDate,
       );
 
-      setState(() {
-        _kehadiranList = kehadiranList;
-        _isLoading = false;
-      });
+      if (state.errorMessage != null && kehadiranList.isEmpty) {
+        setState(() {
+          _kehadiranList = fallbackKehadiranGuruData
+              .map((json) => KehadiranGuru.fromJson(json))
+              .toList();
+          _usesFallback = true;
+          _errorMessage = state.errorMessage;
+          _isLoading = false;
+        });
+      } else {
+        setState(() {
+          _kehadiranList = kehadiranList;
+          _usesFallback = false;
+          _isLoading = false;
+        });
+      }
     } catch (e) {
       print('Error fetching kehadiran guru by date range: $e');
       setState(() {

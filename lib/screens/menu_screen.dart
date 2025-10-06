@@ -1,4 +1,6 @@
 import 'package:flutter/material.dart';
+import 'package:provider/provider.dart';
+
 import 'detail_screen.dart';
 import '../widgets/top_bar.dart';
 import '../widgets/bottom_banner.dart';
@@ -7,7 +9,7 @@ import '../widgets/top_banner.dart';
 import '../widgets/responsive_wrapper.dart';
 import '../core/constants/detail_lists.dart';
 import '../models/banner_menu_utama_model.dart';
-import '../repository/banner_menu_utama_repository.dart';
+import '../providers/banner_menu_utama_provider.dart';
 
 /// Class argumen tetap.
 class MenuScreenArgs {
@@ -27,53 +29,37 @@ class MenuScreen extends StatefulWidget {
 }
 
 class _MenuScreenState extends State<MenuScreen> {
-  final BannerMenuUtamaRepository _bannerRepository =
-      BannerMenuUtamaRepository();
-  BannerMenuUtama? _banner;
-  bool _isLoadingBanner = true;
-
   @override
   void initState() {
     super.initState();
-    _fetchBanner();
-  }
-
-  Future<void> _fetchBanner() async {
-    try {
-      final banner =
-          await _bannerRepository.getBannerByTitle(widget.args.title);
-      if (mounted) {
-        setState(() {
-          _banner = banner;
-          _isLoadingBanner = false;
-        });
-      }
-    } catch (e) {
-      print('❌ Error fetching banner: $e');
-      if (mounted) {
-        setState(() {
-          _isLoadingBanner = false;
-        });
-      }
-    }
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      context
+          .read<BannerMenuUtamaProvider>()
+          .fetchBanner(widget.args.title);
+    });
   }
 
   @override
   Widget build(BuildContext context) {
     print(widget.args.title);
+    final bannerProvider = context.watch<BannerMenuUtamaProvider>();
+    final bannerState = bannerProvider.bannerState(widget.args.title);
+    final BannerMenuUtama? banner = bannerState.data;
+    final bool isLoadingBanner = bannerState.isLoading && !bannerState.hasLoaded;
+
     return ResponsiveWrapper(
       child: Scaffold(
         appBar: TopBar(title: widget.args.title),
         body: Column(
           children: [
             // Use banner from API if available, fallback to assets
-            _isLoadingBanner
+            isLoadingBanner
                 ? Container(
                     height: 120,
                     child: Center(child: CircularProgressIndicator()),
                   )
                 : TopBanner(
-                    imageUrl: _banner?.resolvedTopBannerUrl,
+                    imageUrl: banner?.resolvedTopBannerUrl,
                     assetPath: 'assets/banners/top.png', // Fallback
                   ),
             SizedBox(height: 20),

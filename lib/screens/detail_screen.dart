@@ -1,13 +1,15 @@
 import 'package:flutter/material.dart';
+import 'package:provider/provider.dart';
 import 'package:pesantren_app/widgets/top_banner.dart';
 import 'package:pesantren_app/widgets/bottom_banner.dart';
 import 'package:pesantren_app/widgets/detail_layout.dart';
 import 'package:pesantren_app/widgets/banner_widget.dart';
 import 'package:pesantren_app/models/banner_config.dart';
+
 import '../widgets/responsive_wrapper.dart';
 import '../core/utils/menu_slug_mapper.dart';
-import '../repository/lembaga_repository.dart';
 import '../models/lembaga_model.dart';
+import '../providers/lembaga_provider.dart';
 
 class DetailScreen extends StatefulWidget {
   final String title;
@@ -24,72 +26,45 @@ class DetailScreen extends StatefulWidget {
 }
 
 class _DetailScreenState extends State<DetailScreen> {
-  final LembagaRepository _repository = LembagaRepository();
-  Lembaga? _cachedLembaga;
-  bool _isLoadingData = false;
   String? _lembagaSlug;
-  String? _loadingError;
 
   @override
   void initState() {
     super.initState();
-    _preloadLembagaData();
+    _initialize();
   }
 
-  Future<void> _preloadLembagaData() async {
-    // Get slug dari title
+  void _initialize() {
     _lembagaSlug = MenuSlugMapper.getSlugByMenuTitle(widget.title);
 
-    if (_lembagaSlug != null) {
-      setState(() {
-        _isLoadingData = true;
-        _loadingError = null;
+    if (_lembagaSlug != null && _lembagaSlug!.isNotEmpty) {
+      WidgetsBinding.instance.addPostFrameCallback((_) {
+        context.read<LembagaProvider>().fetchBySlug(_lembagaSlug!);
       });
-
-      try {
-        print(
-            '🔄 Pre-loading data untuk: ${widget.title} (slug: $_lembagaSlug)');
-
-        _cachedLembaga = await _repository.fetchBySlug(_lembagaSlug!);
-
-        if (_cachedLembaga != null) {
-          print('✅ Pre-load berhasil: ${_cachedLembaga!.nama}');
-          print('📸 Images: ${_cachedLembaga!.images.length} foto');
-          print('🎥 Videos: ${_cachedLembaga!.videos.length} video');
-          print(
-              '📄 Profil: ${_cachedLembaga!.hasProfilContent() ? "Ada" : "Kosong"}');
-          print(
-              '📋 Program Kerja: ${_cachedLembaga!.hasProgramKerjaContent() ? "Ada" : "Kosong"}');
-        } else {
-          print('❌ Pre-load gagal: Data tidak ditemukan');
-          _loadingError = 'Data tidak ditemukan';
-        }
-      } catch (e) {
-        print('❌ Pre-load error: $e');
-        _loadingError = e.toString();
-        _cachedLembaga = null;
-      }
-
-      if (mounted) {
-        setState(() => _isLoadingData = false);
-      }
     }
   }
 
-  /// Create BannerConfig from cached lembaga data
-  BannerConfig _createBannerConfig() {
-    if (_cachedLembaga != null) {
+  BannerConfig _createBannerConfig(Lembaga? lembaga) {
+    if (lembaga != null) {
       return BannerConfig.fromLembaga(
-        _cachedLembaga!.topBanner,
-        _cachedLembaga!.botBanner,
+        lembaga.topBanner,
+        lembaga.botBanner,
       );
     }
-    // Return empty banner config if no cached data
+
     return const BannerConfig();
   }
 
   @override
   Widget build(BuildContext context) {
+    final provider = context.watch<LembagaProvider>();
+    final lembagaState =
+        _lembagaSlug != null ? provider.lembagaState(_lembagaSlug!) : null;
+    final lembaga = lembagaState?.data;
+    final isLoadingData = lembagaState?.isLoading ?? false;
+    final loadingError = lembagaState?.errorMessage;
+    final bannerConfig = _createBannerConfig(lembaga);
+
     return ResponsiveWrapper(
       child: Scaffold(
         appBar: AppBar(
@@ -97,10 +72,9 @@ class _DetailScreenState extends State<DetailScreen> {
         ),
         body: Column(
           children: [
-            // Use BannerWidget with API data if available, fallback to TopBanner as placeholder
-            (_cachedLembaga != null && _createBannerConfig().hasTopBanner)
+            (lembaga != null && bannerConfig.hasTopBanner)
                 ? BannerWidget(
-                    bannerConfig: _createBannerConfig(),
+                    bannerConfig: bannerConfig,
                     isTopBanner: true,
                     height: 150,
                   )
@@ -108,9 +82,7 @@ class _DetailScreenState extends State<DetailScreen> {
                     assetPath: 'assets/banners/top.png',
                     height: 150,
                   ),
-
-            // Loading indicator untuk pre-load
-            if (_isLoadingData)
+            if (isLoadingData)
               Container(
                 padding: const EdgeInsets.all(12),
                 margin: const EdgeInsets.symmetric(horizontal: 16),
@@ -140,9 +112,7 @@ class _DetailScreenState extends State<DetailScreen> {
                   ],
                 ),
               ),
-
-            // Error indicator jika ada error loading
-            if (_loadingError != null && !_isLoadingData)
+            if (loadingError != null && !isLoadingData)
               Container(
                 padding: const EdgeInsets.all(12),
                 margin: const EdgeInsets.symmetric(horizontal: 16),
@@ -168,7 +138,7 @@ class _DetailScreenState extends State<DetailScreen> {
                             ),
                           ),
                           Text(
-                            'Menggunakan mode offline',
+                            loadingError,
                             style: TextStyle(
                               fontSize: 12,
                               color: Colors.orange.shade600,
@@ -180,7 +150,6 @@ class _DetailScreenState extends State<DetailScreen> {
                   ],
                 ),
               ),
-
             Expanded(
               child: Padding(
                 padding: const EdgeInsets.all(16.0),
@@ -188,20 +157,20 @@ class _DetailScreenState extends State<DetailScreen> {
                   title: widget.title,
                   menuItems: widget.menuItems,
                   lembagaSlug: _lembagaSlug,
-                  cachedLembaga: _cachedLembaga, // Pass cached data
+                  cachedLembaga: lembaga,
                 ),
               ),
             ),
           ],
         ),
         bottomNavigationBar:
-            (_cachedLembaga != null && _createBannerConfig().hasBottomBanner)
+            (lembaga != null && bannerConfig.hasBottomBanner)
                 ? BannerWidget(
-                    bannerConfig: _createBannerConfig(),
+                    bannerConfig: bannerConfig,
                     isTopBanner: false,
                     height: 100,
                   )
-                : BottomBanner(assetPath: 'assets/banners/bottom.png'),
+                : const BottomBanner(assetPath: 'assets/banners/bottom.png'),
       ),
     );
   }

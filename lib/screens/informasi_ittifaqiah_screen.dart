@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:markdown_widget/markdown_widget.dart';
+import 'package:provider/provider.dart';
 import 'package:pesantren_app/widgets/bottom_banner.dart';
 import 'package:pesantren_app/widgets/responsive_wrapper.dart';
 import 'package:pesantren_app/widgets/top_banner.dart';
@@ -12,7 +13,7 @@ import 'galeri_screen.dart';
 import 'blueprint_isci_dynamic_screen.dart';
 import '../models/lembaga_model.dart';
 import '../models/informasi_al_ittifaqiah_model.dart';
-import '../repository/informasi_al_ittifaqiah_repository.dart';
+import '../providers/informasi_al_ittifaqiah_provider.dart';
 import '../core/config/markdown_config.dart';
 
 class InformasiIttifaqiahScreen extends StatefulWidget {
@@ -24,8 +25,6 @@ class InformasiIttifaqiahScreen extends StatefulWidget {
 }
 
 class _InformasiIttifaqiahScreenState extends State<InformasiIttifaqiahScreen> {
-  final InformasiAlIttifaqiahRepository _repository =
-      InformasiAlIttifaqiahRepository();
   InformasiAlIttifaqiah? _informasiData;
   bool _isLoading = true;
   String? _errorMessage;
@@ -43,7 +42,9 @@ class _InformasiIttifaqiahScreenState extends State<InformasiIttifaqiahScreen> {
         _errorMessage = null;
       });
 
-      final data = await _repository.fetchInformasiAlIttifaqiah();
+      final provider = context.read<InformasiAlIttifaqiahProvider>();
+      final data = await provider.fetchInformasi(forceRefresh: true);
+      final state = provider.informasiState;
 
       // Debug print untuk melihat data yang dimuat
       print('DEBUG: Data loaded successfully');
@@ -60,6 +61,7 @@ class _InformasiIttifaqiahScreenState extends State<InformasiIttifaqiahScreen> {
       setState(() {
         _informasiData = data;
         _isLoading = false;
+        _errorMessage = state.errorMessage;
       });
     } catch (e) {
       print('DEBUG: Error loading data: $e');

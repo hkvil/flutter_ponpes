@@ -1,17 +1,14 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_login/flutter_login.dart';
-import '../repository/auth_repository.dart';
+import 'package:provider/provider.dart';
+
+import '../providers/auth_provider.dart';
 import '../widgets/responsive_wrapper.dart';
 
 class LoginScreen extends StatelessWidget {
   const LoginScreen({Key? key}) : super(key: key);
 
   Duration get loginTime => const Duration(milliseconds: 2250);
-
-  Future<String?> _authUser(LoginData data) async {
-    final repo = AuthRepository();
-    return await repo.login(identifier: data.name, password: data.password);
-  }
 
   Future<String?> _recoverPassword(String name) async {
     await Future.delayed(loginTime);
@@ -20,6 +17,20 @@ class LoginScreen extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    Future<String?> _authUser(LoginData data) async {
+      final authProvider = context.read<AuthProvider>();
+      final success = await authProvider.login(
+        identifier: data.name,
+        password: data.password,
+      );
+
+      if (success) {
+        return null;
+      }
+
+      return authProvider.authError ?? 'Login gagal';
+    }
+
     return ResponsiveWrapper(
       child: Scaffold(
         body: Column(

@@ -1,8 +1,10 @@
 import 'package:flutter/material.dart';
+import 'package:provider/provider.dart';
+
 import '../core/theme/app_colors.dart';
 import '../core/utils/menu_slug_mapper.dart';
-import '../repository/prestasi_repository.dart';
 import '../models/models.dart';
+import '../providers/prestasi_provider.dart';
 import '../data/fallback/prestasi_fallback.dart';
 
 class PrestasiSantriScreen extends StatefulWidget {
@@ -20,8 +22,6 @@ class PrestasiSantriScreen extends StatefulWidget {
 }
 
 class _PrestasiSantriScreenState extends State<PrestasiSantriScreen> {
-  final PrestasiRepository _prestasiRepo = PrestasiRepository();
-
   bool _isLoading = true;
   String? _errorMessage;
   List<Prestasi> _prestasiList = [];
@@ -46,17 +46,33 @@ class _PrestasiSantriScreenState extends State<PrestasiSantriScreen> {
 
     try {
       final slug = _getLembagaSlug(widget.lembagaName);
-      final prestasiList = await _prestasiRepo.getPrestasiByLembaga(
+      final provider = context.read<PrestasiProvider>();
+      final prestasiList = await provider.fetchPrestasiByLembaga(
+        slug,
+        tahun: tahun,
+        tingkat: tingkat,
+        forceRefresh: true,
+      );
+      final state = provider.prestasiState(
         slug,
         tahun: tahun,
         tingkat: tingkat,
       );
 
-      setState(() {
-        _prestasiList = prestasiList;
-        _usesFallback = false;
-        _isLoading = false;
-      });
+      if (state.errorMessage != null && prestasiList.isEmpty) {
+        setState(() {
+          _prestasiList = [];
+          _usesFallback = true;
+          _errorMessage = state.errorMessage;
+          _isLoading = false;
+        });
+      } else {
+        setState(() {
+          _prestasiList = prestasiList;
+          _usesFallback = false;
+          _isLoading = false;
+        });
+      }
     } catch (e) {
       print('Error fetching prestasi: $e');
       // Convert fallback data to empty list since we can't convert Map to Prestasi easily

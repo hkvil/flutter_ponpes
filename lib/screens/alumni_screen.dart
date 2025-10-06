@@ -1,8 +1,10 @@
 import 'package:flutter/material.dart';
+import 'package:provider/provider.dart';
+
 import '../core/theme/app_colors.dart';
 import '../core/utils/menu_slug_mapper.dart';
-import '../repository/santri_repository.dart';
 import '../models/models.dart';
+import '../providers/santri_provider.dart';
 import '../data/fallback/santri_fallback.dart';
 
 class AlumniScreen extends StatefulWidget {
@@ -20,8 +22,6 @@ class AlumniScreen extends StatefulWidget {
 }
 
 class _AlumniScreenState extends State<AlumniScreen> {
-  final SantriRepository _santriRepo = SantriRepository();
-
   bool _isLoading = true;
   String? _errorMessage;
   List<Santri> _alumniList = [];
@@ -45,14 +45,33 @@ class _AlumniScreenState extends State<AlumniScreen> {
 
     try {
       final slug = _getLembagaSlug(widget.lembagaName);
-      final alumniList =
-          await _santriRepo.getAlumniByLembaga(slug, tahunMasuk: tahunMasuk);
+      if (slug.isEmpty) {
+        throw Exception('Slug lembaga tidak ditemukan');
+      }
 
-      setState(() {
-        _alumniList = alumniList;
-        _usesFallback = false;
-        _isLoading = false;
-      });
+      final provider = context.read<SantriProvider>();
+      final alumniList = await provider.fetchAlumniByLembaga(
+        slug,
+        tahunMasuk: tahunMasuk,
+        forceRefresh: true,
+      );
+      final state = provider.alumniState(slug, tahunMasuk: tahunMasuk);
+
+      if (state.errorMessage != null && alumniList.isEmpty) {
+        setState(() {
+          _alumniList =
+              fallbackSantriData.map((json) => Santri.fromJson(json)).toList();
+          _usesFallback = true;
+          _errorMessage = state.errorMessage;
+          _isLoading = false;
+        });
+      } else {
+        setState(() {
+          _alumniList = alumniList;
+          _usesFallback = false;
+          _isLoading = false;
+        });
+      }
     } catch (e) {
       print('Error fetching alumni: $e');
       setState(() {

@@ -9,15 +9,57 @@ class AuthRepository extends BaseRepository {
 
   static const _storage = FlutterSecureStorage();
 
-  /// Debug method untuk memeriksa konfigurasi auth
-  static void debugAuthConfig() {
-    print('🔧 [AUTH_DEBUG] ===== Auth Configuration Debug =====');
-    print('🔧 [AUTH_DEBUG] API_HOST: ${dotenv.env['API_HOST']}');
-    print('🔧 [AUTH_DEBUG] Environment loaded: ${dotenv.isEveryDefined([
-          'API_HOST'
-        ])}');
-    print('🔧 [AUTH_DEBUG] All env vars: ${dotenv.env.keys.toList()}');
-    print('🔧 [AUTH_DEBUG] ========================================');
+  /// Token expiry duration in hours (default: 24 hours = 1 day)
+  static const int _tokenExpiryHours = 24;
+
+  /// Get token expiry duration from environment or use default
+  static int get tokenExpiryHours {
+    final envValue = dotenv.env['JWT_EXPIRY_HOURS'];
+    if (envValue != null) {
+      final parsed = int.tryParse(envValue);
+      if (parsed != null && parsed > 0) {
+        return parsed;
+      }
+    }
+    return _tokenExpiryHours;
+  }
+
+  /// Check if the stored JWT token is expired
+  static Future<bool> isTokenExpired() async {
+    try {
+      final loginTimeStr = await _storage.read(key: 'jwt_login_time');
+      if (loginTimeStr == null) {
+        print(
+            '⏰ [TOKEN_EXPIRY] No login time found - token considered expired');
+        return true;
+      }
+
+      final loginTime =
+          DateTime.fromMillisecondsSinceEpoch(int.parse(loginTimeStr));
+      final now = DateTime.now();
+      final expiryDuration = Duration(hours: tokenExpiryHours);
+      final expiryTime = loginTime.add(expiryDuration);
+
+      final isExpired = now.isAfter(expiryTime);
+      final remainingTime = expiryTime.difference(now);
+
+      print('⏰ [TOKEN_EXPIRY] Token expiry check:');
+      print('⏰ [TOKEN_EXPIRY] - Login time: $loginTime');
+      print('⏰ [TOKEN_EXPIRY] - Current time: $now');
+      print('⏰ [TOKEN_EXPIRY] - Expiry duration: ${tokenExpiryHours} hours');
+      print('⏰ [TOKEN_EXPIRY] - Expiry time: $expiryTime');
+      print('⏰ [TOKEN_EXPIRY] - Is expired: $isExpired');
+
+      if (!isExpired && remainingTime.inMinutes < 60) {
+        print(
+            '⏰ [TOKEN_EXPIRY] - Remaining time: ${remainingTime.inMinutes} minutes');
+      }
+
+      return isExpired;
+    } catch (e) {
+      print('⏰ [TOKEN_EXPIRY] Error checking token expiry: $e');
+      return true; // Consider expired if error occurs
+    }
   }
 
   /// Test koneksi ke API endpoint
@@ -117,6 +159,14 @@ class AuthRepository extends BaseRepository {
 
   /// Mengambil data pengguna yang sedang login menggunakan token yang tersimpan.
   Future<Map<String, dynamic>?> fetchCurrentUser() async {
+    // Check if token is expired first
+    final tokenExpired = await isTokenExpired();
+    if (tokenExpired) {
+      print('❌ [AUTH] Token expired, clearing auth data');
+      await clearAuthData();
+      return null;
+    }
+
     try {
       final response = await dio.get(
         '/api/users/me',
@@ -129,6 +179,11 @@ class AuthRepository extends BaseRepository {
       return null;
     } catch (e) {
       print('❌ [AUTH] Failed to fetch current user: $e');
+      // If we get 401, token might be invalid/expired, clear auth data
+      if (e is DioException && e.response?.statusCode == 401) {
+        print('❌ [AUTH] 401 Unauthorized - clearing auth data');
+        await clearAuthData();
+      }
       return null;
     }
   }
@@ -152,9 +207,22 @@ class AuthRepository extends BaseRepository {
               DateTime.fromMillisecondsSinceEpoch(int.parse(loginTime));
           final now = DateTime.now();
           final duration = now.difference(loginDateTime);
+          final expiryDuration = Duration(hours: tokenExpiryHours);
+          final expiryTime = loginDateTime.add(expiryDuration);
+          final isExpired = now.isAfter(expiryTime);
+
           print('📱 [STORAGE_DEBUG] Login time: $loginDateTime');
           print(
               '📱 [STORAGE_DEBUG] Time since login: ${duration.inMinutes} minutes ago');
+          print('📱 [STORAGE_DEBUG] Token expiry: ${tokenExpiryHours} hours');
+          print('📱 [STORAGE_DEBUG] Expiry time: $expiryTime');
+          print('📱 [STORAGE_DEBUG] Is expired: $isExpired');
+
+          if (!isExpired) {
+            final remaining = expiryTime.difference(now);
+            print(
+                '📱 [STORAGE_DEBUG] Remaining time: ${remaining.inHours} hours ${remaining.inMinutes % 60} minutes');
+          }
         } else {
           print('📱 [STORAGE_DEBUG] ⚠️ JWT found but no login time recorded');
         }

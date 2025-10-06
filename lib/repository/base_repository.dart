@@ -83,6 +83,25 @@ abstract class BaseRepository {
   /// Returns authorization header using JWT from secure storage.
   Future<Map<String, String>> _asyncAuthorizationHeader() async {
     try {
+      // Check if token is expired by comparing login time with current time
+      final loginTimeStr = await _storage.read(key: 'jwt_login_time');
+      if (loginTimeStr != null) {
+        final loginTime =
+            DateTime.fromMillisecondsSinceEpoch(int.parse(loginTimeStr));
+        final now = DateTime.now();
+        // Default expiry: 24 hours, can be overridden by JWT_EXPIRY_HOURS env var
+        final expiryHours =
+            int.tryParse(dotenv.env['JWT_EXPIRY_HOURS'] ?? '24') ?? 24;
+        final expiryDuration = Duration(hours: expiryHours);
+        final expiryTime = loginTime.add(expiryDuration);
+
+        if (now.isAfter(expiryTime)) {
+          print(
+              '⚠️ [AUTH] Token expired (${expiryHours}h), not including Authorization header');
+          return const {};
+        }
+      }
+
       final jwt = await _storage.read(key: 'jwt');
       if (jwt != null && jwt.isNotEmpty) {
         return {'Authorization': 'Bearer $jwt'};

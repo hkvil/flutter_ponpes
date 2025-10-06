@@ -1,41 +1,30 @@
 import 'package:dio/dio.dart';
-import 'package:flutter_dotenv/flutter_dotenv.dart';
-import '../models/banner_menu_utama_model.dart';
 
-class BannerMenuUtamaRepository {
-  final Dio _dio = Dio(
-    BaseOptions(
-      connectTimeout: const Duration(seconds: 15),
-      receiveTimeout: const Duration(seconds: 15),
-    ),
-  );
+import '../models/banner_menu_utama_model.dart';
+import 'base_repository.dart';
+
+class BannerMenuUtamaRepository extends BaseRepository {
+  BannerMenuUtamaRepository({Dio? dio}) : super(dio: dio);
 
   /// Ambil banner berdasarkan title menu (PPI, INFORMASI, dll)
   Future<BannerMenuUtama?> getBannerByTitle(String title) async {
     print('\n🔄 [BANNER_API] Fetching banner for title: "$title"');
-
-    final apiHost = dotenv.env['API_HOST'] ?? 'http://localhost:1337';
-    final apiToken = dotenv.env['API_TOKEN_READONLY'] ?? '';
+    print('📍 Endpoint: /api/banner-menu-utamas');
 
     try {
-      final response = await _dio.get(
-        '$apiHost/api/banner-menu-utamas',
+      final response = await dio.get(
+        '/api/banner-menu-utamas',
         queryParameters: {
           'filters[title][\$contains]': title,
           'populate': 'all',
         },
-        options: Options(
-          headers: {
-            'Content-Type': 'application/json',
-            if (apiToken.isNotEmpty) 'Authorization': 'Bearer $apiToken',
-          },
-        ),
+        options: buildOptions(),
       );
 
       print(
           '✅ [BANNER_API] Response received - Status: ${response.statusCode}');
 
-      final body = response.data as Map<String, dynamic>;
+      final body = ensureMap(response.data);
       final data = (body['data'] as List?) ?? const [];
 
       print('📦 [BANNER_API] Data count: ${data.length}');
@@ -55,8 +44,9 @@ class BannerMenuUtamaRepository {
       print('   - Bottom Banner: ${banner.bottomBannerUrl ?? 'null'}');
 
       return banner;
-    } catch (e, stackTrace) {
-      print('❌ [BANNER_API] ERROR: $e');
+    } on DioException catch (e, stackTrace) {
+      final message = mapDioError(e);
+      print('❌ [BANNER_API] ERROR: $message');
       print('📍 StackTrace: $stackTrace');
       return null;
     }
@@ -66,27 +56,19 @@ class BannerMenuUtamaRepository {
   Future<List<BannerMenuUtama>> getAllBanners() async {
     print('\n🔄 [BANNER_API] Fetching all banners');
 
-    final apiHost = dotenv.env['API_HOST'] ?? 'http://localhost:1337';
-    final apiToken = dotenv.env['API_TOKEN_READONLY'] ?? '';
-
     try {
-      final response = await _dio.get(
-        '$apiHost/api/banner-menu-utamas',
+      final response = await dio.get(
+        '/api/banner-menu-utamas',
         queryParameters: {
           'sort': 'title:asc',
         },
-        options: Options(
-          headers: {
-            'Content-Type': 'application/json',
-            if (apiToken.isNotEmpty) 'Authorization': 'Bearer $apiToken',
-          },
-        ),
+        options: buildOptions(),
       );
 
       print(
           '✅ [BANNER_API] Response received - Status: ${response.statusCode}');
 
-      final body = response.data as Map<String, dynamic>;
+      final body = ensureMap(response.data);
       final banners = BannerMenuUtama.listFromStrapiEnvelope(body);
 
       print('🎉 [BANNER_API] Found ${banners.length} banners');
@@ -95,8 +77,9 @@ class BannerMenuUtamaRepository {
       }
 
       return banners;
-    } catch (e, stackTrace) {
-      print('❌ [BANNER_API] ERROR: $e');
+    } on DioException catch (e, stackTrace) {
+      final message = mapDioError(e);
+      print('❌ [BANNER_API] ERROR: $message');
       print('📍 StackTrace: $stackTrace');
       return [];
     }

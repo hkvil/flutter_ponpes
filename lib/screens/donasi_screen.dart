@@ -1,8 +1,10 @@
 import 'package:flutter/material.dart';
 import 'package:carousel_slider/carousel_slider.dart';
 import 'package:flutter_dotenv/flutter_dotenv.dart';
-import '../repository/donasi_repository.dart';
+import 'package:provider/provider.dart';
+
 import '../models/donasi_model.dart';
+import '../providers/donasi_provider.dart';
 
 class DonationScreen extends StatefulWidget {
   const DonationScreen({super.key});
@@ -12,11 +14,6 @@ class DonationScreen extends StatefulWidget {
 }
 
 class _DonationScreenState extends State<DonationScreen> {
-  final DonasiRepository _repository = DonasiRepository();
-  List<DonasiModel> donations = [];
-  bool isLoading = true;
-  String? errorMessage;
-
   // Dummy slider data - can be replaced with API data later
   final List<Map<String, String>> sliderImages = [
     {
@@ -36,33 +33,18 @@ class _DonationScreenState extends State<DonationScreen> {
   @override
   void initState() {
     super.initState();
-    _loadDonations();
-  }
-
-  Future<void> _loadDonations() async {
-    try {
-      setState(() {
-        isLoading = true;
-        errorMessage = null;
-      });
-
-      final response = await _repository.getDonations(pageSize: 50);
-
-      setState(() {
-        donations = response.data;
-        isLoading = false;
-      });
-    } catch (e) {
-      setState(() {
-        errorMessage = e.toString();
-        isLoading = false;
-      });
-      print('Error loading donations: $e');
-    }
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      context.read<DonasiProvider>().fetchDonations(pageSize: 50);
+    });
   }
 
   @override
   Widget build(BuildContext context) {
+    final donasiProvider = context.watch<DonasiProvider>();
+    final List<DonasiModel> donations = donasiProvider.donations;
+    final bool isLoading = donasiProvider.isLoading;
+    final String? errorMessage = donasiProvider.errorMessage;
+
     return Scaffold(
       appBar: AppBar(
         backgroundColor: const Color(0xFF2E7D32),
@@ -81,7 +63,8 @@ class _DonationScreenState extends State<DonationScreen> {
         centerTitle: false,
       ),
       body: RefreshIndicator(
-        onRefresh: _loadDonations,
+        onRefresh: () =>
+            context.read<DonasiProvider>().refreshDonations(pageSize: 50),
         child: SingleChildScrollView(
           child: Column(
             crossAxisAlignment: CrossAxisAlignment.start,
@@ -158,7 +141,9 @@ class _DonationScreenState extends State<DonationScreen> {
                         ),
                         const SizedBox(height: 16),
                         ElevatedButton(
-                          onPressed: _loadDonations,
+                          onPressed: () => context
+                              .read<DonasiProvider>()
+                              .refreshDonations(pageSize: 50),
                           style: ElevatedButton.styleFrom(
                             backgroundColor: const Color(0xFF2E7D32),
                             foregroundColor: Colors.white,

@@ -1,27 +1,20 @@
 import 'package:dio/dio.dart';
-import 'package:flutter_dotenv/flutter_dotenv.dart';
-import '../models/staff.dart';
 
-class StaffRepository {
-  final Dio _dio = Dio(
-    BaseOptions(
-      connectTimeout: const Duration(seconds: 15),
-      receiveTimeout: const Duration(seconds: 15),
-    ),
-  );
+import '../models/staff.dart';
+import 'base_repository.dart';
+
+class StaffRepository extends BaseRepository {
+  StaffRepository({Dio? dio}) : super(dio: dio);
 
   /// Get staff by lembaga slug (active only)
   Future<List<Staff>> getStaffByLembaga(
     String lembagaSlug, {
     int? page,
     int? pageSize,
-  }) async {
-    final apiHost = dotenv.env['API_HOST'] ?? '';
-    final apiToken = dotenv.env['API_TOKEN_READONLY'] ?? '';
-
-    final response = await _dio.get(
-      '$apiHost/api/staffs',
-      queryParameters: {
+  }) {
+    return _fetchStaff(
+      'active:$lembagaSlug',
+      {
         'filters[lembaga][slug][\$eq]': lembagaSlug,
         'filters[aktif][\$eq]': true,
         'populate[lembaga]': true,
@@ -29,24 +22,7 @@ class StaffRepository {
         'pagination[pageSize]': pageSize ?? 100,
         if (page != null) 'pagination[page]': page,
       },
-      options: Options(
-        headers: {
-          'Content-Type': 'application/json',
-          if (apiToken.isNotEmpty) 'Authorization': 'Bearer $apiToken',
-        },
-      ),
     );
-
-    final body = response.data as Map<String, dynamic>;
-    final dataList = body['data'] as List<dynamic>?;
-
-    if (dataList == null || dataList.isEmpty) {
-      return [];
-    }
-
-    return dataList
-        .map((item) => Staff.fromJson(item as Map<String, dynamic>))
-        .toList();
   }
 
   /// Get all staff by lembaga slug (including inactive)
@@ -54,36 +30,16 @@ class StaffRepository {
     String lembagaSlug, {
     int? page,
     int? pageSize,
-  }) async {
-    final apiHost = dotenv.env['API_HOST'] ?? '';
-    final apiToken = dotenv.env['API_TOKEN_READONLY'] ?? '';
-
-    final response = await _dio.get(
-      '$apiHost/api/staffs',
-      queryParameters: {
+  }) {
+    return _fetchStaff(
+      'all:$lembagaSlug',
+      {
         'filters[lembaga][slug][\$eq]': lembagaSlug,
         'pagination[pageSize]': pageSize ?? 25,
         if (page != null) 'pagination[page]': page,
         'populate': 'deep',
       },
-      options: Options(
-        headers: {
-          'Content-Type': 'application/json',
-          if (apiToken.isNotEmpty) 'Authorization': 'Bearer $apiToken',
-        },
-      ),
     );
-
-    final body = response.data as Map<String, dynamic>;
-    final dataList = body['data'] as List<dynamic>?;
-
-    if (dataList == null || dataList.isEmpty) {
-      return [];
-    }
-
-    return dataList
-        .map((item) => Staff.fromJson(item as Map<String, dynamic>))
-        .toList();
   }
 
   /// Get staff by jabatan and lembaga
@@ -92,13 +48,10 @@ class StaffRepository {
     String jabatan, {
     int? page,
     int? pageSize,
-  }) async {
-    final apiHost = dotenv.env['API_HOST'] ?? '';
-    final apiToken = dotenv.env['API_TOKEN_READONLY'] ?? '';
-
-    final response = await _dio.get(
-      '$apiHost/api/staffs',
-      queryParameters: {
+  }) {
+    return _fetchStaff(
+      'jabatan:$jabatan',
+      {
         'filters[lembaga][slug][\$eq]': lembagaSlug,
         'filters[jabatan][\$eq]': jabatan,
         'filters[isActive][\$eq]': true,
@@ -106,24 +59,7 @@ class StaffRepository {
         if (page != null) 'pagination[page]': page,
         'populate': 'deep',
       },
-      options: Options(
-        headers: {
-          'Content-Type': 'application/json',
-          if (apiToken.isNotEmpty) 'Authorization': 'Bearer $apiToken',
-        },
-      ),
     );
-
-    final body = response.data as Map<String, dynamic>;
-    final dataList = body['data'] as List<dynamic>?;
-
-    if (dataList == null || dataList.isEmpty) {
-      return [];
-    }
-
-    return dataList
-        .map((item) => Staff.fromJson(item as Map<String, dynamic>))
-        .toList();
   }
 
   /// Get teachers only by lembaga
@@ -131,13 +67,10 @@ class StaffRepository {
     String lembagaSlug, {
     int? page,
     int? pageSize,
-  }) async {
-    final apiHost = dotenv.env['API_HOST'] ?? '';
-    final apiToken = dotenv.env['API_TOKEN_READONLY'] ?? '';
-
-    final response = await _dio.get(
-      '$apiHost/api/staffs',
-      queryParameters: {
+  }) {
+    return _fetchStaff(
+      'teacher:$lembagaSlug',
+      {
         'filters[lembaga][slug][\$eq]': lembagaSlug,
         'filters[isGuru][\$eq]': true,
         'filters[isActive][\$eq]': true,
@@ -145,56 +78,61 @@ class StaffRepository {
         if (page != null) 'pagination[page]': page,
         'populate': 'deep',
       },
-      options: Options(
-        headers: {
-          'Content-Type': 'application/json',
-          if (apiToken.isNotEmpty) 'Authorization': 'Bearer $apiToken',
-        },
-      ),
     );
-
-    final body = response.data as Map<String, dynamic>;
-    final dataList = body['data'] as List<dynamic>?;
-
-    if (dataList == null || dataList.isEmpty) {
-      return [];
-    }
-
-    return dataList
-        .map((item) => Staff.fromJson(item as Map<String, dynamic>))
-        .toList();
   }
 
   /// Get single staff by ID
   Future<Staff?> getStaffById(int id) async {
-    final apiHost = dotenv.env['API_HOST'] ?? '';
-    final apiToken = dotenv.env['API_TOKEN_READONLY'] ?? '';
-
     try {
-      final response = await _dio.get(
-        '$apiHost/api/staffs/$id',
+      final response = await dio.get(
+        '/api/staffs/$id',
         queryParameters: {
           'populate': 'deep',
         },
-        options: Options(
-          headers: {
-            'Content-Type': 'application/json',
-            if (apiToken.isNotEmpty) 'Authorization': 'Bearer $apiToken',
-          },
-        ),
+        options: buildOptions(),
       );
 
-      final body = response.data as Map<String, dynamic>;
-      final data = body['data'] as Map<String, dynamic>?;
+      final body = ensureMap(response.data);
+      final data = body['data'];
 
-      if (data == null) {
-        return null;
+      if (data is Map<String, dynamic>) {
+        return Staff.fromJson(data);
       }
 
-      return Staff.fromJson(data);
-    } catch (e) {
-      print('Error getting staff by id: $e');
       return null;
+    } on DioException catch (e) {
+      final message = mapDioError(e);
+      print('Error getting staff by id: $message');
+      return null;
+    }
+  }
+
+  Future<List<Staff>> _fetchStaff(
+    String context,
+    Map<String, dynamic> queryParameters,
+  ) async {
+    try {
+      final response = await dio.get(
+        '/api/staffs',
+        queryParameters: queryParameters,
+        options: buildOptions(),
+      );
+
+      final body = ensureMap(response.data);
+      final dataList = (body['data'] as List<dynamic>?) ?? const [];
+
+      if (dataList.isEmpty) {
+        return [];
+      }
+
+      return dataList
+          .whereType<Map<String, dynamic>>()
+          .map(Staff.fromJson)
+          .toList();
+    } on DioException catch (e) {
+      final message = mapDioError(e);
+      print('Error fetching staff ($context): $message');
+      throw Exception('Failed to fetch staff: $message');
     }
   }
 }

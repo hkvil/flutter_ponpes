@@ -14,65 +14,141 @@ class AccountScreen extends StatelessWidget {
     return ResponsiveWrapper(
       child: Consumer<AuthProvider>(
         builder: (context, authProvider, _) {
-          // Jika belum ada data user, tampilkan sebagai Guest
-          final username = authProvider.user?.username ?? 'Guest';
-          final email = authProvider.user?.email ?? 'guest@email.com';
-          final joinDate = authProvider.user?.createdAt != null
-              ? DateFormat('d MMMM yyyy').format(authProvider.user!.createdAt)
-              : DateFormat('d MMMM yyyy').format(DateTime.now());
+          final isLoggedIn = authProvider.user != null;
 
-          return Scaffold(
-            appBar: AppBar(
-              title: const Text('Akun Saya'),
-              elevation: 0,
-              backgroundColor: Colors.transparent,
-              foregroundColor: Colors.green.shade800,
-            ),
-            body: ListView(
-              padding: const EdgeInsets.all(16.0),
-              children: [
-                _buildProfileHeader(context, username, email),
-                const SizedBox(height: 24),
-                _buildInfoCard(context, [
-                  _buildInfoTile(
-                    icon: Icons.person_outline,
-                    title: 'Username',
-                    subtitle: username,
-                  ),
-                  _buildInfoTile(
-                    icon: Icons.email_outlined,
-                    title: 'Email',
-                    subtitle: email,
-                  ),
-                  _buildInfoTile(
-                    icon: Icons.calendar_today_outlined,
-                    title: 'Bergabung Sejak',
-                    subtitle: joinDate,
-                  ),
-                ]),
-                const SizedBox(height: 24),
-                ElevatedButton.icon(
-                  icon: const Icon(Icons.logout),
-                  label: const Text('Logout'),
-                  style: ElevatedButton.styleFrom(
-                    backgroundColor: Colors.green.shade700,
-                    foregroundColor: Colors.white,
-                    padding: const EdgeInsets.symmetric(vertical: 12),
-                    shape: RoundedRectangleBorder(
-                      borderRadius: BorderRadius.circular(12),
-                    ),
-                  ),
-                  onPressed: () async {
-                    await authProvider.logout();
-                    if (context.mounted) {
-                      Navigator.of(context).pushReplacementNamed('/');
-                    }
-                  },
-                ),
-              ],
-            ),
-          );
+          // Jika belum login, tampilkan UI untuk guest
+          if (!isLoggedIn) {
+            return _buildGuestView(context, authProvider);
+          }
+
+          // Jika sudah login, tampilkan UI normal
+          final username = authProvider.user!.username;
+          final email = authProvider.user!.email;
+          final joinDate =
+              DateFormat('d MMMM yyyy').format(authProvider.user!.createdAt);
+
+          return _buildLoggedInView(
+              context, authProvider, username, email, joinDate);
         },
+      ),
+    );
+  }
+
+  // Widget untuk tampilan guest (belum login)
+  Widget _buildGuestView(BuildContext context, AuthProvider authProvider) {
+    return Scaffold(
+      appBar: AppBar(
+        title: const Text('Akun'),
+        elevation: 0,
+        backgroundColor: Colors.transparent,
+        foregroundColor: Colors.green.shade800,
+      ),
+      body: Center(
+        child: Padding(
+          padding: const EdgeInsets.all(24.0),
+          child: Column(
+            mainAxisAlignment: MainAxisAlignment.center,
+            children: [
+              Icon(
+                Icons.account_circle_outlined,
+                size: 80,
+                color: Colors.grey.shade400,
+              ),
+              const SizedBox(height: 24),
+              Text(
+                'Belum Masuk',
+                style: TextStyle(
+                  fontSize: 24,
+                  fontWeight: FontWeight.bold,
+                  color: Colors.grey.shade700,
+                ),
+              ),
+              const SizedBox(height: 8),
+              Text(
+                'Silakan masuk untuk mengakses fitur akun Anda',
+                textAlign: TextAlign.center,
+                style: TextStyle(
+                  fontSize: 16,
+                  color: Colors.grey.shade600,
+                ),
+              ),
+              const SizedBox(height: 32),
+              ElevatedButton.icon(
+                icon: const Icon(Icons.login),
+                label: const Text('Masuk'),
+                style: ElevatedButton.styleFrom(
+                  backgroundColor: Colors.green.shade700,
+                  foregroundColor: Colors.white,
+                  padding:
+                      const EdgeInsets.symmetric(horizontal: 32, vertical: 12),
+                  shape: RoundedRectangleBorder(
+                    borderRadius: BorderRadius.circular(12),
+                  ),
+                ),
+                onPressed: () {
+                  // Navigate to login screen
+                  Navigator.of(context).pushNamed('/login');
+                },
+              ),
+            ],
+          ),
+        ),
+      ),
+    );
+  }
+
+  // Widget untuk tampilan user yang sudah login
+  Widget _buildLoggedInView(BuildContext context, AuthProvider authProvider,
+      String username, String email, String joinDate) {
+    return Scaffold(
+      appBar: AppBar(
+        title: const Text('Akun Saya'),
+        elevation: 0,
+        backgroundColor: Colors.transparent,
+        foregroundColor: Colors.green.shade800,
+      ),
+      body: ListView(
+        padding: const EdgeInsets.all(16.0),
+        children: [
+          _buildProfileHeader(context, username, email),
+          const SizedBox(height: 24),
+          _buildInfoCard(context, [
+            _buildInfoTile(
+              icon: Icons.person_outline,
+              title: 'Username',
+              subtitle: username,
+            ),
+            _buildInfoTile(
+              icon: Icons.email_outlined,
+              title: 'Email',
+              subtitle: email,
+            ),
+            _buildInfoTile(
+              icon: Icons.calendar_today_outlined,
+              title: 'Bergabung Sejak',
+              subtitle: joinDate,
+            ),
+          ]),
+          const SizedBox(height: 24),
+          ElevatedButton.icon(
+            icon: const Icon(Icons.logout),
+            label: const Text('Logout'),
+            style: ElevatedButton.styleFrom(
+              backgroundColor: Colors.green.shade700,
+              foregroundColor: Colors.white,
+              padding: const EdgeInsets.symmetric(vertical: 12),
+              shape: RoundedRectangleBorder(
+                borderRadius: BorderRadius.circular(12),
+              ),
+            ),
+            onPressed: () async {
+              await authProvider.logout();
+              if (context.mounted) {
+                Navigator.of(context).pushReplacementNamed('/');
+              }
+            },
+          ),
+        ],
       ),
     );
   }

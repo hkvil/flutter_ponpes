@@ -1,7 +1,10 @@
 import 'package:flutter/material.dart';
+import 'package:provider/provider.dart';
 import 'package:pesantren_app/core/constants/lembaga_slugs.dart';
-import 'package:pesantren_app/repository/lembaga_repository.dart';
 import 'package:pesantren_app/screens/content_screen.dart';
+
+import '../models/lembaga_model.dart';
+import '../providers/lembaga_provider.dart';
 import '../widgets/responsive_wrapper.dart';
 
 class DebugScreen extends StatefulWidget {
@@ -175,7 +178,6 @@ class _SlugTestTab extends StatefulWidget {
 }
 
 class _SlugTestTabState extends State<_SlugTestTab> {
-  final LembagaRepository _repository = LembagaRepository();
   Map<String, String> testResults = {};
   bool isTestingAll = false;
   int currentTestIndex = 0;
@@ -385,7 +387,10 @@ class _SlugTestTabState extends State<_SlugTestTab> {
     try {
       print('🧪 Testing slug: $slug');
 
-      final lembaga = await _repository.fetchBySlug(slug);
+      final provider = context.read<LembagaProvider>();
+      final lembaga =
+          await provider.fetchBySlug(slug, forceRefresh: true);
+      final errorMessage = provider.lembagaState(slug).errorMessage;
 
       if (lembaga != null) {
         final hasContent = (lembaga.profilMd?.isNotEmpty == true) ||
@@ -399,13 +404,14 @@ class _SlugTestTabState extends State<_SlugTestTab> {
             '✅ Success: $slug ${hasContent ? "(has content)" : "(empty content)"}');
       } else {
         setState(() {
-          testResults[slug] = '❌ Not found';
+          testResults[slug] =
+              errorMessage != null ? '❌ ${_truncateError(errorMessage)}' : '❌ Not found';
         });
         print('❌ Not found: $slug');
       }
     } catch (e) {
       setState(() {
-        testResults[slug] = '❌ Error: ${e.toString().substring(0, 20)}...';
+        testResults[slug] = '❌ Error: ${_truncateError(e.toString())}';
       });
       print('❌ Error testing $slug: $e');
     }
@@ -419,7 +425,7 @@ class _SlugTestTabState extends State<_SlugTestTab> {
 
   void _viewContent(String slug, String nama) async {
     try {
-      final lembaga = await _repository.fetchBySlug(slug);
+      final lembaga = await context.read<LembagaProvider>().fetchBySlug(slug);
       if (lembaga != null && mounted) {
         Navigator.push(
           context,
@@ -458,7 +464,7 @@ class _SlugTestTabState extends State<_SlugTestTab> {
         ),
       );
 
-      final lembaga = await _repository.fetchBySlug(slug);
+      final lembaga = await context.read<LembagaProvider>().fetchBySlug(slug);
 
       if (mounted) {
         Navigator.pop(context); // Close loading dialog
@@ -481,7 +487,7 @@ class _SlugTestTabState extends State<_SlugTestTab> {
     }
   }
 
-  void _showRawDataDialog(String slug, String nama, dynamic lembaga) {
+  void _showRawDataDialog(String slug, String nama, Lembaga lembaga) {
     showDialog(
       context: context,
       builder: (context) => AlertDialog(
@@ -569,6 +575,11 @@ class _SlugTestTabState extends State<_SlugTestTab> {
         ],
       ),
     );
+  }
+
+  String _truncateError(String message) {
+    if (message.length <= 20) return message;
+    return message.substring(0, 20) + '...';
   }
 
   Widget _buildDataField(String label, String value) {

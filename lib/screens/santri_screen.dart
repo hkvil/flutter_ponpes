@@ -1,10 +1,12 @@
 import 'package:flutter/material.dart';
+import 'package:provider/provider.dart';
+
 import '../core/theme/app_colors.dart';
 import '../core/utils/menu_slug_mapper.dart';
-import '../repository/santri_repository.dart';
-import '../repository/kelas_repository.dart';
-import '../repository/kehadiran_repository.dart';
 import '../models/models.dart';
+import '../providers/santri_provider.dart';
+import '../providers/kelas_provider.dart';
+import '../providers/kehadiran_provider.dart';
 import '../data/fallback/santri_fallback.dart';
 import '../data/fallback/kehadiran_fallback.dart';
 
@@ -97,9 +99,6 @@ class DaftarSantriTab extends StatefulWidget {
 }
 
 class _DaftarSantriTabState extends State<DaftarSantriTab> {
-  final SantriRepository _santriRepo = SantriRepository();
-  final KelasRepository _kelasRepo = KelasRepository();
-
   String selectedKelas = 'Semua Kelas';
   int jumlahSantri = 0;
   String searchQuery = '';
@@ -189,24 +188,16 @@ class _DaftarSantriTabState extends State<DaftarSantriTab> {
         return;
       }
 
-      // Fetch kelas from API
-      final kelasList = await _kelasRepo.getKelasByLembaga(
+      final provider = context.read<KelasProvider>();
+      final kelasNames = await provider.fetchKelas(
         lembagaSlug,
         pageSize: 100,
+        forceRefresh: true,
       );
 
       setState(() {
-        // Extract kelas names from API response
-        final kelasNames = kelasList
-            .map((kelas) => kelas.kelas) // Use 'kelas' property
-            .toSet() // Remove duplicates
-            .toList();
-
-        // Sort alphabetically
-        kelasNames.sort();
-
-        // Add "Semua Kelas" as first option
-        this.kelasList = ['Semua Kelas', ...kelasNames];
+        final sortedKelas = [...kelasNames]..sort();
+        kelasList = ['Semua Kelas', ...sortedKelas];
         _isLoadingKelas = false;
       });
 
@@ -230,18 +221,32 @@ class _DaftarSantriTabState extends State<DaftarSantriTab> {
       // Get lembaga slug from widget or use default
       final lembagaSlug = _getLembagaSlug();
 
-      // Fetch santri data from API
-      final santriList = await _santriRepo.getSantriByLembaga(
-        lembagaSlug,
-        pageSize: 100, // Get more data
-      );
+      if (lembagaSlug.isEmpty) {
+        throw Exception('Slug lembaga tidak ditemukan');
+      }
 
-      setState(() {
-        _santriList = santriList;
-        _usesFallback = false;
-        _isLoading = false;
-        _updateJumlahSantri();
-      });
+      final provider = context.read<SantriProvider>();
+      final santriList = await provider.fetchSantriByLembaga(
+        lembagaSlug,
+        forceRefresh: true,
+      );
+      final state = provider.santriState(lembagaSlug);
+
+      if (state.errorMessage != null && santriList.isEmpty) {
+        setState(() {
+          _usesFallback = true;
+          _isLoading = false;
+          _errorMessage = state.errorMessage;
+          _updateJumlahSantri();
+        });
+      } else {
+        setState(() {
+          _santriList = santriList;
+          _usesFallback = false;
+          _isLoading = false;
+          _updateJumlahSantri();
+        });
+      }
     } catch (e) {
       print('Error fetching santri data: $e');
       // Fallback to static data
@@ -269,9 +274,7 @@ class _DaftarSantriTabState extends State<DaftarSantriTab> {
   }
 
   void _updateJumlahSantri() {
-    setState(() {
-      jumlahSantri = filteredSantri.length;
-    });
+    jumlahSantri = filteredSantri.length;
   }
 
   void _showSearchDialog() {
@@ -1017,8 +1020,6 @@ class KehadiranSantriTab extends StatefulWidget {
 }
 
 class _KehadiranSantriTabState extends State<KehadiranSantriTab> {
-  final KehadiranRepository _kehadiranRepo = KehadiranRepository();
-
   bool _isLoading = true;
   String? _errorMessage;
   List<KehadiranSantri> _kehadiranList = [];
@@ -1041,14 +1042,33 @@ class _KehadiranSantriTabState extends State<KehadiranSantriTab> {
 
     try {
       final slug = _getLembagaSlug(widget.lembagaName);
-      final kehadiranList =
-          await _kehadiranRepo.getKehadiranSantriByLembaga(slug);
+      if (slug.isEmpty) {
+        throw Exception('Slug lembaga tidak ditemukan');
+      }
 
-      setState(() {
-        _kehadiranList = kehadiranList;
-        _usesFallback = false;
-        _isLoading = false;
-      });
+      final provider = context.read<KehadiranProvider>();
+      final kehadiranList = await provider.fetchSantriByLembaga(
+        slug,
+        forceRefresh: true,
+      );
+      final state = provider.santriState(slug);
+
+      if (state.errorMessage != null && kehadiranList.isEmpty) {
+        setState(() {
+          _kehadiranList = fallbackKehadiranSantriData
+              .map((json) => KehadiranSantri.fromJson(json))
+              .toList();
+          _usesFallback = true;
+          _errorMessage = state.errorMessage;
+          _isLoading = false;
+        });
+      } else {
+        setState(() {
+          _kehadiranList = kehadiranList;
+          _usesFallback = false;
+          _isLoading = false;
+        });
+      }
     } catch (e) {
       print('Error fetching kehadiran: $e');
       setState(() {
@@ -1227,16 +1247,39 @@ class _KehadiranSantriTabState extends State<KehadiranSantriTab> {
 
     try {
       final slug = _getLembagaSlug(widget.lembagaName);
-      final kehadiranList = await _kehadiranRepo.getKehadiranSantriByDateRange(
+      if (slug.isEmpty) {
+        throw Exception('Slug lembaga tidak ditemukan');
+      }
+
+      final provider = context.read<KehadiranProvider>();
+      final kehadiranList = await provider.fetchSantriByDateRange(
         slug,
         startDate!,
         endDate!,
+        forceRefresh: true,
+      );
+      final state = provider.santriState(
+        slug,
+        startDate: startDate,
+        endDate: endDate,
       );
 
-      setState(() {
-        _kehadiranList = kehadiranList;
-        _isLoading = false;
-      });
+      if (state.errorMessage != null && kehadiranList.isEmpty) {
+        setState(() {
+          _kehadiranList = fallbackKehadiranSantriData
+              .map((json) => KehadiranSantri.fromJson(json))
+              .toList();
+          _usesFallback = true;
+          _errorMessage = state.errorMessage;
+          _isLoading = false;
+        });
+      } else {
+        setState(() {
+          _kehadiranList = kehadiranList;
+          _usesFallback = false;
+          _isLoading = false;
+        });
+      }
     } catch (e) {
       print('Error fetching kehadiran by date range: $e');
       setState(() {

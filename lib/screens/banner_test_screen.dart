@@ -25,8 +25,11 @@ class _BannerTestScreenState extends State<BannerTestScreen> {
   Future<void> _loadBanners() async {
     try {
       print('🧪 [BANNER_TEST] Loading banners for taman-kanak-kanak...');
-      final config = await _bannerManager.getBannerConfig('profil',
-          lembagaSlug: 'taman-kanak-kanak');
+      final config = await _bannerManager.getBannerConfig(
+        context,
+        'profil',
+        lembagaSlug: 'taman-kanak-kanak',
+      );
 
       print('🧪 [BANNER_TEST] Loaded banner config:');
       print('   - Top Banner: ${config.topBannerUrl}');

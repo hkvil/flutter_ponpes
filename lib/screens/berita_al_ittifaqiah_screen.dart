@@ -1,10 +1,12 @@
 import 'package:flutter/material.dart';
+import 'package:provider/provider.dart';
+
 import '../widgets/top_banner.dart';
 import '../widgets/bottom_banner.dart';
 import '../widgets/responsive_wrapper.dart';
 import '../widgets/top_bar.dart';
 import '../models/informasi_al_ittifaqiah_model.dart';
-import '../repository/informasi_al_ittifaqiah_repository.dart';
+import '../providers/informasi_al_ittifaqiah_provider.dart';
 import 'content_screen.dart';
 
 class BeritaAlIttifaqiahScreen extends StatefulWidget {
@@ -16,8 +18,6 @@ class BeritaAlIttifaqiahScreen extends StatefulWidget {
 }
 
 class _BeritaAlIttifaqiahScreenState extends State<BeritaAlIttifaqiahScreen> {
-  final InformasiAlIttifaqiahRepository _repository =
-      InformasiAlIttifaqiahRepository();
   List<NewsItem>? _newsData;
   bool _isLoading = true;
   String? _errorMessage;
@@ -35,11 +35,13 @@ class _BeritaAlIttifaqiahScreenState extends State<BeritaAlIttifaqiahScreen> {
         _errorMessage = null;
       });
 
-      final informasiData = await _repository.fetchInformasiAlIttifaqiah();
+      final provider = context.read<InformasiAlIttifaqiahProvider>();
+      final informasiData = await provider.fetchInformasi(forceRefresh: true);
 
       setState(() {
         _newsData = informasiData?.news ?? [];
         _isLoading = false;
+        _errorMessage = provider.informasiState.errorMessage;
       });
 
       print('DEBUG: News data loaded: ${_newsData?.length ?? 0} items');

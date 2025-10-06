@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:provider/provider.dart';
 import '../../screens/galeri_screen.dart';
 import '../../screens/contact_screen.dart';
 import '../../screens/bannered_detail_screen.dart';
@@ -9,12 +10,11 @@ import '../../screens/alumni_screen.dart';
 import '../../screens/prestasi_santri_screen.dart';
 import '../../models/profile_section.dart';
 import '../../models/lembaga_model.dart';
-import '../../repository/lembaga_repository.dart';
+import '../../providers/lembaga_provider.dart';
 import 'banner_manager.dart';
 import '../constants/profil.dart';
 
 class MenuNavigationHelper {
-  static final LembagaRepository _lembagaRepository = LembagaRepository();
   static final BannerManager _bannerManager = BannerManager();
 
   /// Navigate to appropriate screen based on menu item and lembaga slug
@@ -48,7 +48,9 @@ class MenuNavigationHelper {
     );
 
     try {
-      final lembaga = await _lembagaRepository.fetchBySlug(slug);
+      final provider = Provider.of<LembagaProvider>(context, listen: false);
+      final lembaga = await provider.fetchBySlug(slug);
+      final errorMessage = provider.lembagaState(slug).errorMessage;
 
       // Dismiss loading
       if (context.mounted) {
@@ -58,8 +60,9 @@ class MenuNavigationHelper {
       if (lembaga == null) {
         if (context.mounted) {
           ScaffoldMessenger.of(context).showSnackBar(
-            const SnackBar(
-              content: Text('Data lembaga tidak ditemukan'),
+            SnackBar(
+              content: Text(
+                  errorMessage ?? 'Data lembaga tidak ditemukan'),
               backgroundColor: Colors.red,
             ),
           );
@@ -244,8 +247,11 @@ class MenuNavigationHelper {
   static void _navigateWithBanner(BuildContext context, String menuItem,
       String categoryTitle, String? lembagaSlug) async {
     // Get banner config
-    final bannerConfig = await _bannerManager.getBannerConfig(menuItem,
-        lembagaSlug: lembagaSlug);
+    final bannerConfig = await _bannerManager.getBannerConfig(
+      context,
+      menuItem,
+      lembagaSlug: lembagaSlug,
+    );
 
     if (!context.mounted) return;
 
@@ -436,8 +442,11 @@ class MenuNavigationHelper {
         '🎯 [CONTENT_BANNER] Menu: $menuItem, hasContent: ${markdownContent != null}');
 
     // Get banner config from lembaga
-    final bannerConfig = await _bannerManager.getBannerConfig(menuItem,
-        lembagaSlug: lembaga.slug);
+    final bannerConfig = await _bannerManager.getBannerConfig(
+      context,
+      menuItem,
+      lembagaSlug: lembaga.slug,
+    );
 
     print(
         '🎯 [CONTENT_BANNER] Banner config loaded - hasTopBanner: ${bannerConfig.hasTopBanner}, hasBottomBanner: ${bannerConfig.hasBottomBanner}');

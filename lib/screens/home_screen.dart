@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:carousel_slider/carousel_slider.dart';
+import 'package:provider/provider.dart';
 
 import '../widgets/section_header.dart';
 import '../widgets/top_bar.dart';
@@ -8,15 +9,15 @@ import '../widgets/menu_button.dart';
 import '../widgets/responsive_wrapper.dart';
 import '../widgets/achievement_section.dart';
 import '../core/router/app_router.dart';
-import '../repository/slider_repository.dart';
 import 'menu_screen.dart';
+import '../providers/slider_provider.dart';
 
 /// The home screen shows the main menu grid and achievements.
 ///
 /// It consists of a carousel slider with autoplay, a grid of ten menu buttons,
 /// a list of achievements, and a fixed bottom banner. Navigation to other
 /// screens is handled via named routes defined in [AppRouter].
-class HomeScreen extends StatelessWidget {
+class HomeScreen extends StatefulWidget {
   const HomeScreen({super.key});
 
   /// List of menu items: each entry holds a title and the path to its icon.
@@ -34,7 +35,85 @@ class HomeScreen extends StatelessWidget {
   ];
 
   @override
+  State<HomeScreen> createState() => _HomeScreenState();
+}
+
+class _HomeScreenState extends State<HomeScreen> {
+  @override
+  void initState() {
+    super.initState();
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      context.read<SliderProvider>().fetchSliderImages();
+    });
+  }
+
+  @override
   Widget build(BuildContext context) {
+    final sliderProvider = context.watch<SliderProvider>();
+    final sliderState = sliderProvider.sliderState;
+    final images = sliderProvider.imageUrls;
+
+    Widget _buildSlider() {
+      if (sliderState.isLoading && !sliderState.hasLoaded) {
+        return Container(
+          height: 200.0,
+          color: Colors.grey.shade200,
+          child: const Center(child: CircularProgressIndicator()),
+        );
+      }
+
+      if (sliderState.errorMessage != null && images.isEmpty) {
+        return Container(
+          height: 200.0,
+          color: Colors.red.shade100,
+          child: Center(
+            child: Text('Error: ${sliderState.errorMessage}'),
+          ),
+        );
+      }
+
+      if (images.isEmpty) {
+        return Container(
+          height: 200.0,
+          color: Colors.grey.shade100,
+          child: const Center(child: Text('No images available')),
+        );
+      }
+
+      return CarouselSlider(
+        options: CarouselOptions(
+          height: 200.0,
+          autoPlay: true,
+          enlargeCenterPage: true,
+          viewportFraction: 1.0,
+          autoPlayInterval: const Duration(seconds: 3),
+        ),
+        items: images.map((imageUrl) {
+          return Builder(
+            builder: (BuildContext context) {
+              return Container(
+                width: MediaQuery.of(context).size.width,
+                margin: const EdgeInsets.symmetric(horizontal: 5.0),
+                decoration: const BoxDecoration(
+                  color: Colors.amber,
+                ),
+                child: Image.network(
+                  imageUrl,
+                  fit: BoxFit.cover,
+                  errorBuilder: (context, error, stackTrace) {
+                    return Container(
+                      color: Colors.grey.shade300,
+                      child: const Icon(Icons.broken_image),
+                    );
+                  },
+                ),
+              );
+            },
+          );
+        }).toList(),
+      );
+    }
+
     return ResponsiveWrapper(
       child: Scaffold(
         appBar: const TopBar(
@@ -45,66 +124,8 @@ class HomeScreen extends StatelessWidget {
         ),
         body: Column(
           children: [
-            // Carousel dengan API call
-            FutureBuilder<List<String>>(
-              future: SliderRepository().fetchSliderImageUrls(),
-              builder: (context, snapshot) {
-                if (snapshot.connectionState == ConnectionState.waiting) {
-                  return Container(
-                    height: 200.0,
-                    color: Colors.grey.shade200,
-                    child: const Center(child: CircularProgressIndicator()),
-                  );
-                } else if (snapshot.hasError) {
-                  return Container(
-                    height: 200.0,
-                    color: Colors.red.shade100,
-                    child: Center(
-                      child: Text('Error: ${snapshot.error}'),
-                    ),
-                  );
-                } else if (!snapshot.hasData || snapshot.data!.isEmpty) {
-                  return Container(
-                    height: 200.0,
-                    color: Colors.grey.shade100,
-                    child: const Center(child: Text('No images available')),
-                  );
-                }
-
-                return CarouselSlider(
-                  options: CarouselOptions(
-                    height: 200.0,
-                    autoPlay: true,
-                    enlargeCenterPage: true,
-                    viewportFraction: 1.0,
-                    autoPlayInterval: const Duration(seconds: 3),
-                  ),
-                  items: snapshot.data!.map((imageUrl) {
-                    return Builder(
-                      builder: (BuildContext context) {
-                        return Container(
-                          width: MediaQuery.of(context).size.width,
-                          margin: const EdgeInsets.symmetric(horizontal: 5.0),
-                          decoration: const BoxDecoration(
-                            color: Colors.amber,
-                          ),
-                          child: Image.network(
-                            imageUrl,
-                            fit: BoxFit.cover,
-                            errorBuilder: (context, error, stackTrace) {
-                              return Container(
-                                color: Colors.grey.shade300,
-                                child: const Icon(Icons.broken_image),
-                              );
-                            },
-                          ),
-                        );
-                      },
-                    );
-                  }).toList(),
-                );
-              },
-            ),
+            // Carousel dengan Provider
+            _buildSlider(),
             Expanded(
               child: Column(
                 children: [
@@ -120,7 +141,7 @@ class HomeScreen extends StatelessWidget {
                           crossAxisAlignment: CrossAxisAlignment.center,
                           children: [
                             MenuRow(
-                              items: [_menuItems[0]],
+                              items: [HomeScreen._menuItems[0]],
                               buttonSize: 48,
                               onTap: (title) {
                                 Navigator.pushNamed(
@@ -132,7 +153,7 @@ class HomeScreen extends StatelessWidget {
                             ),
                             SizedBox(height: 8),
                             MenuRow(
-                              items: _menuItems.sublist(1, 4),
+                              items: HomeScreen._menuItems.sublist(1, 4),
                               buttonSize: 48,
                               onTap: (title) {
                                 Navigator.pushNamed(
@@ -144,7 +165,7 @@ class HomeScreen extends StatelessWidget {
                             ),
                             SizedBox(height: 8),
                             MenuRow(
-                              items: _menuItems.sublist(4, 7),
+                              items: HomeScreen._menuItems.sublist(4, 7),
                               buttonSize: 48,
                               onTap: (title) {
                                 Navigator.pushNamed(
@@ -156,7 +177,7 @@ class HomeScreen extends StatelessWidget {
                             ),
                             SizedBox(height: 8),
                             MenuRow(
-                              items: _menuItems.sublist(7, 10),
+                              items: HomeScreen._menuItems.sublist(7, 10),
                               buttonSize: 48,
                               onTap: (title) {
                                 if (title == 'DONASI') {

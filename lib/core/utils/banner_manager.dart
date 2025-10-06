@@ -1,19 +1,23 @@
+import 'package:flutter/widgets.dart';
+import 'package:provider/provider.dart';
+
 import '../../models/banner_config.dart';
-import '../../repository/lembaga_repository.dart';
+import '../../providers/lembaga_provider.dart';
 
 class BannerManager {
   static final BannerManager _instance = BannerManager._internal();
   factory BannerManager() => _instance;
   BannerManager._internal();
 
-  final LembagaRepository _repository = LembagaRepository();
-
   // Cache untuk menyimpan banner configs per lembaga
   final Map<String, BannerConfig> _bannerCache = {};
 
   /// Get banner config untuk menu tertentu
-  Future<BannerConfig> getBannerConfig(String menuKey,
-      {String? lembagaSlug}) async {
+  Future<BannerConfig> getBannerConfig(
+    BuildContext context,
+    String menuKey, {
+    String? lembagaSlug,
+  }) async {
     // Untuk banner yang sama di semua menu lembaga, kita cuma perlu lembagaSlug
     final cacheKey = lembagaSlug ?? 'default';
 
@@ -25,7 +29,8 @@ class BannerManager {
     try {
       // Jika ada lembagaSlug, ambil banner dari API
       if (lembagaSlug != null) {
-        final lembaga = await _repository.fetchBySlug(lembagaSlug);
+        final provider = Provider.of<LembagaProvider>(context, listen: false);
+        final lembaga = await provider.fetchBySlug(lembagaSlug);
         if (lembaga != null) {
           // Buat banner config dari topBanner dan botBanner lembaga
           final bannerConfig = BannerConfig.fromLembaga(
@@ -60,9 +65,11 @@ class BannerManager {
   }
 
   /// Pre-load banner config dari lembaga (topBanner & botBanner)
-  Future<void> preloadBannerConfigs(String lembagaSlug) async {
+  Future<void> preloadBannerConfigs(
+      BuildContext context, String lembagaSlug) async {
     try {
-      final lembaga = await _repository.fetchBySlug(lembagaSlug);
+      final provider = Provider.of<LembagaProvider>(context, listen: false);
+      final lembaga = await provider.fetchBySlug(lembagaSlug);
       if (lembaga != null) {
         // Buat banner config dari topBanner dan botBanner lembaga
         final bannerConfig = BannerConfig.fromLembaga(

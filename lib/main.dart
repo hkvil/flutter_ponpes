@@ -2,9 +2,10 @@ import 'package:flutter/material.dart';
 import 'package:intl/date_symbol_data_local.dart';
 import 'package:intl/intl.dart';
 import 'package:flutter_dotenv/flutter_dotenv.dart';
+import 'package:pesantren_app/screens/home_screen.dart';
+import 'package:pesantren_app/screens/splash_screen.dart';
 import 'package:provider/provider.dart';
 
-import 'core/utils/auth_utils.dart';
 import 'core/theme/app_colors.dart';
 import 'core/router/app_router.dart';
 import 'providers/achievement_provider.dart';
@@ -34,18 +35,17 @@ Future<void> main() async {
   await initializeDateFormatting('id_ID');
   Intl.defaultLocale = 'id_ID';
 
-  final isLoggedIn = await checkIsLoggedIn();
-  runApp(PesantrenApp(isLoggedIn: isLoggedIn));
+  runApp(const PesantrenApp());
 }
 
 class PesantrenApp extends StatelessWidget {
-  final bool isLoggedIn;
-  const PesantrenApp({super.key, this.isLoggedIn = false});
+  const PesantrenApp({super.key});
 
   @override
   Widget build(BuildContext context) {
     return MultiProvider(
       providers: [
+        ChangeNotifierProvider(create: (_) => AuthProvider()),
         ChangeNotifierProvider(create: (_) => DonasiProvider()),
         ChangeNotifierProvider(create: (_) => SliderProvider()),
         ChangeNotifierProvider(create: (_) => AchievementProvider()),
@@ -56,26 +56,32 @@ class PesantrenApp extends StatelessWidget {
         ChangeNotifierProvider(create: (_) => StaffProvider()),
         ChangeNotifierProvider(create: (_) => KehadiranProvider()),
         ChangeNotifierProvider(create: (_) => PrestasiProvider()),
-        ChangeNotifierProvider(
-            create: (_) => InformasiAlIttifaqiahProvider()),
-        ChangeNotifierProvider(create: (_) => AuthProvider()),
+        ChangeNotifierProvider(create: (_) => InformasiAlIttifaqiahProvider()),
         ChangeNotifierProvider(create: (_) => TahunAjaranProvider()),
       ],
-      child: MaterialApp(
-        debugShowCheckedModeBanner: false,
-        title: 'Pesantren UI',
-        theme: ThemeData(
-          colorScheme: ColorScheme.fromSeed(seedColor: AppColors.primaryGreen),
-          useMaterial3: true,
-          scaffoldBackgroundColor: Colors.white,
-          appBarTheme: const AppBarTheme(
-            backgroundColor: AppColors.primaryGreen,
-            foregroundColor: Colors.white,
-            centerTitle: false,
-          ),
-        ),
-        initialRoute: isLoggedIn ? AppRouter.home : AppRouter.splash,
-        onGenerateRoute: AppRouter.onGenerateRoute,
+      child: Consumer<AuthProvider>(
+        builder: (context, auth, _) {
+          return MaterialApp(
+            debugShowCheckedModeBanner: false,
+            title: 'Pesantren UI',
+            theme: ThemeData(
+              colorScheme:
+                  ColorScheme.fromSeed(seedColor: AppColors.primaryGreen),
+              useMaterial3: true,
+              scaffoldBackgroundColor: Colors.white,
+              appBarTheme: const AppBarTheme(
+                backgroundColor: AppColors.primaryGreen,
+                foregroundColor: Colors.white,
+                centerTitle: false,
+              ),
+            ),
+            home: auth.isInitialized
+                ? (auth.isLoggedIn ? const HomeScreen() : const SplashScreen())
+                : const Scaffold(
+                    body: Center(child: CircularProgressIndicator())),
+            onGenerateRoute: AppRouter.onGenerateRoute,
+          );
+        },
       ),
     );
   }

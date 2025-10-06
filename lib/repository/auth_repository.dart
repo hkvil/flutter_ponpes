@@ -13,7 +13,9 @@ class AuthRepository extends BaseRepository {
   static void debugAuthConfig() {
     print('🔧 [AUTH_DEBUG] ===== Auth Configuration Debug =====');
     print('🔧 [AUTH_DEBUG] API_HOST: ${dotenv.env['API_HOST']}');
-    print('🔧 [AUTH_DEBUG] Environment loaded: ${dotenv.isEveryDefined(['API_HOST'])}');
+    print('🔧 [AUTH_DEBUG] Environment loaded: ${dotenv.isEveryDefined([
+          'API_HOST'
+        ])}');
     print('🔧 [AUTH_DEBUG] All env vars: ${dotenv.env.keys.toList()}');
     print('🔧 [AUTH_DEBUG] ========================================');
   }
@@ -27,7 +29,7 @@ class AuthRepository extends BaseRepository {
     try {
       final response = await repo.dio.get(
         '/api/users/me',
-        options: repo.buildOptions(),
+        options: await repo.buildAuthenticatedOptions(),
       );
       print('🔗 [API_TEST] ✅ API accessible, status: ${response.statusCode}');
     } catch (e) {
@@ -74,7 +76,8 @@ class AuthRepository extends BaseRepository {
         final jwt = data['jwt'] as String;
         print('🔐 [AUTH] ✅ Login successful! JWT received');
         print('🔐 [AUTH] JWT length: ${jwt.length}');
-        print('🔐 [AUTH] JWT preview: ${jwt.substring(0, jwt.length > 20 ? 20 : jwt.length)}...');
+        print(
+            '🔐 [AUTH] JWT preview: ${jwt.substring(0, jwt.length > 20 ? 20 : jwt.length)}...');
 
         await _storage.write(key: 'jwt', value: jwt);
         await _storage.write(
@@ -86,8 +89,9 @@ class AuthRepository extends BaseRepository {
         return null; // sukses
       } else {
         final error = data['error'];
-        final errorMsg =
-            error is Map<String, dynamic> ? error['message'] ?? 'Login gagal' : 'Login gagal';
+        final errorMsg = error is Map<String, dynamic>
+            ? error['message'] ?? 'Login gagal'
+            : 'Login gagal';
         print('🔐 [AUTH] ❌ Login failed: $errorMsg');
         return errorMsg;
       }
@@ -111,6 +115,24 @@ class AuthRepository extends BaseRepository {
     }
   }
 
+  /// Mengambil data pengguna yang sedang login menggunakan token yang tersimpan.
+  Future<Map<String, dynamic>?> fetchCurrentUser() async {
+    try {
+      final response = await dio.get(
+        '/api/users/me',
+        options:
+            await buildAuthenticatedOptions(), // Menggunakan JWT dari secure storage
+      );
+      if (response.statusCode == 200 && response.data is Map<String, dynamic>) {
+        return response.data as Map<String, dynamic>;
+      }
+      return null;
+    } catch (e) {
+      print('❌ [AUTH] Failed to fetch current user: $e');
+      return null;
+    }
+  }
+
   /// Debug method untuk memeriksa JWT yang tersimpan
   static Future<void> debugStoredJWT() async {
     print('📱 [STORAGE_DEBUG] ===== JWT Storage Debug =====');
@@ -122,7 +144,8 @@ class AuthRepository extends BaseRepository {
       if (jwt != null) {
         print('📱 [STORAGE_DEBUG] ✅ JWT found in storage');
         print('📱 [STORAGE_DEBUG] JWT length: ${jwt.length}');
-        print('📱 [STORAGE_DEBUG] JWT preview: ${jwt.substring(0, jwt.length > 20 ? 20 : jwt.length)}...');
+        print(
+            '📱 [STORAGE_DEBUG] JWT preview: ${jwt.substring(0, jwt.length > 20 ? 20 : jwt.length)}...');
 
         if (loginTime != null) {
           final loginDateTime =
@@ -130,7 +153,8 @@ class AuthRepository extends BaseRepository {
           final now = DateTime.now();
           final duration = now.difference(loginDateTime);
           print('📱 [STORAGE_DEBUG] Login time: $loginDateTime');
-          print('📱 [STORAGE_DEBUG] Time since login: ${duration.inMinutes} minutes ago');
+          print(
+              '📱 [STORAGE_DEBUG] Time since login: ${duration.inMinutes} minutes ago');
         } else {
           print('📱 [STORAGE_DEBUG] ⚠️ JWT found but no login time recorded');
         }

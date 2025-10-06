@@ -3,68 +3,76 @@
 import 'package:flutter/material.dart';
 import 'package:intl/intl.dart';
 import 'package:pesantren_app/widgets/responsive_wrapper.dart';
+import 'package:provider/provider.dart';
+import 'package:pesantren_app/providers/auth_provider.dart';
 
 class AccountScreen extends StatelessWidget {
   const AccountScreen({super.key});
 
   @override
   Widget build(BuildContext context) {
-    // Data statis untuk contoh
-    const username = "pengguna1";
-    const email = "pengguna1@email.com";
-    final joinDate = DateFormat('d MMMM yyyy').format(DateTime.now());
-
     return ResponsiveWrapper(
-      child: Scaffold(
-        appBar: AppBar(
-          title: const Text('Akun Saya'),
-          elevation: 0,
-          backgroundColor: Colors.transparent,
-          foregroundColor: Colors.green.shade800, // Diubah ke hijau tua
-        ),
-        body: ListView(
-          padding: const EdgeInsets.all(16.0),
-          children: [
-            _buildProfileHeader(context, username, email),
-            const SizedBox(height: 24),
-            _buildInfoCard(context, [
-              _buildInfoTile(
-                icon: Icons.person_outline,
-                title: 'Username',
-                subtitle: username,
-              ),
-              _buildInfoTile(
-                icon: Icons.email_outlined,
-                title: 'Email',
-                subtitle: email,
-              ),
-              _buildInfoTile(
-                icon: Icons.calendar_today_outlined,
-                title: 'Bergabung Sejak',
-                subtitle: joinDate,
-              ),
-            ]),
-            const SizedBox(height: 24),
-            ElevatedButton.icon(
-              icon: const Icon(Icons.logout),
-              label: const Text('Logout'),
-              style: ElevatedButton.styleFrom(
-                backgroundColor: Colors.green.shade700, // Diubah ke hijau
-                foregroundColor: Colors.white,
-                padding: const EdgeInsets.symmetric(vertical: 12),
-                shape: RoundedRectangleBorder(
-                  borderRadius: BorderRadius.circular(12),
-                ),
-              ),
-              onPressed: () {
-                // Aksi logout dinonaktifkan sementara di versi statis
-                ScaffoldMessenger.of(context).showSnackBar(
-                  const SnackBar(content: Text('Fungsi Logout belum aktif.')),
-                );
-              },
+      child: Consumer<AuthProvider>(
+        builder: (context, authProvider, _) {
+          // Jika belum ada data user, tampilkan sebagai Guest
+          final username = authProvider.user?.username ?? 'Guest';
+          final email = authProvider.user?.email ?? 'guest@email.com';
+          final joinDate = authProvider.user?.createdAt != null
+              ? DateFormat('d MMMM yyyy').format(authProvider.user!.createdAt)
+              : DateFormat('d MMMM yyyy').format(DateTime.now());
+
+          return Scaffold(
+            appBar: AppBar(
+              title: const Text('Akun Saya'),
+              elevation: 0,
+              backgroundColor: Colors.transparent,
+              foregroundColor: Colors.green.shade800,
             ),
-          ],
-        ),
+            body: ListView(
+              padding: const EdgeInsets.all(16.0),
+              children: [
+                _buildProfileHeader(context, username, email),
+                const SizedBox(height: 24),
+                _buildInfoCard(context, [
+                  _buildInfoTile(
+                    icon: Icons.person_outline,
+                    title: 'Username',
+                    subtitle: username,
+                  ),
+                  _buildInfoTile(
+                    icon: Icons.email_outlined,
+                    title: 'Email',
+                    subtitle: email,
+                  ),
+                  _buildInfoTile(
+                    icon: Icons.calendar_today_outlined,
+                    title: 'Bergabung Sejak',
+                    subtitle: joinDate,
+                  ),
+                ]),
+                const SizedBox(height: 24),
+                ElevatedButton.icon(
+                  icon: const Icon(Icons.logout),
+                  label: const Text('Logout'),
+                  style: ElevatedButton.styleFrom(
+                    backgroundColor: Colors.green.shade700,
+                    foregroundColor: Colors.white,
+                    padding: const EdgeInsets.symmetric(vertical: 12),
+                    shape: RoundedRectangleBorder(
+                      borderRadius: BorderRadius.circular(12),
+                    ),
+                  ),
+                  onPressed: () async {
+                    await authProvider.logout();
+                    if (context.mounted) {
+                      Navigator.of(context).pushReplacementNamed('/');
+                    }
+                  },
+                ),
+              ],
+            ),
+          );
+        },
       ),
     );
   }

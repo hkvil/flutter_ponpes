@@ -2,12 +2,15 @@ import 'dart:convert';
 
 import 'package:dio/dio.dart';
 import 'package:flutter_dotenv/flutter_dotenv.dart';
+import 'package:flutter_secure_storage/flutter_secure_storage.dart';
 
 import '../core/network/dio_client.dart';
 
 /// Base class providing shared networking utilities for repositories.
 abstract class BaseRepository {
   BaseRepository({Dio? dio}) : dio = dio ?? DioClient().client;
+
+  static const _storage = FlutterSecureStorage();
 
   /// Configured Dio client that reuses the shared application settings.
   final Dio dio;
@@ -19,8 +22,20 @@ abstract class BaseRepository {
   }) {
     final resolvedHeaders = <String, String>{
       'Content-Type': 'application/json',
-      if (includeAuthorization)
-        ..._authorizationHeader(),
+      if (includeAuthorization) ..._authorizationHeader(),
+      if (headers != null) ...headers,
+    };
+
+    return Options(headers: resolvedHeaders);
+  }
+
+  /// Builds [Options] with JWT from secure storage for authenticated requests.
+  Future<Options> buildAuthenticatedOptions({
+    Map<String, String>? headers,
+  }) async {
+    final resolvedHeaders = <String, String>{
+      'Content-Type': 'application/json',
+      ...await _asyncAuthorizationHeader(),
       if (headers != null) ...headers,
     };
 
@@ -61,6 +76,19 @@ abstract class BaseRepository {
     final token = dotenv.env['API_TOKEN_READONLY'];
     if (token != null && token.isNotEmpty) {
       return {'Authorization': 'Bearer $token'};
+    }
+    return const {};
+  }
+
+  /// Returns authorization header using JWT from secure storage.
+  Future<Map<String, String>> _asyncAuthorizationHeader() async {
+    try {
+      final jwt = await _storage.read(key: 'jwt');
+      if (jwt != null && jwt.isNotEmpty) {
+        return {'Authorization': 'Bearer $jwt'};
+      }
+    } catch (e) {
+      print('⚠️ [AUTH] Failed to read JWT from storage: $e');
     }
     return const {};
   }

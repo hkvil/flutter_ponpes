@@ -1,39 +1,42 @@
 import 'package:dio/dio.dart';
-import 'package:flutter_dotenv/flutter_dotenv.dart';
-import '../models/slider_model.dart';
 
-class SliderRepository {
-  final Dio _dio = Dio(
-    BaseOptions(
-      connectTimeout: const Duration(seconds: 10),
-      receiveTimeout: const Duration(seconds: 10),
-    ),
-  );
+import '../models/slider_model.dart';
+import 'base_repository.dart';
+
+class SliderRepository extends BaseRepository {
+  SliderRepository({Dio? dio}) : super(dio: dio);
 
   Future<List<String>> fetchSliderImageUrls() async {
     print('Fetching slider images...');
-    final apiHost = dotenv.env['API_HOST'] ?? '';
-    final apiToken = dotenv.env['API_TOKEN_READONLY'] ?? '';
-    print('apiHost: $apiHost');
-    print('apiToken: $apiToken');
+
     try {
-      final response = await _dio.get(
-        '$apiHost/api/sliders?populate=*',
-        options: Options(
-          headers: {
-            'Authorization': 'Bearer $apiToken',
-          },
-        ),
+      final response = await dio.get(
+        '/api/sliders',
+        queryParameters: {
+          'populate': '*',
+        },
+        options: buildOptions(),
       );
-      print('Response data: ${response.data}');
-      final data = response.data['data'] as List<dynamic>? ?? [];
+
+      final body = ensureMap(response.data);
+      print('Response data: $body');
+
+      final data = (body['data'] as List<dynamic>?) ?? const [];
       print('Slider data: $data');
-      if (data.isEmpty) return [];
-      final slider = SliderModel.fromJson(data.first, apiHost);
+
+      if (data.isEmpty) {
+        return [];
+      }
+
+      final slider = SliderModel.fromJson(
+        data.first as Map<String, dynamic>,
+        baseUrl,
+      );
       print('Parsed image URLs: ${slider.imageUrls}');
       return slider.imageUrls;
-    } catch (e) {
-      print('Dio error: $e');
+    } on DioException catch (e) {
+      final message = mapDioError(e);
+      print('Dio error while fetching slider images: $message');
       return [];
     }
   }

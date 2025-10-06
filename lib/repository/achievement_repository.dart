@@ -1,41 +1,33 @@
 import 'package:dio/dio.dart';
-import 'package:flutter_dotenv/flutter_dotenv.dart';
-import '../models/achievement_model.dart';
 
-class AchievementRepository {
-  final Dio _dio = Dio(
-    BaseOptions(
-      connectTimeout: const Duration(seconds: 10),
-      receiveTimeout: const Duration(seconds: 10),
-    ),
-  );
+import '../models/achievement_model.dart';
+import 'base_repository.dart';
+
+class AchievementRepository extends BaseRepository {
+  AchievementRepository({Dio? dio}) : super(dio: dio);
 
   Future<List<AchievementModel>> fetchAchievements() async {
     print('Fetching achievements...');
-    final apiHost = dotenv.env['API_HOST'] ?? '';
-    final apiToken = dotenv.env['API_TOKEN_READONLY'] ?? '';
-    print('apiHost: $apiHost');
-    print('apiToken: $apiToken');
 
     try {
-      final response = await _dio.get(
-        '$apiHost/api/prestasi-dan-penghargaan-pesantrens?populate=*',
-        options: Options(
-          headers: {
-            'Authorization': 'Bearer $apiToken',
-          },
-        ),
+      final response = await dio.get(
+        '/api/prestasi-dan-penghargaan-pesantrens',
+        queryParameters: {
+          'populate': '*',
+        },
+        options: buildOptions(),
       );
 
-      print('Response data: ${response.data}');
-      if (response.statusCode == 200) {
-        return AchievementModel.fromJsonList(response.data, apiHost);
-      } else {
-        throw Exception('Failed to load achievements: ${response.statusCode}');
-      }
-    } catch (e) {
-      print('Error fetching achievements: $e');
-      throw Exception('Failed to fetch achievements: $e');
+      final body = ensureMap(response.data);
+      print('Response data: $body');
+
+      final achievements = AchievementModel.fromJsonList(body, baseUrl);
+      print('Parsed ${achievements.length} achievements');
+      return achievements;
+    } on DioException catch (e) {
+      final message = mapDioError(e);
+      print('Error fetching achievements: $message');
+      throw Exception('Failed to fetch achievements: $message');
     }
   }
 }

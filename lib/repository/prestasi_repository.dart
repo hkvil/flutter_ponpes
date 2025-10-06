@@ -1,14 +1,10 @@
 import 'package:dio/dio.dart';
-import 'package:flutter_dotenv/flutter_dotenv.dart';
-import '../models/prestasi.dart';
 
-class PrestasiRepository {
-  final Dio _dio = Dio(
-    BaseOptions(
-      connectTimeout: const Duration(seconds: 15),
-      receiveTimeout: const Duration(seconds: 15),
-    ),
-  );
+import '../models/prestasi.dart';
+import 'base_repository.dart';
+
+class PrestasiRepository extends BaseRepository {
+  PrestasiRepository({Dio? dio}) : super(dio: dio);
 
   /// Get all prestasi by lembaga (filter by santri's lembaga)
   Future<List<Prestasi>> getPrestasiByLembaga(
@@ -17,13 +13,10 @@ class PrestasiRepository {
     int? pageSize,
     String? tahun,
     String? tingkat,
-  }) async {
-    final apiHost = dotenv.env['API_HOST'] ?? '';
-    final apiToken = dotenv.env['API_TOKEN_READONLY'] ?? '';
-
-    final response = await _dio.get(
-      '$apiHost/api/prestasis',
-      queryParameters: {
+  }) {
+    return _fetchPrestasi(
+      'lembaga:$lembagaSlug',
+      {
         'filters[santri][lembaga][slug][\$eq]': lembagaSlug,
         if (tahun != null) 'filters[tahun][\$eq]': tahun,
         if (tingkat != null) 'filters[tingkat][\$eq]': tingkat,
@@ -32,24 +25,7 @@ class PrestasiRepository {
         'pagination[pageSize]': pageSize ?? 100,
         if (page != null) 'pagination[page]': page,
       },
-      options: Options(
-        headers: {
-          'Content-Type': 'application/json',
-          if (apiToken.isNotEmpty) 'Authorization': 'Bearer $apiToken',
-        },
-      ),
     );
-
-    final body = response.data as Map<String, dynamic>;
-    final dataList = body['data'] as List<dynamic>?;
-
-    if (dataList == null || dataList.isEmpty) {
-      return [];
-    }
-
-    return dataList
-        .map((item) => Prestasi.fromJson(item as Map<String, dynamic>))
-        .toList();
   }
 
   /// Get prestasi by kategori and lembaga
@@ -58,13 +34,10 @@ class PrestasiRepository {
     String kategori, {
     int? page,
     int? pageSize,
-  }) async {
-    final apiHost = dotenv.env['API_HOST'] ?? '';
-    final apiToken = dotenv.env['API_TOKEN_READONLY'] ?? '';
-
-    final response = await _dio.get(
-      '$apiHost/api/prestasis',
-      queryParameters: {
+  }) {
+    return _fetchPrestasi(
+      'kategori:$kategori',
+      {
         'filters[lembaga][slug][\$eq]': lembagaSlug,
         'filters[kategori][\$eq]': kategori,
         'pagination[pageSize]': pageSize ?? 25,
@@ -72,24 +45,7 @@ class PrestasiRepository {
         'populate': 'deep',
         'sort': 'tanggal:desc',
       },
-      options: Options(
-        headers: {
-          'Content-Type': 'application/json',
-          if (apiToken.isNotEmpty) 'Authorization': 'Bearer $apiToken',
-        },
-      ),
     );
-
-    final body = response.data as Map<String, dynamic>;
-    final dataList = body['data'] as List<dynamic>?;
-
-    if (dataList == null || dataList.isEmpty) {
-      return [];
-    }
-
-    return dataList
-        .map((item) => Prestasi.fromJson(item as Map<String, dynamic>))
-        .toList();
   }
 
   /// Get prestasi by tingkat (level) and lembaga
@@ -98,13 +54,10 @@ class PrestasiRepository {
     String tingkat, {
     int? page,
     int? pageSize,
-  }) async {
-    final apiHost = dotenv.env['API_HOST'] ?? '';
-    final apiToken = dotenv.env['API_TOKEN_READONLY'] ?? '';
-
-    final response = await _dio.get(
-      '$apiHost/api/prestasis',
-      queryParameters: {
+  }) {
+    return _fetchPrestasi(
+      'tingkat:$tingkat',
+      {
         'filters[lembaga][slug][\$eq]': lembagaSlug,
         'filters[tingkat][\$eq]': tingkat,
         'pagination[pageSize]': pageSize ?? 25,
@@ -112,24 +65,7 @@ class PrestasiRepository {
         'populate': 'deep',
         'sort': 'tanggal:desc',
       },
-      options: Options(
-        headers: {
-          'Content-Type': 'application/json',
-          if (apiToken.isNotEmpty) 'Authorization': 'Bearer $apiToken',
-        },
-      ),
     );
-
-    final body = response.data as Map<String, dynamic>;
-    final dataList = body['data'] as List<dynamic>?;
-
-    if (dataList == null || dataList.isEmpty) {
-      return [];
-    }
-
-    return dataList
-        .map((item) => Prestasi.fromJson(item as Map<String, dynamic>))
-        .toList();
   }
 
   /// Get prestasi by tahun ajaran and lembaga
@@ -138,13 +74,10 @@ class PrestasiRepository {
     String tahunAjaranName, {
     int? page,
     int? pageSize,
-  }) async {
-    final apiHost = dotenv.env['API_HOST'] ?? '';
-    final apiToken = dotenv.env['API_TOKEN_READONLY'] ?? '';
-
-    final response = await _dio.get(
-      '$apiHost/api/prestasis',
-      queryParameters: {
+  }) {
+    return _fetchPrestasi(
+      'tahun:$tahunAjaranName',
+      {
         'filters[lembaga][slug][\$eq]': lembagaSlug,
         'filters[tahunAjaran][nama][\$eq]': tahunAjaranName,
         'pagination[pageSize]': pageSize ?? 25,
@@ -152,24 +85,7 @@ class PrestasiRepository {
         'populate': 'deep',
         'sort': 'tanggal:desc',
       },
-      options: Options(
-        headers: {
-          'Content-Type': 'application/json',
-          if (apiToken.isNotEmpty) 'Authorization': 'Bearer $apiToken',
-        },
-      ),
     );
-
-    final body = response.data as Map<String, dynamic>;
-    final dataList = body['data'] as List<dynamic>?;
-
-    if (dataList == null || dataList.isEmpty) {
-      return [];
-    }
-
-    return dataList
-        .map((item) => Prestasi.fromJson(item as Map<String, dynamic>))
-        .toList();
   }
 
   /// Get prestasi by santri ID
@@ -177,69 +93,45 @@ class PrestasiRepository {
     int santriId, {
     int? page,
     int? pageSize,
-  }) async {
-    final apiHost = dotenv.env['API_HOST'] ?? '';
-    final apiToken = dotenv.env['API_TOKEN_READONLY'] ?? '';
-
-    final response = await _dio.get(
-      '$apiHost/api/prestasis',
-      queryParameters: {
+  }) {
+    return _fetchPrestasi(
+      'santri:$santriId',
+      {
         'filters[santri][id][\$eq]': santriId,
         'pagination[pageSize]': pageSize ?? 25,
         if (page != null) 'pagination[page]': page,
         'populate': 'deep',
         'sort': 'tanggal:desc',
       },
-      options: Options(
-        headers: {
-          'Content-Type': 'application/json',
-          if (apiToken.isNotEmpty) 'Authorization': 'Bearer $apiToken',
-        },
-      ),
     );
-
-    final body = response.data as Map<String, dynamic>;
-    final dataList = body['data'] as List<dynamic>?;
-
-    if (dataList == null || dataList.isEmpty) {
-      return [];
-    }
-
-    return dataList
-        .map((item) => Prestasi.fromJson(item as Map<String, dynamic>))
-        .toList();
   }
 
-  /// Get single prestasi by ID
-  Future<Prestasi?> getPrestasiById(int id) async {
-    final apiHost = dotenv.env['API_HOST'] ?? '';
-    final apiToken = dotenv.env['API_TOKEN_READONLY'] ?? '';
-
+  Future<List<Prestasi>> _fetchPrestasi(
+    String context,
+    Map<String, dynamic> queryParameters,
+  ) async {
     try {
-      final response = await _dio.get(
-        '$apiHost/api/prestasis/$id',
-        queryParameters: {
-          'populate': 'deep',
-        },
-        options: Options(
-          headers: {
-            'Content-Type': 'application/json',
-            if (apiToken.isNotEmpty) 'Authorization': 'Bearer $apiToken',
-          },
-        ),
+      final response = await dio.get(
+        '/api/prestasis',
+        queryParameters: queryParameters,
+        options: buildOptions(),
       );
 
-      final body = response.data as Map<String, dynamic>;
-      final data = body['data'] as Map<String, dynamic>?;
+      final body = ensureMap(response.data);
+      final dataList = (body['data'] as List<dynamic>?) ?? const [];
 
-      if (data == null) {
-        return null;
+      if (dataList.isEmpty) {
+        return [];
       }
 
-      return Prestasi.fromJson(data);
-    } catch (e) {
-      print('Error getting prestasi by id: $e');
-      return null;
+      return dataList
+          .whereType<Map<String, dynamic>>()
+          .map(Prestasi.fromJson)
+          .toList();
+    } on DioException catch (e) {
+      final message = mapDioError(e);
+      print('Error fetching prestasi ($context): $message');
+      throw Exception('Failed to fetch prestasi: $message');
     }
   }
 }

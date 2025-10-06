@@ -1,46 +1,31 @@
 import 'package:dio/dio.dart';
-import 'package:flutter_dotenv/flutter_dotenv.dart';
 import 'package:pesantren_app/models/informasi_al_ittifaqiah_model.dart';
 
-class InformasiAlIttifaqiahRepository {
-  final Dio _dio = Dio(
-    BaseOptions(
-      connectTimeout: const Duration(seconds: 15),
-      receiveTimeout: const Duration(seconds: 15),
-    ),
-  );
+import 'base_repository.dart';
+
+class InformasiAlIttifaqiahRepository extends BaseRepository {
+  InformasiAlIttifaqiahRepository({Dio? dio}) : super(dio: dio);
 
   /// Ambil data informasi Al-Ittifaqiah lengkap dengan populate=all
   Future<InformasiAlIttifaqiah?> fetchInformasiAlIttifaqiah() async {
-    // ===== API REQUEST TRACKING =====
     print('\n🔄 [INFORMASI_API] Starting API call...');
     print('📍 Endpoint: /api/informasi-al-ittifaqiah');
 
-    final apiHost = dotenv.env['API_HOST'] ?? '';
-    final apiToken = dotenv.env['API_TOKEN_READONLY'] ?? '';
-
     try {
-      final response = await _dio.get(
-        '$apiHost/api/informasi-al-ittifaqiah',
+      final response = await dio.get(
+        '/api/informasi-al-ittifaqiah',
         queryParameters: {
           'populate': 'all',
         },
-        options: Options(
-          headers: {
-            'Content-Type': 'application/json',
-            if (apiToken.isNotEmpty) 'Authorization': 'Bearer $apiToken',
-          },
-        ),
+        options: buildOptions(),
       );
 
       print('🔧 [API_DEBUG] URL called with populate=all');
-
-      // ===== API RESPONSE TRACKING =====
       print('\n✅ [INFORMASI_API] Response received');
       print('📊 Status Code: ${response.statusCode}');
       print('📈 Response Headers: ${response.headers.map}');
 
-      final body = response.data as Map<String, dynamic>;
+      final body = ensureMap(response.data);
       print('📦 Response Body Keys: ${body.keys.toList()}');
 
       final data = body['data'];
@@ -50,12 +35,10 @@ class InformasiAlIttifaqiahRepository {
         return null;
       }
 
-      // ===== DATA PROCESSING TRACKING =====
       print('\n🔄 [INFORMASI_API] Processing data...');
       final rawData = data as Map<String, dynamic>;
       print('📄 Raw Data Keys: ${rawData.keys.toList()}');
 
-      // Print key information
       if (rawData['profilMd'] != null) {
         final profilLength = (rawData['profilMd'] as String).length;
         print('📝 profilMd: Found ($profilLength chars)');
@@ -63,7 +46,6 @@ class InformasiAlIttifaqiahRepository {
         print('📝 profilMd: NULL');
       }
 
-      // Check gallery data
       if (rawData['galeriTamu'] is List) {
         final galeriTamuCount = (rawData['galeriTamu'] as List).length;
         print('🖼️ galeriTamu: Found ($galeriTamuCount items)');
@@ -80,13 +62,11 @@ class InformasiAlIttifaqiahRepository {
         print('🏗️ bluePrintISCI: Found ($bluePrintCount items)');
       }
 
-      // Check news data
       if (rawData['news'] is List) {
         final newsCount = (rawData['news'] as List).length;
         print('📰 news: Found ($newsCount items)');
       }
 
-      // Check statistics data
       if (rawData['santri'] is List) {
         final santriCount = (rawData['santri'] as List).length;
         print('👨‍🎓 santri: Found ($santriCount records)');
@@ -104,7 +84,6 @@ class InformasiAlIttifaqiahRepository {
 
       final informasi = InformasiAlIttifaqiah.fromJson(rawData);
 
-      // ===== FINAL RESULT TRACKING =====
       print('\n✅ [INFORMASI_API] Data processing completed');
       print('🏛️ ID: ${informasi.id}');
       print('📝 ProfilMd Available: ${informasi.hasProfilContent()}');
@@ -123,10 +102,10 @@ class InformasiAlIttifaqiahRepository {
 
       print('🎉 [INFORMASI_API] Success! Returning informasi data\n');
       return informasi;
-    } catch (e, stackTrace) {
-      // ===== ERROR TRACKING =====
+    } on DioException catch (e, stackTrace) {
+      final message = mapDioError(e);
       print('\n❌ [INFORMASI_API] ERROR occurred!');
-      print('🚨 Error: $e');
+      print('🚨 Error: $message');
       print('📍 StackTrace: $stackTrace');
       print('💡 Please check API endpoint and network connection\n');
       rethrow;

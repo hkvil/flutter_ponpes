@@ -2,9 +2,12 @@ import 'package:flutter/material.dart';
 import 'package:intl/date_symbol_data_local.dart';
 import 'package:intl/intl.dart';
 import 'package:flutter_dotenv/flutter_dotenv.dart';
+import 'package:provider/provider.dart';
+
 import 'core/utils/auth_utils.dart';
 import 'core/theme/app_colors.dart';
 import 'core/router/app_router.dart';
+import 'providers/donasi_provider.dart';
 
 /// Entry point of the Pesantren application.
 ///
@@ -29,21 +32,28 @@ class PesantrenApp extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return MaterialApp(
-      debugShowCheckedModeBanner: false,
-      title: 'Pesantren UI',
-      theme: ThemeData(
-        colorScheme: ColorScheme.fromSeed(seedColor: AppColors.primaryGreen),
-        useMaterial3: true,
-        scaffoldBackgroundColor: Colors.white,
-        appBarTheme: const AppBarTheme(
-          backgroundColor: AppColors.primaryGreen,
-          foregroundColor: Colors.white,
-          centerTitle: false,
+    return MultiProvider(
+      providers: [
+        ChangeNotifierProvider(
+          create: (_) => DonasiProvider(),
         ),
+      ],
+      child: MaterialApp(
+        debugShowCheckedModeBanner: false,
+        title: 'Pesantren UI',
+        theme: ThemeData(
+          colorScheme: ColorScheme.fromSeed(seedColor: AppColors.primaryGreen),
+          useMaterial3: true,
+          scaffoldBackgroundColor: Colors.white,
+          appBarTheme: const AppBarTheme(
+            backgroundColor: AppColors.primaryGreen,
+            foregroundColor: Colors.white,
+            centerTitle: false,
+          ),
+        ),
+        initialRoute: isLoggedIn ? AppRouter.home : AppRouter.splash,
+        onGenerateRoute: AppRouter.onGenerateRoute,
       ),
-      initialRoute: isLoggedIn ? AppRouter.home : AppRouter.splash,
-      onGenerateRoute: AppRouter.onGenerateRoute,
     );
   }
 }

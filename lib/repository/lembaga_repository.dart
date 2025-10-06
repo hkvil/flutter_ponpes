@@ -1,75 +1,59 @@
 import 'package:dio/dio.dart';
-import 'package:flutter_dotenv/flutter_dotenv.dart';
 import 'package:pesantren_app/models/lembaga_model.dart';
 
-class LembagaRepository {
-  final Dio _dio = Dio(
-    BaseOptions(
-      connectTimeout: const Duration(seconds: 15),
-      receiveTimeout: const Duration(seconds: 15),
-    ),
-  );
+import 'base_repository.dart';
+
+class LembagaRepository extends BaseRepository {
+  LembagaRepository({Dio? dio}) : super(dio: dio);
 
   /// Ambil daftar lembaga untuk menu (nama + slug + timestamp)
   Future<List<Lembaga>> fetchAll() async {
-    final apiHost = dotenv.env['API_HOST'] ?? '';
-    final apiToken = dotenv.env['API_TOKEN_READONLY'] ?? '';
-
-    final response = await _dio.get(
-      '$apiHost/api/lembagas',
-      queryParameters: {
-        'fields[0]': 'nama',
-        'fields[1]': 'slug',
-        'fields[2]': 'createdAt',
-        'fields[3]': 'updatedAt',
-        'sort': 'nama:asc',
-        'pagination[pageSize]': 200,
-      },
-      options: Options(
-        headers: {
-          'Content-Type': 'application/json',
-          if (apiToken.isNotEmpty) 'Authorization': 'Bearer $apiToken',
+    try {
+      final response = await dio.get(
+        '/api/lembagas',
+        queryParameters: {
+          'fields[0]': 'nama',
+          'fields[1]': 'slug',
+          'fields[2]': 'createdAt',
+          'fields[3]': 'updatedAt',
+          'sort': 'nama:asc',
+          'pagination[pageSize]': 200,
         },
-      ),
-    );
-    final body = response.data as Map<String, dynamic>;
-    return Lembaga.listFromStrapiEnvelope(body);
+        options: buildOptions(),
+      );
+
+      final body = ensureMap(response.data);
+      return Lembaga.listFromStrapiEnvelope(body);
+    } on DioException catch (e) {
+      final message = mapDioError(e);
+      print('Error fetching lembaga list: $message');
+      throw Exception('Failed to fetch lembaga list: $message');
+    }
   }
 
   /// Ambil detail lembaga by slug, lengkap dengan images/videos/kontak/profilMd/programKerjaMd
   Future<Lembaga?> fetchBySlug(String slug) async {
-    // ===== API REQUEST TRACKING =====
     print('\n🔄 [LEMBAGA_API] Starting API call...');
     print('📍 Slug: "$slug"');
 
-    final apiHost = dotenv.env['API_HOST'] ?? '';
-    final apiToken = dotenv.env['API_TOKEN_READONLY'] ?? '';
-
     try {
-      // Strapi v5 dengan plugin: populate=all untuk mendapatkan semua field termasuk deep populate
-      final response = await _dio.get(
-        '$apiHost/api/lembagas',
+      final response = await dio.get(
+        '/api/lembagas',
         queryParameters: {
           'filters[slug][\$eq]': slug,
           'populate': 'all',
         },
-        options: Options(
-          headers: {
-            'Content-Type': 'application/json',
-            if (apiToken.isNotEmpty) 'Authorization': 'Bearer $apiToken',
-          },
-        ),
+        options: buildOptions(),
       );
 
       print(
           '🔧 [API_DEBUG] URL called with populate=all (plugin untuk deep populate)');
 
-      // ===== API RESPONSE TRACKING =====
       print('\n✅ [LEMBAGA_API] Response received');
       print('📊 Status Code: ${response.statusCode}');
       print('📈 Response Headers: ${response.headers.map}');
 
-      final body = response.data as Map<String, dynamic>;
+      final body = ensureMap(response.data);
       print('📦 Response Body Keys: ${body.keys.toList()}');
 
       final data = (body['data'] as List?) ?? const [];
@@ -81,12 +65,10 @@ class LembagaRepository {
         return null;
       }
 
-      // ===== DATA PROCESSING TRACKING =====
       print('\n🔄 [LEMBAGA_API] Processing data...');
       final rawData = data.first as Map<String, dynamic>;
       print('📄 Raw Data Keys: ${rawData.keys.toList()}');
 
-      // Print raw markdown content
       if (rawData['profilMd'] != null) {
         final profilLength = (rawData['profilMd'] as String).length;
         print('📝 profilMd: Found ($profilLength chars)');
@@ -105,7 +87,6 @@ class LembagaRepository {
         print('📋 programKerjaMd: NULL');
       }
 
-      // Check frontImages
       if (rawData['frontImages'] is List) {
         final frontImagesCount = (rawData['frontImages'] as List).length;
         print('🖼️  frontImages: Found ($frontImagesCount images)');
@@ -117,15 +98,15 @@ class LembagaRepository {
             print('🖼️  Image $i: ${img['url']}');
           }
         }
-        if (frontImagesCount > 3)
+        if (frontImagesCount > 3) {
           print('🖼️  ... and ${frontImagesCount - 3} more images');
+        }
       } else {
         print('🖼️  frontImages: NULL or empty');
       }
 
       final lembaga = Lembaga.fromJson(rawData);
 
-      // ===== FINAL RESULT TRACKING =====
       print('\n✅ [LEMBAGA_API] Data processing completed');
       print('🏛️  Lembaga Name: "${lembaga.nama}"');
       print('🔗 Lembaga Slug: "${lembaga.slug}"');
@@ -144,10 +125,10 @@ class LembagaRepository {
 
       print('🎉 [LEMBAGA_API] Success! Returning lembaga data\n');
       return lembaga;
-    } catch (e, stackTrace) {
-      // ===== ERROR TRACKING =====
+    } on DioException catch (e, stackTrace) {
+      final message = mapDioError(e);
       print('\n❌ [LEMBAGA_API] ERROR occurred!');
-      print('🚨 Error: $e');
+      print('🚨 Error: $message');
       print('📍 StackTrace: $stackTrace');
       print('🔧 Slug attempted: "$slug"');
       print('💡 Please check API endpoint and network connection\n');

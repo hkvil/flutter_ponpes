@@ -216,50 +216,59 @@ class _PrestasiSantriScreenState extends State<PrestasiSantriScreen> {
 
     return Scaffold(
       backgroundColor: AppColors.primaryGreen,
-      body: Column(
-        children: [
-          if (_errorMessage != null)
-            Container(
-              width: double.infinity,
-              padding: const EdgeInsets.all(12),
-              color: Colors.orange.shade100,
-              child: Row(
-                children: [
-                  Icon(Icons.info_outline,
-                      color: Colors.orange.shade700, size: 20),
-                  const SizedBox(width: 8),
-                  Expanded(
-                    child: Text(
-                      _errorMessage!,
-                      style: TextStyle(
-                          color: Colors.orange.shade900, fontSize: 12),
-                      maxLines: 2,
-                      overflow: TextOverflow.ellipsis,
-                    ),
+      body: RefreshIndicator(
+        color: AppColors.primaryGreen,
+        onRefresh: () => _fetchPrestasiData(
+            tahun: selectedYear, tingkat: selectedTingkat),
+        child: CustomScrollView(
+          physics: const AlwaysScrollableScrollPhysics(),
+          slivers: [
+            if (_errorMessage != null)
+              SliverToBoxAdapter(
+                child: Container(
+                  width: double.infinity,
+                  padding: const EdgeInsets.all(12),
+                  color: Colors.orange.shade100,
+                  child: Row(
+                    children: [
+                      Icon(Icons.info_outline,
+                          color: Colors.orange.shade700, size: 20),
+                      const SizedBox(width: 8),
+                      Expanded(
+                        child: Text(
+                          _errorMessage!,
+                          style: TextStyle(
+                              color: Colors.orange.shade900, fontSize: 12),
+                          maxLines: 2,
+                          overflow: TextOverflow.ellipsis,
+                        ),
+                      ),
+                    ],
                   ),
-                ],
-              ),
-            ),
-          _buildHeader(),
-          Expanded(
-            child: Container(
-              decoration: const BoxDecoration(
-                color: Colors.white,
-                borderRadius: BorderRadius.only(
-                  topLeft: Radius.circular(30),
-                  topRight: Radius.circular(30),
                 ),
               ),
-              child: Column(
-                children: [
-                  _buildFilters(),
-                  _buildStats(),
-                  Expanded(child: _buildPrestasiList()),
-                ],
+            SliverToBoxAdapter(child: _buildHeader()),
+            SliverToBoxAdapter(
+              child: Container(
+                decoration: const BoxDecoration(
+                  color: Colors.white,
+                  borderRadius: BorderRadius.only(
+                    topLeft: Radius.circular(30),
+                    topRight: Radius.circular(30),
+                  ),
+                ),
+                child: Column(
+                  children: [
+                    _buildFilters(),
+                    _buildStats(),
+                    _buildPrestasiList(),
+                    const SizedBox(height: 24),
+                  ],
+                ),
               ),
             ),
-          ),
-        ],
+          ],
+        ),
       ),
     );
   }
@@ -635,21 +644,18 @@ class _PrestasiSantriScreenState extends State<PrestasiSantriScreen> {
             ),
           ),
           const SizedBox(height: 12),
-          Expanded(
-            child: filteredPrestasi.isEmpty
-                ? _buildEmptyState()
-                : RefreshIndicator(
-                    onRefresh: () => _fetchPrestasiData(
-                        tahun: selectedYear, tingkat: selectedTingkat),
-                    child: ListView.builder(
-                      itemCount: filteredPrestasi.length,
-                      itemBuilder: (context, index) {
-                        final prestasi = filteredPrestasi[index];
-                        return _buildPrestasiCard(prestasi, index);
-                      },
-                    ),
-                  ),
-          ),
+          if (filteredPrestasi.isEmpty)
+            SizedBox(height: 200, child: _buildEmptyState())
+          else
+            ListView.builder(
+              shrinkWrap: true,
+              physics: const NeverScrollableScrollPhysics(),
+              itemCount: filteredPrestasi.length,
+              itemBuilder: (context, index) {
+                final prestasi = filteredPrestasi[index];
+                return _buildPrestasiCard(prestasi, index);
+              },
+            ),
         ],
       ),
     );

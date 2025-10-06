@@ -29,19 +29,31 @@ class ContactScreen extends StatelessWidget {
         backgroundColor: const Color(0xFF2E7D32),
         foregroundColor: Colors.white,
       ),
-      body: Center(
-        child: Column(children: [
-          // Use API banner if available, otherwise use default banner
-          if (bannerConfig != null && bannerConfig.hasTopBanner)
-            BannerWidget(bannerConfig: bannerConfig)
-          else
-            const TopBanner(assetPath: 'assets/banners/top.png'),
+      body: LayoutBuilder(
+        builder: (context, constraints) {
+          final content = Column(
+            mainAxisSize: MainAxisSize.min,
+            children: [
+              // Use API banner if available, otherwise use default banner
+              if (bannerConfig != null && bannerConfig.hasTopBanner)
+                BannerWidget(bannerConfig: bannerConfig)
+              else
+                const TopBanner(assetPath: 'assets/banners/top.png'),
 
-          const SizedBox(height: 20),
+              const SizedBox(height: 20),
 
-          // Pass contact data from API to ContactPanel
-          ContactPanel(kontakData: kontakData)
-        ]),
+              // Pass contact data from API to ContactPanel
+              ContactPanel(kontakData: kontakData)
+            ],
+          );
+
+          return SingleChildScrollView(
+            child: ConstrainedBox(
+              constraints: BoxConstraints(minHeight: constraints.maxHeight),
+              child: Center(child: content),
+            ),
+          );
+        },
       ),
     );
   }

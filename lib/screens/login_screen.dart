@@ -33,29 +33,36 @@ class LoginScreen extends StatelessWidget {
 
     return ResponsiveWrapper(
       child: Scaffold(
-        body: Column(
-          mainAxisAlignment: MainAxisAlignment.center,
-          children: [
-            Expanded(
-              child: FlutterLogin(
-                title: 'Al Ittifaqiah',
-                onLogin: _authUser,
-                onRecoverPassword: _recoverPassword,
-                onSubmitAnimationCompleted: () {
-                  Navigator.of(context).pushReplacementNamed('/home');
-                },
+        body: LayoutBuilder(
+          builder: (context, constraints) {
+            return SingleChildScrollView(
+              child: ConstrainedBox(
+                constraints: BoxConstraints(minHeight: constraints.maxHeight),
+                child: Column(
+                  mainAxisAlignment: MainAxisAlignment.center,
+                  children: [
+                    FlutterLogin(
+                      title: 'Al Ittifaqiah',
+                      onLogin: _authUser,
+                      onRecoverPassword: _recoverPassword,
+                      onSubmitAnimationCompleted: () {
+                        Navigator.of(context).pushReplacementNamed('/home');
+                      },
+                    ),
+                    Padding(
+                      padding: const EdgeInsets.only(bottom: 16.0, top: 8.0),
+                      child: TextButton(
+                        onPressed: () {
+                          Navigator.of(context).pushReplacementNamed('/home');
+                        },
+                        child: const Text('Login as Guest'),
+                      ),
+                    ),
+                  ],
+                ),
               ),
-            ),
-            Padding(
-              padding: const EdgeInsets.only(bottom: 16.0),
-              child: TextButton(
-                onPressed: () {
-                  Navigator.of(context).pushReplacementNamed('/home');
-                },
-                child: Text('Login as Guest'),
-              ),
-            ),
-          ],
+            );
+          },
         ),
       ),
     );

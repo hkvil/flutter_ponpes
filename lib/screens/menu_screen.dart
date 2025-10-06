@@ -49,143 +49,163 @@ class _MenuScreenState extends State<MenuScreen> {
     return ResponsiveWrapper(
       child: Scaffold(
         appBar: TopBar(title: widget.args.title),
-        body: Column(
-          children: [
-            // Use banner from API if available, fallback to assets
-            isLoadingBanner
-                ? Container(
-                    height: 120,
-                    child: Center(child: CircularProgressIndicator()),
-                  )
-                : TopBanner(
-                    imageUrl: banner?.resolvedTopBannerUrl,
-                    assetPath: 'assets/banners/top.png', // Fallback
-                  ),
-            SizedBox(height: 20),
-            Expanded(
-              child: Builder(
-                builder: (context) {
-                  if (widget.menuData is Map<String, dynamic>) {
-                    final keys = widget.menuData.keys.toList();
-                    return ListView.builder(
-                      itemCount: keys.length,
-                      itemBuilder: (context, index) {
-                        final key = keys[index];
-                        return ReusableListTileWidget(
-                          value: null,
-                          titleText: key,
-                          onTap: () {
-                            Navigator.push(
-                              context,
-                              MaterialPageRoute(
-                                builder: (context) => MenuScreen(
-                                  args: MenuScreenArgs(title: key),
-                                  menuData: widget.menuData[key],
-                                ),
-                              ),
-                            );
-                          },
-                        );
-                      },
-                    );
-                  } else if (widget.menuData is List) {
-                    // Cek apakah List berisi Map (menu dengan warna)
-                    if (widget.menuData.isNotEmpty &&
-                        widget.menuData.first is Map) {
-                      return ListView.builder(
-                        itemCount: widget.menuData.length,
-                        itemBuilder: (context, index) {
-                          final item =
-                              widget.menuData[index] as Map<String, dynamic>;
-                          final title = item['title'] ?? '';
-                          final indexBackgroundColor =
-                              item['indexBackgroundColor'] != null
-                                  ? Color(item['indexBackgroundColor'])
-                                  : null;
-                          final titleTextBackgroundColor =
-                              item['titleTextBackgroundColor'] != null
-                                  ? Color(item['titleTextBackgroundColor'])
-                                  : null;
-                          Widget tile = ReusableListTileWidget(
-                            value: null,
-                            titleText: title,
-                            indexBackgroundColor: indexBackgroundColor,
-                            titleTextBackgroundColor: titleTextBackgroundColor,
-                            onTap: () {
-                              // Jika item adalah label (Formal/Non Formal), tidak navigasi
-                              if (title == 'Formal' || title == 'Non Formal')
-                                return;
-                              final isPenyelenggara = widget.args.title ==
-                                  'Organ Penyelenggara Pendidikan Formal';
-                              Navigator.push(
-                                context,
-                                MaterialPageRoute(
-                                  builder: (context) => DetailScreen(
-                                    title: title,
-                                    menuItems: isPenyelenggara
-                                        ? menuItemsJenis2
-                                        : menuItemsJenis1,
-                                  ),
-                                ),
+        body: LayoutBuilder(
+          builder: (context, constraints) {
+            return SingleChildScrollView(
+              child: ConstrainedBox(
+                constraints: BoxConstraints(minHeight: constraints.maxHeight),
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.stretch,
+                  children: [
+                    // Use banner from API if available, fallback to assets
+                    isLoadingBanner
+                        ? SizedBox(
+                            height: 120,
+                            child: Center(child: CircularProgressIndicator()),
+                          )
+                        : TopBanner(
+                            imageUrl: banner?.resolvedTopBannerUrl,
+                            assetPath: 'assets/banners/top.png', // Fallback
+                          ),
+                    const SizedBox(height: 20),
+                    Builder(
+                      builder: (context) {
+                        if (widget.menuData is Map<String, dynamic>) {
+                          final keys = widget.menuData.keys.toList();
+                          return ListView.builder(
+                            shrinkWrap: true,
+                            physics: const NeverScrollableScrollPhysics(),
+                            itemCount: keys.length,
+                            itemBuilder: (context, index) {
+                              final key = keys[index];
+                              return ReusableListTileWidget(
+                                value: null,
+                                titleText: key,
+                                onTap: () {
+                                  Navigator.push(
+                                    context,
+                                    MaterialPageRoute(
+                                      builder: (context) => MenuScreen(
+                                        args: MenuScreenArgs(title: key),
+                                        menuData: widget.menuData[key],
+                                      ),
+                                    ),
+                                  );
+                                },
                               );
                             },
                           );
-                          if (title != 'Formal' && title != 'Non Formal') {
-                            tile = Padding(
-                              padding: const EdgeInsets.only(left: 60.0),
-                              child: tile,
+                        } else if (widget.menuData is List) {
+                          // Cek apakah List berisi Map (menu dengan warna)
+                          if (widget.menuData.isNotEmpty &&
+                              widget.menuData.first is Map) {
+                            return ListView.builder(
+                              shrinkWrap: true,
+                              physics: const NeverScrollableScrollPhysics(),
+                              itemCount: widget.menuData.length,
+                              itemBuilder: (context, index) {
+                                final item = widget.menuData[index]
+                                    as Map<String, dynamic>;
+                                final title = item['title'] ?? '';
+                                final indexBackgroundColor =
+                                    item['indexBackgroundColor'] != null
+                                        ? Color(item['indexBackgroundColor'])
+                                        : null;
+                                final titleTextBackgroundColor =
+                                    item['titleTextBackgroundColor'] != null
+                                        ? Color(item['titleTextBackgroundColor'])
+                                        : null;
+                                Widget tile = ReusableListTileWidget(
+                                  value: null,
+                                  titleText: title,
+                                  indexBackgroundColor: indexBackgroundColor,
+                                  titleTextBackgroundColor:
+                                      titleTextBackgroundColor,
+                                  onTap: () {
+                                    // Jika item adalah label (Formal/Non Formal), tidak navigasi
+                                    if (title == 'Formal' ||
+                                        title == 'Non Formal') {
+                                      return;
+                                    }
+                                    final isPenyelenggara = widget.args.title ==
+                                        'Organ Penyelenggara Pendidikan Formal';
+                                    Navigator.push(
+                                      context,
+                                      MaterialPageRoute(
+                                        builder: (context) => DetailScreen(
+                                          title: title,
+                                          menuItems: isPenyelenggara
+                                              ? menuItemsJenis2
+                                              : menuItemsJenis1,
+                                        ),
+                                      ),
+                                    );
+                                  },
+                                );
+                                if (title != 'Formal' &&
+                                    title != 'Non Formal') {
+                                  tile = Padding(
+                                    padding:
+                                        const EdgeInsets.only(left: 60.0),
+                                    child: tile,
+                                  );
+                                }
+                                return tile;
+                              },
                             );
+                          } else if (widget.menuData.isNotEmpty &&
+                              widget.menuData.first is String) {
+                            // Fallback jika masih List<String> atau List menu bercabang
+                            return ListView.builder(
+                              shrinkWrap: true,
+                              physics: const NeverScrollableScrollPhysics(),
+                              itemCount: widget.menuData.length,
+                              itemBuilder: (context, index) {
+                                final item = widget.menuData[index];
+                                return ReusableListTileWidget(
+                                  value: null,
+                                  titleText: item.toString(),
+                                  onTap: () {
+                                    if (item is List) {
+                                      Navigator.push(
+                                        context,
+                                        MaterialPageRoute(
+                                          builder: (context) => MenuScreen(
+                                            args: MenuScreenArgs(
+                                                title: item.toString()),
+                                            menuData: item,
+                                          ),
+                                        ),
+                                      );
+                                    } else {
+                                      Navigator.push(
+                                        context,
+                                        MaterialPageRoute(
+                                          builder: (context) => DetailScreen(
+                                            title: item.toString(),
+                                            menuItems: menuItemsJenis1,
+                                          ),
+                                        ),
+                                      );
+                                    }
+                                  },
+                                );
+                              },
+                            );
+                          } else {
+                            return const Center(child: Text('Belum ada data.'));
                           }
-                          return tile;
-                        },
-                      );
-                    } else if (widget.menuData.isNotEmpty &&
-                        widget.menuData.first is String) {
-                      // Fallback jika masih List<String> atau List menu bercabang
-                      return ListView.builder(
-                        itemCount: widget.menuData.length,
-                        itemBuilder: (context, index) {
-                          final item = widget.menuData[index];
-                          return ReusableListTileWidget(
-                            value: null,
-                            titleText: item.toString(),
-                            onTap: () {
-                              if (item is List) {
-                                Navigator.push(
-                                  context,
-                                  MaterialPageRoute(
-                                    builder: (context) => MenuScreen(
-                                      args: MenuScreenArgs(
-                                          title: item.toString()),
-                                      menuData: item,
-                                    ),
-                                  ),
-                                );
-                              } else {
-                                Navigator.push(
-                                  context,
-                                  MaterialPageRoute(
-                                    builder: (context) => DetailScreen(
-                                      title: item.toString(),
-                                      menuItems: menuItemsJenis1,
-                                    ),
-                                  ),
-                                );
-                              }
-                            },
-                          );
-                        },
-                      );
-                    } else {
-                      return const Center(child: Text('Belum ada data.'));
-                    }
-                  } else {
-                    return const Center(child: Text('Belum ada data.'));
-                  }
-                },
+                        } else {
+                          return const Center(child: Text('Belum ada data.'));
+                        }
+                      },
+                    ),
+                    const SizedBox(height: 24),
+                  ],
+                ),
               ),
-            ),
-          ],
+            );
+          },
         ),
         bottomNavigationBar: BottomBanner(
           imageUrl: banner?.resolvedBottomBannerUrl,

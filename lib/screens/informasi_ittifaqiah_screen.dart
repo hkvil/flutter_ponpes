@@ -102,208 +102,202 @@ class _InformasiIttifaqiahScreenState extends State<InformasiIttifaqiahScreen> {
     return ResponsiveWrapper(
       child: Scaffold(
         appBar: const TopBar(title: 'Informasi Al-Ittifaqiah'),
-        body: Column(
-          children: [
-            const TopBanner(assetPath: 'assets/banners/top.png'),
-            const SizedBox(height: 16),
-            Expanded(
-              child: _isLoading
-                  ? const Center(child: CircularProgressIndicator())
-                  : _errorMessage != null
-                      ? Center(
-                          child: Column(
-                            mainAxisAlignment: MainAxisAlignment.center,
-                            children: [
-                              Icon(
-                                Icons.error_outline,
-                                size: 64,
-                                color: Colors.red[300],
-                              ),
-                              const SizedBox(height: 16),
-                              Text(
-                                _errorMessage!,
-                                textAlign: TextAlign.center,
-                                style: const TextStyle(
-                                  fontSize: 16,
-                                  color: Colors.red,
-                                ),
-                              ),
-                              const SizedBox(height: 16),
-                              ElevatedButton(
-                                onPressed: _loadData,
-                                child: const Text('Coba Lagi'),
-                              ),
-                            ],
-                          ),
-                        )
-                      : ListView(
-                          padding: const EdgeInsets.symmetric(horizontal: 16),
-                          children: [
-                            ReusableListTileWidget(
-                              value: null,
-                              titleText: 'Profil Al-Ittifaqiah',
-                              onTap: () {
-                                if (_informasiData?.hasProfilContent() ==
-                                    true) {
-                                  Navigator.push(
-                                    context,
-                                    MaterialPageRoute(
-                                      builder: (context) => _ProfilScreen(
-                                        profilMd: _informasiData!.profilMd!,
-                                      ),
-                                    ),
-                                  );
-                                } else {
-                                  ScaffoldMessenger.of(context).showSnackBar(
-                                    const SnackBar(
-                                      content:
-                                          Text('Data profil tidak tersedia'),
-                                    ),
-                                  );
-                                }
-                              },
-                            ),
-                            const SizedBox(height: 8),
-                            ReusableListTileWidget(
-                              value: null,
-                              titleText: 'Berita Al-Ittifaqiah',
-                              onTap: () {
-                                Navigator.push(
-                                  context,
-                                  MaterialPageRoute(
-                                    builder: (context) =>
-                                        const BeritaAlIttifaqiahScreen(),
-                                  ),
-                                );
-                              },
-                            ),
-                            const SizedBox(height: 8),
-                            ReusableListTileWidget(
-                              value: null,
-                              titleText: 'Jumlah Santri Al-Ittifaqiah',
-                              onTap: () {
-                                final santriData = _informasiData?.santri ?? [];
-                                print(
-                                    'DEBUG: Santri data: ${santriData.length} records');
-                                Navigator.push(
-                                  context,
-                                  MaterialPageRoute(
-                                    builder: (context) =>
-                                        StatisticsScreen.santri(santriData),
-                                  ),
-                                );
-                              },
-                            ),
-                            const SizedBox(height: 8),
-                            ReusableListTileWidget(
-                              value: null,
-                              titleText: 'Jumlah SDM Al-Ittifaqiah',
-                              onTap: () {
-                                final sdmData = _informasiData?.sdm ?? [];
-                                print(
-                                    'DEBUG: SDM data: ${sdmData.length} records');
-                                Navigator.push(
-                                  context,
-                                  MaterialPageRoute(
-                                    builder: (context) =>
-                                        StatisticsScreen.sdm(sdmData),
-                                  ),
-                                );
-                              },
-                            ),
-                            const SizedBox(height: 8),
-                            ReusableListTileWidget(
-                              value: null,
-                              titleText: 'Jumlah Alumni Al-Ittifaqiah',
-                              onTap: () {
-                                final alumniData = _informasiData?.alumni ?? [];
-                                print(
-                                    'DEBUG: Alumni data: ${alumniData.length} records');
-                                Navigator.push(
-                                  context,
-                                  MaterialPageRoute(
-                                    builder: (context) =>
-                                        StatisticsScreen.alumni(alumniData),
-                                  ),
-                                );
-                              },
-                            ),
-                            const SizedBox(height: 8),
-                            ReusableListTileWidget(
-                              value: null,
-                              titleText: 'Galeri Luar Negeri',
-                              onTap: () {
-                                final galeriData =
-                                    _informasiData?.galeriLuarNegeri ?? [];
-                                print(
-                                    'DEBUG: Galeri Luar Negeri data: ${galeriData.length} items');
-                                Navigator.push(
-                                  context,
-                                  MaterialPageRoute(
-                                    builder: (context) => GaleriScreen(
-                                      title: 'Galeri Luar Negeri Al-Ittifaqiah',
-                                      lembaga: _createLembagaFromGaleri(
-                                        galeriData,
-                                        'Luar Negeri Al-Ittifaqiah',
-                                        'galeri-luar-negeri',
-                                      ),
-                                      crossAxisCount: 1,
-                                      showTabs: false,
-                                    ),
-                                  ),
-                                );
-                              },
-                            ),
-                            const SizedBox(height: 8),
-                            ReusableListTileWidget(
-                              value: null,
-                              titleText: 'Galeri Tamu',
-                              onTap: () {
-                                final galeriData =
-                                    _informasiData?.galeriTamu ?? [];
-                                print(
-                                    'DEBUG: Galeri Tamu data: ${galeriData.length} items');
-                                Navigator.push(
-                                  context,
-                                  MaterialPageRoute(
-                                    builder: (context) => GaleriScreen(
-                                      title: 'Galeri Tamu',
-                                      lembaga: _createLembagaFromGaleri(
-                                        galeriData,
-                                        'Tamu',
-                                        'galeri-tamu',
-                                      ),
-                                      crossAxisCount: 1,
-                                      showTabs: false,
-                                    ),
-                                  ),
-                                );
-                              },
-                            ),
-                            const SizedBox(height: 8),
-                            ReusableListTileWidget(
-                              value: null,
-                              titleText: 'BluePrint ISCI',
-                              onTap: () {
-                                final bluePrintData =
-                                    _informasiData?.bluePrintISCI ?? [];
-                                print(
-                                    'DEBUG: BluePrint ISCI data: ${bluePrintData.length} items');
-                                Navigator.push(
-                                  context,
-                                  MaterialPageRoute(
-                                    builder: (context) =>
-                                        BlueprintIsciScreen(
-                                      blueprintItems: bluePrintData,
-                                    ),
-                                  ),
-                                );
-                              },
-                            ),
-                            const SizedBox(height: 16),
-                          ],
+        body: CustomScrollView(
+          slivers: [
+            const SliverToBoxAdapter(child: TopBanner(assetPath: 'assets/banners/top.png')),
+            const SliverToBoxAdapter(child: SizedBox(height: 16)),
+            if (_isLoading)
+              const SliverFillRemaining(
+                hasScrollBody: false,
+                child: Center(child: CircularProgressIndicator()),
+              )
+            else if (_errorMessage != null)
+              SliverFillRemaining(
+                hasScrollBody: false,
+                child: Center(
+                  child: Padding(
+                    padding: const EdgeInsets.symmetric(horizontal: 16),
+                    child: Column(
+                      mainAxisSize: MainAxisSize.min,
+                      children: [
+                        Icon(
+                          Icons.error_outline,
+                          size: 64,
+                          color: Colors.red[300],
                         ),
-            ),
+                        const SizedBox(height: 16),
+                        Text(
+                          _errorMessage!,
+                          textAlign: TextAlign.center,
+                          style: const TextStyle(
+                            fontSize: 16,
+                            color: Colors.red,
+                          ),
+                        ),
+                        const SizedBox(height: 16),
+                        ElevatedButton(
+                          onPressed: _loadData,
+                          child: const Text('Coba Lagi'),
+                        ),
+                      ],
+                    ),
+                  ),
+                ),
+              )
+            else
+              SliverPadding(
+                padding: const EdgeInsets.symmetric(horizontal: 16),
+                sliver: SliverList(
+                  delegate: SliverChildListDelegate([
+                    ReusableListTileWidget(
+                      value: null,
+                      titleText: 'Profil Al-Ittifaqiah',
+                      onTap: () {
+                        if (_informasiData?.hasProfilContent() == true) {
+                          Navigator.push(
+                            context,
+                            MaterialPageRoute(
+                              builder: (context) => _ProfilScreen(
+                                profilMd: _informasiData!.profilMd!,
+                              ),
+                            ),
+                          );
+                        } else {
+                          ScaffoldMessenger.of(context).showSnackBar(
+                            const SnackBar(
+                              content: Text('Data profil tidak tersedia'),
+                            ),
+                          );
+                        }
+                      },
+                    ),
+                    const SizedBox(height: 8),
+                    ReusableListTileWidget(
+                      value: null,
+                      titleText: 'Berita Al-Ittifaqiah',
+                      onTap: () {
+                        Navigator.push(
+                          context,
+                          MaterialPageRoute(
+                            builder: (context) => const BeritaAlIttifaqiahScreen(),
+                          ),
+                        );
+                      },
+                    ),
+                    const SizedBox(height: 8),
+                    ReusableListTileWidget(
+                      value: null,
+                      titleText: 'Jumlah Santri Al-Ittifaqiah',
+                      onTap: () {
+                        final santriData = _informasiData?.santri ?? [];
+                        print('DEBUG: Santri data: ${santriData.length} records');
+                        Navigator.push(
+                          context,
+                          MaterialPageRoute(
+                            builder: (context) => StatisticsScreen.santri(santriData),
+                          ),
+                        );
+                      },
+                    ),
+                    const SizedBox(height: 8),
+                    ReusableListTileWidget(
+                      value: null,
+                      titleText: 'Jumlah SDM Al-Ittifaqiah',
+                      onTap: () {
+                        final sdmData = _informasiData?.sdm ?? [];
+                        print('DEBUG: SDM data: ${sdmData.length} records');
+                        Navigator.push(
+                          context,
+                          MaterialPageRoute(
+                            builder: (context) => StatisticsScreen.sdm(sdmData),
+                          ),
+                        );
+                      },
+                    ),
+                    const SizedBox(height: 8),
+                    ReusableListTileWidget(
+                      value: null,
+                      titleText: 'Jumlah Alumni Al-Ittifaqiah',
+                      onTap: () {
+                        final alumniData = _informasiData?.alumni ?? [];
+                        print('DEBUG: Alumni data: ${alumniData.length} records');
+                        Navigator.push(
+                          context,
+                          MaterialPageRoute(
+                            builder: (context) => StatisticsScreen.alumni(alumniData),
+                          ),
+                        );
+                      },
+                    ),
+                    const SizedBox(height: 8),
+                    ReusableListTileWidget(
+                      value: null,
+                      titleText: 'Galeri Luar Negeri',
+                      onTap: () {
+                        final galeriData = _informasiData?.galeriLuarNegeri ?? [];
+                        print('DEBUG: Galeri Luar Negeri data: ${galeriData.length} items');
+                        Navigator.push(
+                          context,
+                          MaterialPageRoute(
+                            builder: (context) => GaleriScreen(
+                              title: 'Galeri Luar Negeri Al-Ittifaqiah',
+                              lembaga: _createLembagaFromGaleri(
+                                galeriData,
+                                'Luar Negeri Al-Ittifaqiah',
+                                'galeri-luar-negeri',
+                              ),
+                              crossAxisCount: 1,
+                              showTabs: false,
+                            ),
+                          ),
+                        );
+                      },
+                    ),
+                    const SizedBox(height: 8),
+                    ReusableListTileWidget(
+                      value: null,
+                      titleText: 'Galeri Tamu',
+                      onTap: () {
+                        final galeriData = _informasiData?.galeriTamu ?? [];
+                        print('DEBUG: Galeri Tamu data: ${galeriData.length} items');
+                        Navigator.push(
+                          context,
+                          MaterialPageRoute(
+                            builder: (context) => GaleriScreen(
+                              title: 'Galeri Tamu',
+                              lembaga: _createLembagaFromGaleri(
+                                galeriData,
+                                'Tamu',
+                                'galeri-tamu',
+                              ),
+                              crossAxisCount: 1,
+                              showTabs: false,
+                            ),
+                          ),
+                        );
+                      },
+                    ),
+                    const SizedBox(height: 8),
+                    ReusableListTileWidget(
+                      value: null,
+                      titleText: 'BluePrint ISCI',
+                      onTap: () {
+                        final bluePrintData = _informasiData?.bluePrintISCI ?? [];
+                        print('DEBUG: BluePrint ISCI data: ${bluePrintData.length} items');
+                        Navigator.push(
+                          context,
+                          MaterialPageRoute(
+                            builder: (context) => BlueprintIsciScreen(
+                              blueprintItems: bluePrintData,
+                            ),
+                          ),
+                        );
+                      },
+                    ),
+                    const SizedBox(height: 24),
+                  ]),
+                ),
+              ),
           ],
         ),
         bottomNavigationBar:
@@ -322,24 +316,21 @@ class _ProfilScreen extends StatelessWidget {
     return ResponsiveWrapper(
       child: Scaffold(
         appBar: const TopBar(title: 'Profil Al-Ittifaqiah'),
-        body: Column(
-          children: [
-            const TopBanner(assetPath: 'assets/banners/top.png'),
-            const SizedBox(height: 16),
-            Expanded(
-              child: SingleChildScrollView(
-                padding: const EdgeInsets.symmetric(horizontal: 16),
-                child: Column(
-                  crossAxisAlignment: CrossAxisAlignment.start,
-                  children: [
-                    // Display markdown content from API with proper formatting
-                    MarkdownBlock(
-                      data: profilMd,
-                      config: AppMarkdownConfig.defaultConfig,
-                    ),
-                    const SizedBox(height: 16),
-                  ],
-                ),
+        body: CustomScrollView(
+          slivers: [
+            const SliverToBoxAdapter(
+                child: TopBanner(assetPath: 'assets/banners/top.png')),
+            const SliverToBoxAdapter(child: SizedBox(height: 16)),
+            SliverPadding(
+              padding: const EdgeInsets.symmetric(horizontal: 16),
+              sliver: SliverList(
+                delegate: SliverChildListDelegate([
+                  MarkdownBlock(
+                    data: profilMd,
+                    config: AppMarkdownConfig.defaultConfig,
+                  ),
+                  const SizedBox(height: 16),
+                ]),
               ),
             ),
           ],

@@ -242,50 +242,58 @@ class _AlumniScreenState extends State<AlumniScreen> {
 
     return Scaffold(
       backgroundColor: AppColors.primaryGreen,
-      body: Column(
-        children: [
-          if (_errorMessage != null)
-            Container(
-              width: double.infinity,
-              padding: const EdgeInsets.all(12),
-              color: Colors.orange.shade100,
-              child: Row(
-                children: [
-                  Icon(Icons.info_outline,
-                      color: Colors.orange.shade700, size: 20),
-                  const SizedBox(width: 8),
-                  Expanded(
-                    child: Text(
-                      _errorMessage!,
-                      style: TextStyle(
-                          color: Colors.orange.shade900, fontSize: 12),
-                      maxLines: 2,
-                      overflow: TextOverflow.ellipsis,
-                    ),
+      body: RefreshIndicator(
+        color: AppColors.primaryGreen,
+        onRefresh: () => _fetchAlumniData(tahunMasuk: selectedYear),
+        child: CustomScrollView(
+          physics: const AlwaysScrollableScrollPhysics(),
+          slivers: [
+            if (_errorMessage != null)
+              SliverToBoxAdapter(
+                child: Container(
+                  width: double.infinity,
+                  padding: const EdgeInsets.all(12),
+                  color: Colors.orange.shade100,
+                  child: Row(
+                    children: [
+                      Icon(Icons.info_outline,
+                          color: Colors.orange.shade700, size: 20),
+                      const SizedBox(width: 8),
+                      Expanded(
+                        child: Text(
+                          _errorMessage!,
+                          style: TextStyle(
+                              color: Colors.orange.shade900, fontSize: 12),
+                          maxLines: 2,
+                          overflow: TextOverflow.ellipsis,
+                        ),
+                      ),
+                    ],
                   ),
-                ],
-              ),
-            ),
-          _buildHeader(),
-          Expanded(
-            child: Container(
-              decoration: const BoxDecoration(
-                color: Colors.white,
-                borderRadius: BorderRadius.only(
-                  topLeft: Radius.circular(30),
-                  topRight: Radius.circular(30),
                 ),
               ),
-              child: Column(
-                children: [
-                  _buildFilters(),
-                  _buildAlumniCount(),
-                  Expanded(child: _buildAlumniList()),
-                ],
+            SliverToBoxAdapter(child: _buildHeader()),
+            SliverToBoxAdapter(
+              child: Container(
+                decoration: const BoxDecoration(
+                  color: Colors.white,
+                  borderRadius: BorderRadius.only(
+                    topLeft: Radius.circular(30),
+                    topRight: Radius.circular(30),
+                  ),
+                ),
+                child: Column(
+                  children: [
+                    _buildFilters(),
+                    _buildAlumniCount(),
+                    _buildAlumniList(),
+                    const SizedBox(height: 24),
+                  ],
+                ),
               ),
             ),
-          ),
-        ],
+          ],
+        ),
       ),
     );
   }
@@ -569,20 +577,18 @@ class _AlumniScreenState extends State<AlumniScreen> {
             ),
           ),
           const SizedBox(height: 12),
-          Expanded(
-            child: filteredAlumni.isEmpty
-                ? _buildEmptyState()
-                : RefreshIndicator(
-                    onRefresh: _fetchAlumniData,
-                    child: ListView.builder(
-                      itemCount: filteredAlumni.length,
-                      itemBuilder: (context, index) {
-                        final alumni = filteredAlumni[index];
-                        return _buildAlumniCard(alumni, index);
-                      },
-                    ),
-                  ),
-          ),
+          if (filteredAlumni.isEmpty)
+            SizedBox(height: 200, child: _buildEmptyState())
+          else
+            ListView.builder(
+              shrinkWrap: true,
+              physics: const NeverScrollableScrollPhysics(),
+              itemCount: filteredAlumni.length,
+              itemBuilder: (context, index) {
+                final alumni = filteredAlumni[index];
+                return _buildAlumniCard(alumni, index);
+              },
+            ),
         ],
       ),
     );

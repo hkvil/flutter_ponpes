@@ -70,98 +70,106 @@ class _DetailScreenState extends State<DetailScreen> {
         appBar: AppBar(
           title: Text(widget.title),
         ),
-        body: Column(
-          children: [
-            (lembaga != null && bannerConfig.hasTopBanner)
-                ? BannerWidget(
-                    bannerConfig: bannerConfig,
-                    isTopBanner: true,
-                    height: 150,
-                  )
-                : TopBanner(
-                    assetPath: 'assets/banners/top.png',
-                    height: 150,
-                  ),
-            if (isLoadingData)
-              Container(
-                padding: const EdgeInsets.all(12),
-                margin: const EdgeInsets.symmetric(horizontal: 16),
-                decoration: BoxDecoration(
-                  color: Colors.blue.shade50,
-                  borderRadius: BorderRadius.circular(8),
-                  border: Border.all(color: Colors.blue.shade200),
-                ),
-                child: Row(
+        body: LayoutBuilder(
+          builder: (context, constraints) {
+            return SingleChildScrollView(
+              child: ConstrainedBox(
+                constraints: BoxConstraints(minHeight: constraints.maxHeight),
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.stretch,
                   children: [
-                    const SizedBox(
-                      width: 20,
-                      height: 20,
-                      child: CircularProgressIndicator(strokeWidth: 2),
-                    ),
-                    const SizedBox(width: 12),
-                    Expanded(
-                      child: Text(
-                        'Memuat data ${widget.title}...',
-                        style: TextStyle(
-                          fontSize: 14,
-                          color: Colors.blue.shade700,
-                          fontWeight: FontWeight.w500,
+                    (lembaga != null && bannerConfig.hasTopBanner)
+                        ? BannerWidget(
+                            bannerConfig: bannerConfig,
+                            isTopBanner: true,
+                            height: 150,
+                          )
+                        : TopBanner(
+                            assetPath: 'assets/banners/top.png',
+                            height: 150,
+                          ),
+                    if (isLoadingData)
+                      Container(
+                        padding: const EdgeInsets.all(12),
+                        margin: const EdgeInsets.symmetric(horizontal: 16),
+                        decoration: BoxDecoration(
+                          color: Colors.blue.shade50,
+                          borderRadius: BorderRadius.circular(8),
+                          border: Border.all(color: Colors.blue.shade200),
+                        ),
+                        child: Row(
+                          children: [
+                            const SizedBox(
+                              width: 20,
+                              height: 20,
+                              child: CircularProgressIndicator(strokeWidth: 2),
+                            ),
+                            const SizedBox(width: 12),
+                            Expanded(
+                              child: Text(
+                                'Memuat data ${widget.title}...',
+                                style: TextStyle(
+                                  fontSize: 14,
+                                  color: Colors.blue.shade700,
+                                  fontWeight: FontWeight.w500,
+                                ),
+                              ),
+                            ),
+                          ],
                         ),
                       ),
-                    ),
-                  ],
-                ),
-              ),
-            if (loadingError != null && !isLoadingData)
-              Container(
-                padding: const EdgeInsets.all(12),
-                margin: const EdgeInsets.symmetric(horizontal: 16),
-                decoration: BoxDecoration(
-                  color: Colors.orange.shade50,
-                  borderRadius: BorderRadius.circular(8),
-                  border: Border.all(color: Colors.orange.shade200),
-                ),
-                child: Row(
-                  children: [
-                    Icon(Icons.warning, color: Colors.orange.shade700),
-                    const SizedBox(width: 12),
-                    Expanded(
-                      child: Column(
-                        crossAxisAlignment: CrossAxisAlignment.start,
-                        children: [
-                          Text(
-                            'Gagal memuat data online',
-                            style: TextStyle(
-                              fontSize: 14,
-                              color: Colors.orange.shade700,
-                              fontWeight: FontWeight.w500,
+                    if (loadingError != null && !isLoadingData)
+                      Container(
+                        padding: const EdgeInsets.all(12),
+                        margin: const EdgeInsets.symmetric(horizontal: 16),
+                        decoration: BoxDecoration(
+                          color: Colors.orange.shade50,
+                          borderRadius: BorderRadius.circular(8),
+                          border: Border.all(color: Colors.orange.shade200),
+                        ),
+                        child: Row(
+                          children: [
+                            Icon(Icons.warning, color: Colors.orange.shade700),
+                            const SizedBox(width: 12),
+                            Expanded(
+                              child: Column(
+                                crossAxisAlignment: CrossAxisAlignment.start,
+                                children: [
+                                  Text(
+                                    'Gagal memuat data online',
+                                    style: TextStyle(
+                                      fontSize: 14,
+                                      color: Colors.orange.shade700,
+                                      fontWeight: FontWeight.w500,
+                                    ),
+                                  ),
+                                  Text(
+                                    loadingError,
+                                    style: TextStyle(
+                                      fontSize: 12,
+                                      color: Colors.orange.shade600,
+                                    ),
+                                  ),
+                                ],
+                              ),
                             ),
-                          ),
-                          Text(
-                            loadingError,
-                            style: TextStyle(
-                              fontSize: 12,
-                              color: Colors.orange.shade600,
-                            ),
-                          ),
-                        ],
+                          ],
+                        ),
+                      ),
+                    Padding(
+                      padding: const EdgeInsets.all(16.0),
+                      child: DetailLayout(
+                        title: widget.title,
+                        menuItems: widget.menuItems,
+                        lembagaSlug: _lembagaSlug,
+                        cachedLembaga: lembaga,
                       ),
                     ),
                   ],
                 ),
               ),
-            Expanded(
-              child: Padding(
-                padding: const EdgeInsets.all(16.0),
-                child: DetailLayout(
-                  title: widget.title,
-                  menuItems: widget.menuItems,
-                  lembagaSlug: _lembagaSlug,
-                  cachedLembaga: lembaga,
-                ),
-              ),
-            ),
-          ],
+            );
+          },
         ),
         bottomNavigationBar:
             (lembaga != null && bannerConfig.hasBottomBanner)

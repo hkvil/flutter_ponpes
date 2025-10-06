@@ -28,23 +28,30 @@ class DetailLayout extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return Container(
-      padding: const EdgeInsets.all(16.0),
-      child: Row(
-        crossAxisAlignment: CrossAxisAlignment.start,
-        children: [
-          // Left side - Images
-          Container(
-            width: imageWidth + 20, // Tambah padding 20px untuk margin
-            child: _buildImagesList(),
+    return LayoutBuilder(
+      builder: (context, constraints) {
+        return SingleChildScrollView(
+          padding: const EdgeInsets.all(16.0),
+          child: ConstrainedBox(
+            constraints: BoxConstraints(minHeight: constraints.maxHeight),
+            child: Row(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                // Left side - Images
+                SizedBox(
+                  width: imageWidth + 20, // Tambah padding 20px untuk margin
+                  child: _buildImagesList(),
+                ),
+                const SizedBox(width: 16),
+                // Right side - Menu items
+                Flexible(
+                  child: _buildMenuList(),
+                ),
+              ],
+            ),
           ),
-          const SizedBox(width: 16),
-          // Right side - Menu items
-          Flexible(
-            child: _buildMenuList(),
-          ),
-        ],
-      ),
+        );
+      },
     );
   }
 

@@ -59,14 +59,23 @@ class _BeritaAlIttifaqiahScreenState extends State<BeritaAlIttifaqiahScreen> {
     return ResponsiveWrapper(
       child: Scaffold(
         appBar: const TopBar(title: 'Berita Al-Ittifaqiah'),
-        body: Column(
-          children: [
-            const TopBanner(assetPath: 'assets/banners/top.png'),
-            const SizedBox(height: 16),
-            Expanded(
-              child: _buildBody(),
-            ),
-          ],
+        body: LayoutBuilder(
+          builder: (context, constraints) {
+            return SingleChildScrollView(
+              child: ConstrainedBox(
+                constraints: BoxConstraints(minHeight: constraints.maxHeight),
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.stretch,
+                  children: [
+                    const TopBanner(assetPath: 'assets/banners/top.png'),
+                    const SizedBox(height: 16),
+                    _buildBody(embedded: true),
+                    const SizedBox(height: 24),
+                  ],
+                ),
+              ),
+            );
+          },
         ),
         bottomNavigationBar:
             const BottomBanner(assetPath: 'assets/banners/bottom.png'),
@@ -74,80 +83,101 @@ class _BeritaAlIttifaqiahScreenState extends State<BeritaAlIttifaqiahScreen> {
     );
   }
 
-  Widget _buildBody() {
+  Widget _buildBody({bool embedded = false}) {
     if (_isLoading) {
-      return const Center(
-        child: Column(
-          mainAxisAlignment: MainAxisAlignment.center,
-          children: [
-            CircularProgressIndicator(),
-            SizedBox(height: 16),
-            Text(
-              'Memuat berita...',
-              style: TextStyle(
-                fontSize: 16,
-                color: Colors.grey,
-              ),
+      final child = Column(
+        mainAxisAlignment: MainAxisAlignment.center,
+        children: const [
+          CircularProgressIndicator(),
+          SizedBox(height: 16),
+          Text(
+            'Memuat berita...',
+            style: TextStyle(
+              fontSize: 16,
+              color: Colors.grey,
             ),
-          ],
-        ),
+          ),
+        ],
       );
+
+      if (embedded) {
+        return Padding(
+          padding: const EdgeInsets.symmetric(horizontal: 16),
+          child: Center(child: child),
+        );
+      }
+
+      return Center(child: child);
     }
 
     if (_errorMessage != null) {
-      return Center(
-        child: Column(
-          mainAxisAlignment: MainAxisAlignment.center,
-          children: [
-            const Icon(
-              Icons.error_outline,
-              size: 64,
+      final child = Column(
+        mainAxisAlignment: MainAxisAlignment.center,
+        children: [
+          const Icon(
+            Icons.error_outline,
+            size: 64,
+            color: Colors.red,
+          ),
+          const SizedBox(height: 16),
+          Text(
+            _errorMessage!,
+            style: const TextStyle(
+              fontSize: 16,
               color: Colors.red,
             ),
-            const SizedBox(height: 16),
-            Text(
-              _errorMessage!,
-              style: const TextStyle(
-                fontSize: 16,
-                color: Colors.red,
-              ),
-              textAlign: TextAlign.center,
-            ),
-            const SizedBox(height: 16),
-            ElevatedButton(
-              onPressed: _loadNewsData,
-              child: const Text('Coba Lagi'),
-            ),
-          ],
-        ),
+            textAlign: TextAlign.center,
+          ),
+          const SizedBox(height: 16),
+          ElevatedButton(
+            onPressed: _loadNewsData,
+            child: const Text('Coba Lagi'),
+          ),
+        ],
       );
+
+      if (embedded) {
+        return Padding(
+          padding: const EdgeInsets.symmetric(horizontal: 16),
+          child: Center(child: child),
+        );
+      }
+
+      return Center(child: child);
     }
 
     if (_newsData == null || _newsData!.isEmpty) {
-      return const Center(
-        child: Column(
-          mainAxisAlignment: MainAxisAlignment.center,
-          children: [
-            Icon(
-              Icons.article_outlined,
-              size: 64,
+      const child = Column(
+        mainAxisAlignment: MainAxisAlignment.center,
+        children: [
+          Icon(
+            Icons.article_outlined,
+            size: 64,
+            color: Colors.grey,
+          ),
+          SizedBox(height: 16),
+          Text(
+            'Tidak ada berita tersedia',
+            style: TextStyle(
+              fontSize: 16,
               color: Colors.grey,
             ),
-            SizedBox(height: 16),
-            Text(
-              'Tidak ada berita tersedia',
-              style: TextStyle(
-                fontSize: 16,
-                color: Colors.grey,
-              ),
-            ),
-          ],
-        ),
+          ),
+        ],
       );
+
+      if (embedded) {
+        return const Padding(
+          padding: EdgeInsets.symmetric(horizontal: 16),
+          child: Center(child: child),
+        );
+      }
+
+      return const Center(child: child);
     }
 
-    return ListView.builder(
-      padding: const EdgeInsets.all(16),
+    final listView = ListView.builder(
+      padding: const EdgeInsets.symmetric(horizontal: 16),
       itemCount: _newsData!.length,
       itemBuilder: (context, index) {
         final newsItem = _newsData![index];
@@ -170,6 +200,40 @@ class _BeritaAlIttifaqiahScreenState extends State<BeritaAlIttifaqiahScreen> {
         );
       },
     );
+
+    if (embedded) {
+      return ListView.builder(
+        padding: EdgeInsets.zero,
+        shrinkWrap: true,
+        physics: const NeverScrollableScrollPhysics(),
+        itemCount: _newsData!.length,
+        itemBuilder: (context, index) {
+          final newsItem = _newsData![index];
+          return Padding(
+            padding: const EdgeInsets.symmetric(horizontal: 16),
+            child: _BeritaCard(
+              title: newsItem.title,
+              thumbnail: newsItem.thumbnailUrl,
+              content: newsItem.content,
+              onTap: () {
+                Navigator.push(
+                  context,
+                  MaterialPageRoute(
+                    builder: (context) => ContentScreen(
+                      title: newsItem.title,
+                      markdownContent: newsItem.content,
+                      type: ContentScreenType.minimal,
+                    ),
+                  ),
+                );
+              },
+            ),
+          );
+        },
+      );
+    }
+
+    return listView;
   }
 }
 

@@ -56,7 +56,7 @@ class ContentScreen extends StatelessWidget {
 
         // Gunakan Expanded sederhana
         Expanded(
-          child: Container(
+          child: SingleChildScrollView(
             padding: const EdgeInsets.all(20.0),
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.start,

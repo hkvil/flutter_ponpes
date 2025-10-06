@@ -95,41 +95,46 @@ class StatisticsScreen extends StatelessWidget {
       child: Scaffold(
         backgroundColor: Colors.grey[100],
         appBar: TopBar(title: title),
-        body: Column(
-          children: [
-            const TopBanner(assetPath: 'assets/banners/top.png'),
-            Expanded(
-              child: Padding(
-                padding: const EdgeInsets.symmetric(horizontal: 16),
+        body: LayoutBuilder(
+          builder: (context, constraints) {
+            return SingleChildScrollView(
+              child: ConstrainedBox(
+                constraints: BoxConstraints(minHeight: constraints.maxHeight),
                 child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.stretch,
                   children: [
-                    // Header dengan total - menggunakan desain asli
+                    const TopBanner(assetPath: 'assets/banners/top.png'),
                     Padding(
-                      padding: const EdgeInsets.only(top: 16, bottom: 16),
-                      child: _CustomListTile(
-                        title: 'TOTAL',
-                        value: total.toString(),
-                        isTotal: true,
-                      ),
-                    ),
-                    const SizedBox(height: 16),
-                    // List per tahun - menggunakan desain asli
-                    ...convertedData
-                        .map((item) => Padding(
+                      padding: const EdgeInsets.symmetric(horizontal: 16),
+                      child: Column(
+                        crossAxisAlignment: CrossAxisAlignment.stretch,
+                        children: [
+                          const SizedBox(height: 16),
+                          _CustomListTile(
+                            title: 'TOTAL',
+                            value: total.toString(),
+                            isTotal: true,
+                          ),
+                          const SizedBox(height: 16),
+                          ...convertedData.map(
+                            (item) => Padding(
                               padding: const EdgeInsets.only(bottom: 8),
                               child: _CustomListTile(
                                 title: item['lembaga'],
                                 value: item['jumlah'].toString(),
                                 isTotal: false,
                               ),
-                            ))
-                        .toList(),
-                    const SizedBox(height: 16),
+                            ),
+                          ),
+                          const SizedBox(height: 32),
+                        ],
+                      ),
+                    ),
                   ],
                 ),
               ),
-            ),
-          ],
+            );
+          },
         ),
         bottomNavigationBar:
             const BottomBanner(assetPath: 'assets/banners/bottom.png'),

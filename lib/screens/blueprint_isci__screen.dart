@@ -19,69 +19,70 @@ class BlueprintIsciScreen extends StatelessWidget {
     return ResponsiveWrapper(
       child: Scaffold(
         appBar: const TopBar(title: 'BluePrint ISCI'),
-        body: Column(
-          children: [
-            const TopBanner(assetPath: 'assets/banners/top.png'),
-            const SizedBox(height: 16),
-            Expanded(
-              child: blueprintItems.isEmpty
-                  ? const Center(
-                      child: Column(
-                        mainAxisAlignment: MainAxisAlignment.center,
-                        children: [
-                          Icon(
-                            Icons.architecture_outlined,
-                            size: 64,
-                            color: Colors.grey,
-                          ),
-                          SizedBox(height: 16),
-                          Text(
-                            'Tidak ada data BluePrint ISCI',
-                            style: TextStyle(
-                              fontSize: 16,
-                              color: Colors.grey,
-                            ),
-                          ),
-                        ],
+        body: CustomScrollView(
+          slivers: [
+            const SliverToBoxAdapter(
+                child: TopBanner(assetPath: 'assets/banners/top.png')),
+            const SliverToBoxAdapter(child: SizedBox(height: 16)),
+            if (blueprintItems.isEmpty)
+              const SliverFillRemaining(
+                hasScrollBody: false,
+                child: Center(
+                  child: Column(
+                    mainAxisSize: MainAxisSize.min,
+                    children: [
+                      Icon(
+                        Icons.architecture_outlined,
+                        size: 64,
+                        color: Colors.grey,
                       ),
-                    )
-                  : SingleChildScrollView(
-                      padding: const EdgeInsets.symmetric(horizontal: 16),
-                      child: Column(
-                        crossAxisAlignment: CrossAxisAlignment.start,
-                        children: [
-                          const SectionHeader(
-                            title: 'BluePrint ISCI Al-Ittifaqiah',
-                          ),
-                          const Text(
-                            'Rencana Pembangunan Masa Depan',
-                            style: TextStyle(
-                              fontSize: 14,
-                              color: Colors.grey,
-                            ),
-                          ),
-                          const SizedBox(height: 16),
-                          GridView.builder(
-                            shrinkWrap: true,
-                            physics: const NeverScrollableScrollPhysics(),
-                            gridDelegate:
-                                const SliverGridDelegateWithFixedCrossAxisCount(
-                              crossAxisCount: 1,
-                              childAspectRatio: 1.2,
-                              crossAxisSpacing: 12,
-                              mainAxisSpacing: 12,
-                            ),
-                            itemCount: blueprintItems.length,
-                            itemBuilder: (context, index) {
-                              final item = blueprintItems[index];
-                              return _buildBlueprintCard(context, item);
-                            },
-                          ),
-                          const SizedBox(height: 16),
-                        ],
+                      SizedBox(height: 16),
+                      Text(
+                        'Tidak ada data BluePrint ISCI',
+                        style: TextStyle(
+                          fontSize: 16,
+                          color: Colors.grey,
+                        ),
+                      ),
+                    ],
+                  ),
+                ),
+              )
+            else
+              SliverPadding(
+                padding: const EdgeInsets.symmetric(horizontal: 16),
+                sliver: SliverList(
+                  delegate: SliverChildListDelegate([
+                    const SectionHeader(
+                      title: 'BluePrint ISCI Al-Ittifaqiah',
+                    ),
+                    const Text(
+                      'Rencana Pembangunan Masa Depan',
+                      style: TextStyle(
+                        fontSize: 14,
+                        color: Colors.grey,
                       ),
                     ),
-            ),
+                    const SizedBox(height: 16),
+                    GridView.builder(
+                      shrinkWrap: true,
+                      physics: const NeverScrollableScrollPhysics(),
+                      gridDelegate:
+                          const SliverGridDelegateWithFixedCrossAxisCount(
+                        crossAxisCount: 1,
+                        childAspectRatio: 1.2,
+                        crossAxisSpacing: 12,
+                        mainAxisSpacing: 12,
+                      ),
+                      itemCount: blueprintItems.length,
+                      itemBuilder: (context, index) {
+                        final item = blueprintItems[index];
+                        return _buildBlueprintCard(context, item);
+                      },
+                    ),
+                    const SizedBox(height: 16),
+                  ]),
+                ),
           ],
         ),
         bottomNavigationBar:

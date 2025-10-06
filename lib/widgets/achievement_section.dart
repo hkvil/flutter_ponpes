@@ -84,16 +84,21 @@ class _AchievementSectionState extends State<AchievementSection> {
       );
     }
 
-    return Column(
-      crossAxisAlignment: CrossAxisAlignment.start,
-      children: [
-        ...achievements
-            .map((achievement) => AchievementItem(
-                  achievement: achievement,
-                ))
-            .toList(),
-        const SizedBox(height: 72),
-      ],
+    return ListView.builder(
+      shrinkWrap: true,
+      physics: const NeverScrollableScrollPhysics(),
+      padding: EdgeInsets.zero,
+      itemCount: achievements.length + 1,
+      itemBuilder: (context, index) {
+        if (index == achievements.length) {
+          return const SizedBox(height: 72);
+        }
+
+        final achievement = achievements[index];
+        return AchievementItem(
+          achievement: achievement,
+        );
+      },
     );
   }
 }

@@ -5,7 +5,6 @@ import '../core/theme/app_colors.dart';
 import '../core/utils/menu_slug_mapper.dart';
 import '../models/models.dart';
 import '../providers/prestasi_provider.dart';
-import '../data/fallback/prestasi_fallback.dart';
 
 class PrestasiSantriScreen extends StatefulWidget {
   final String title;
@@ -25,7 +24,6 @@ class _PrestasiSantriScreenState extends State<PrestasiSantriScreen> {
   bool _isLoading = true;
   String? _errorMessage;
   List<Prestasi> _prestasiList = [];
-  bool _usesFallback = false;
 
   String? selectedYear;
   String? selectedTingkat;
@@ -59,28 +57,16 @@ class _PrestasiSantriScreenState extends State<PrestasiSantriScreen> {
         tingkat: tingkat,
       );
 
-      if (state.errorMessage != null && prestasiList.isEmpty) {
-        setState(() {
-          _prestasiList = [];
-          _usesFallback = true;
-          _errorMessage = state.errorMessage;
-          _isLoading = false;
-        });
-      } else {
-        setState(() {
-          _prestasiList = prestasiList;
-          _usesFallback = false;
-          _isLoading = false;
-        });
-      }
+      setState(() {
+        _prestasiList = prestasiList;
+        _errorMessage = state.errorMessage;
+        _isLoading = false;
+      });
     } catch (e) {
       print('Error fetching prestasi: $e');
-      // Convert fallback data to empty list since we can't convert Map to Prestasi easily
-      // User will need to see the fallback prestasiData in the UI
       setState(() {
         _prestasiList = [];
-        _usesFallback = true;
-        _errorMessage = 'Using offline data';
+        _errorMessage = 'Gagal memuat data prestasi';
         _isLoading = false;
       });
     }
@@ -91,111 +77,44 @@ class _PrestasiSantriScreenState extends State<PrestasiSantriScreen> {
     return slug ?? '';
   }
 
-  // Use fallback data when API fails
-  List<Map<String, dynamic>> get prestasiData => fallbackPrestasiData;
-
   List<dynamic> get filteredPrestasi {
-    if (_usesFallback) {
-      var filtered = prestasiData.where((prestasi) {
-        final namaLomba = prestasi['namaLomba'] ?? '';
-        final namaSantri = prestasi['santri'] ?? prestasi['namaSantri'] ?? '';
-        final bidang = prestasi['bidang'] ?? prestasi['keterangan'] ?? '';
+    // Using API data only
+    var filtered = _prestasiList.where((prestasi) {
+      final matchesSearch = searchQuery.isEmpty ||
+          prestasi.namaLomba
+              .toLowerCase()
+              .contains(searchQuery.toLowerCase()) ||
+          prestasi.namaSantri
+              .toLowerCase()
+              .contains(searchQuery.toLowerCase()) ||
+          prestasi.bidang.toLowerCase().contains(searchQuery.toLowerCase());
 
-        final matchesSearch = searchQuery.isEmpty ||
-            namaLomba.toLowerCase().contains(searchQuery.toLowerCase()) ||
-            namaSantri.toLowerCase().contains(searchQuery.toLowerCase()) ||
-            bidang.toLowerCase().contains(searchQuery.toLowerCase());
+      return matchesSearch;
+    }).toList();
 
-        final tahunStr = prestasi['tahun'].toString();
-        final matchesYear = selectedYear == null || tahunStr == selectedYear;
+    // Sort by year (newest first) then by ranking
+    filtered.sort((a, b) {
+      final yearComparison = b.tahun.compareTo(a.tahun);
+      if (yearComparison != 0) return yearComparison;
+      return a.rankingOrder.compareTo(b.rankingOrder);
+    });
 
-        final tingkatStr = (prestasi['tingkat'] ?? '').toString().toUpperCase();
-        final selectedTingkatUpper = selectedTingkat?.toUpperCase();
-        final matchesTingkat = selectedTingkat == null ||
-            tingkatStr == selectedTingkatUpper ||
-            tingkatStr.contains(selectedTingkatUpper ?? '');
-
-        return matchesSearch && matchesYear && matchesTingkat;
-      }).toList();
-
-      // Sort by year (newest first) then by ranking
-      filtered.sort((a, b) {
-        final yearA = a['tahun'].toString();
-        final yearB = b['tahun'].toString();
-        final yearComparison = yearB.compareTo(yearA);
-        if (yearComparison != 0) return yearComparison;
-
-        // Sort by ranking (Juara 1, 2, 3)
-        final rankA = _getRankingOrder(a['peringkat'] ?? '');
-        final rankB = _getRankingOrder(b['peringkat'] ?? '');
-        return rankA.compareTo(rankB);
-      });
-
-      return filtered;
-    } else {
-      // Using API data (Prestasi list) - filter already done in API for year and tingkat
-      var filtered = _prestasiList.where((prestasi) {
-        final matchesSearch = searchQuery.isEmpty ||
-            prestasi.namaLomba
-                .toLowerCase()
-                .contains(searchQuery.toLowerCase()) ||
-            prestasi.namaSantri
-                .toLowerCase()
-                .contains(searchQuery.toLowerCase()) ||
-            prestasi.bidang.toLowerCase().contains(searchQuery.toLowerCase());
-
-        return matchesSearch;
-      }).toList();
-
-      // Sort by year (newest first) then by ranking
-      filtered.sort((a, b) {
-        final yearComparison = b.tahun.compareTo(a.tahun);
-        if (yearComparison != 0) return yearComparison;
-        return a.rankingOrder.compareTo(b.rankingOrder);
-      });
-
-      return filtered;
-    }
-  }
-
-  int _getRankingOrder(String peringkat) {
-    if (peringkat.contains('1')) return 1;
-    if (peringkat.contains('2')) return 2;
-    if (peringkat.contains('3')) return 3;
-    return 4;
+    return filtered;
   }
 
   List<String> get availableYears {
-    if (_usesFallback) {
-      final years = prestasiData
-          .map((prestasi) => prestasi['tahun'].toString())
-          .toSet()
-          .toList();
-      years.sort((a, b) => b.compareTo(a)); // Sort descending (newest first)
-      return years;
-    } else {
-      // Get unique years from API data
-      final years =
-          _prestasiList.map((prestasi) => prestasi.tahun).toSet().toList();
-      years.sort((a, b) => b.compareTo(a));
-      return years;
-    }
+    // Get unique years from API data only
+    final years =
+        _prestasiList.map((prestasi) => prestasi.tahun).toSet().toList();
+    years.sort((a, b) => b.compareTo(a));
+    return years;
   }
 
   List<String> get availableTingkat {
-    if (_usesFallback) {
-      final tingkat = prestasiData
-          .map((prestasi) => (prestasi['tingkat'] as String?) ?? '')
-          .where((t) => t.isNotEmpty)
-          .toSet()
-          .toList();
-      return tingkat..sort();
-    } else {
-      // Get unique tingkat from API data
-      final tingkat =
-          _prestasiList.map((prestasi) => prestasi.tingkat).toSet().toList();
-      return tingkat..sort();
-    }
+    // Get unique tingkat from API data only
+    final tingkat =
+        _prestasiList.map((prestasi) => prestasi.tingkat).toSet().toList();
+    return tingkat..sort();
   }
 
   @override
@@ -438,10 +357,8 @@ class _PrestasiSantriScreenState extends State<PrestasiSantriScreen> {
                             setState(() {
                               selectedYear = value;
                             });
-                            if (!_usesFallback) {
-                              _fetchPrestasiData(
-                                  tahun: value, tingkat: selectedTingkat);
-                            }
+                            _fetchPrestasiData(
+                                tahun: value, tingkat: selectedTingkat);
                           },
                         ),
                       ),
@@ -490,10 +407,8 @@ class _PrestasiSantriScreenState extends State<PrestasiSantriScreen> {
                             setState(() {
                               selectedTingkat = value;
                             });
-                            if (!_usesFallback) {
-                              _fetchPrestasiData(
-                                  tahun: selectedYear, tingkat: value);
-                            }
+                            _fetchPrestasiData(
+                                tahun: selectedYear, tingkat: value);
                           },
                         ),
                       ),
@@ -515,21 +430,12 @@ class _PrestasiSantriScreenState extends State<PrestasiSantriScreen> {
     int nasionalCount;
     int internasionalCount;
 
-    if (_usesFallback) {
-      juara1Count =
-          filteredPrestasi.where((p) => p['peringkat'].contains('1')).length;
-      nasionalCount =
-          filteredPrestasi.where((p) => p['tingkat'] == 'Nasional').length;
-      internasionalCount =
-          filteredPrestasi.where((p) => p['tingkat'] == 'Internasional').length;
-    } else {
-      juara1Count =
-          filteredPrestasi.where((p) => (p as Prestasi).isJuara1).length;
-      nasionalCount =
-          filteredPrestasi.where((p) => (p as Prestasi).isNasional).length;
-      internasionalCount =
-          filteredPrestasi.where((p) => (p as Prestasi).isInternasional).length;
-    }
+    juara1Count =
+        filteredPrestasi.where((p) => (p as Prestasi).isJuara1).length;
+    nasionalCount =
+        filteredPrestasi.where((p) => (p as Prestasi).isNasional).length;
+    internasionalCount =
+        filteredPrestasi.where((p) => (p as Prestasi).isInternasional).length;
 
     return Container(
       margin: const EdgeInsets.symmetric(horizontal: 20, vertical: 10),

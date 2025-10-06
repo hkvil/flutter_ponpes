@@ -1,14 +1,11 @@
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 
-import '../core/theme/app_colors.dart';
 import '../core/utils/menu_slug_mapper.dart';
 import '../models/staff.dart';
 import '../models/kehadiran_guru.dart';
 import '../providers/staff_provider.dart';
 import '../providers/kehadiran_provider.dart';
-import '../data/fallback/staff_fallback.dart';
-import '../data/fallback/kehadiran_fallback.dart';
 
 class StaffScreen extends StatefulWidget {
   final String title;
@@ -102,7 +99,6 @@ class _DaftarStaffTabState extends State<DaftarStaffTab> {
   bool _isLoading = true;
   String? _errorMessage;
   List<Staff> _staffList = [];
-  bool _usesFallback = false;
 
   String searchQuery = '';
   final TextEditingController _searchController = TextEditingController();
@@ -111,6 +107,12 @@ class _DaftarStaffTabState extends State<DaftarStaffTab> {
   void initState() {
     super.initState();
     _fetchStaffData();
+  }
+
+  @override
+  void dispose() {
+    _searchController.dispose();
+    super.dispose();
   }
 
   Future<void> _fetchStaffData() async {
@@ -132,29 +134,15 @@ class _DaftarStaffTabState extends State<DaftarStaffTab> {
       );
       final state = provider.staffState(slug);
 
-      if (state.errorMessage != null && staffList.isEmpty) {
-        setState(() {
-          _staffList =
-              fallbackStaffData.map((json) => Staff.fromJson(json)).toList();
-          _usesFallback = true;
-          _errorMessage = state.errorMessage;
-          _isLoading = false;
-        });
-      } else {
-        setState(() {
-          _staffList = staffList;
-          _usesFallback = false;
-          _isLoading = false;
-        });
-      }
+      setState(() {
+        _staffList = staffList;
+        _errorMessage = state.errorMessage;
+        _isLoading = false;
+      });
     } catch (e) {
       print('Error fetching staff: $e');
-      // Use fallback data
       setState(() {
-        _staffList =
-            fallbackStaffData.map((json) => Staff.fromJson(json)).toList();
-        _usesFallback = true;
-        _errorMessage = 'Using offline data';
+        _errorMessage = 'Gagal memuat data staff';
         _isLoading = false;
       });
     }
@@ -167,35 +155,12 @@ class _DaftarStaffTabState extends State<DaftarStaffTab> {
     return slug ?? ''; // Return empty string if no mapping found
   }
 
-  Widget _buildStaffCard(dynamic staffData) {
-    // Handle both API Staff object and fallback Map
-    String nama;
-    String? subtitle;
-    String? avatarUrl;
-    String? tugasInfo;
-    String? nipInfo;
-
-    if (staffData is Staff) {
-      // API data
-      nama = staffData.nama;
-      subtitle = staffData.kategoriPersonil;
-      avatarUrl = null;
-      tugasInfo = staffData.keteranganTugas;
-      nipInfo = staffData.nip;
-    } else if (staffData is Map<String, dynamic>) {
-      // Fallback data
-      nama = staffData['nama'] ?? '';
-      subtitle = staffData['subtitle'] ?? 'Staff';
-      avatarUrl = staffData['avatar'];
-      tugasInfo = null;
-      nipInfo = null;
-    } else {
-      nama = 'Unknown';
-      subtitle = null;
-      avatarUrl = null;
-      tugasInfo = null;
-      nipInfo = null;
-    }
+  Widget _buildStaffCard(Staff staff) {
+    // Using API Staff object only
+    final nama = staff.nama;
+    final subtitle = staff.kategoriPersonil;
+    final tugasInfo = staff.keteranganTugas;
+    final nipInfo = staff.nip;
 
     return Container(
       margin: const EdgeInsets.only(bottom: 12),
@@ -215,14 +180,11 @@ class _DaftarStaffTabState extends State<DaftarStaffTab> {
         leading: CircleAvatar(
           radius: 30,
           backgroundColor: Colors.blue.shade100,
-          backgroundImage: avatarUrl != null ? NetworkImage(avatarUrl) : null,
-          child: avatarUrl == null
-              ? Icon(
-                  Icons.person,
-                  color: Colors.blue.shade700,
-                  size: 30,
-                )
-              : null,
+          child: Icon(
+            Icons.person,
+            color: Colors.blue.shade700,
+            size: 30,
+          ),
         ),
         title: Text(
           nama,
@@ -234,17 +196,15 @@ class _DaftarStaffTabState extends State<DaftarStaffTab> {
         subtitle: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
-            if (subtitle != null) ...[
-              const SizedBox(height: 4),
-              Text(
-                subtitle,
-                style: TextStyle(
-                  color: Colors.grey.shade600,
-                  fontSize: 12,
-                ),
+            const SizedBox(height: 4),
+            Text(
+              subtitle,
+              style: TextStyle(
+                color: Colors.grey.shade600,
+                fontSize: 12,
               ),
-            ],
-            if (tugasInfo != null && tugasInfo.isNotEmpty) ...[
+            ),
+            if (tugasInfo.isNotEmpty) ...[
               const SizedBox(height: 4),
               Text(
                 tugasInfo,
@@ -278,145 +238,23 @@ class _DaftarStaffTabState extends State<DaftarStaffTab> {
           ],
         ),
         trailing: const Icon(Icons.chevron_right, color: Colors.grey),
-        onTap: () {
-          if (staffData is Map<String, dynamic>) {
-            _showStaffDetail(staffData);
-          } else if (staffData is Staff) {
-            _showStaffDetailFromModel(staffData);
-          }
-        },
+        onTap: () => _showStaffDetailFromModel(staff),
       ),
     );
   }
 
-  // Data static Staff
-  final List<Map<String, dynamic>> staffData = [
-    {
-      'nama': 'Dr. Ahmad Fauzi, M.Pd',
-      'subtitle': 'Kepala Madrasah',
-      'avatar': 'https://i.pravatar.cc/150?img=51',
-      'lembaga': 'Taman Pendidikan Al-Quran Al-Ittifaqiah',
-      'tempatLahir': 'Palembang',
-      'tanggalLahir': '15 Juni 1975',
-      'gender': 'Laki-laki',
-      'agama': 'Islam',
-      'noTelephone': '0812-3456-7890',
-      'namaIbu': 'Siti Aminah',
-      'nik': '1671051506750001',
-      'kategoriPersonil': 'Tenaga Pendidik',
-      'keteranganTugas': 'Kepala Madrasah, Mengajar Al-Quran',
-      'statusKepegawaian': 'Tetap',
-      'mulaiTugas': '01 Januari 2005',
-      'aktif': true,
-      'pendidikanTerakhir': 'S2',
-      'lulusan': 'UIN Raden Fatah Palembang',
-      'statusPNS': 'PNS',
-      'statusGuruTetap': 'Guru Tetap',
-    },
-    {
-      'nama': 'Ustadz Muhammad Hakim, S.Pd.I',
-      'subtitle': 'Guru Al-Quran',
-      'avatar': 'https://i.pravatar.cc/150?img=52',
-      'lembaga': 'Taman Pendidikan Al-Quran Al-Ittifaqiah',
-      'tempatLahir': 'Palembang',
-      'tanggalLahir': '22 Agustus 1985',
-      'gender': 'Laki-laki',
-      'agama': 'Islam',
-      'noTelephone': '0813-4567-8901',
-      'namaIbu': 'Fatimah',
-      'nik': '1671052208850001',
-      'kategoriPersonil': 'Tenaga Pendidik',
-      'keteranganTugas': 'Mengajar Tahfidz Al-Quran, Tajwid',
-      'statusKepegawaian': 'Tetap',
-      'mulaiTugas': '15 Agustus 2010',
-      'aktif': true,
-      'pendidikanTerakhir': 'S1',
-      'lulusan': 'IAIN Raden Fatah Palembang',
-      'statusPNS': 'Non PNS',
-      'statusGuruTetap': 'Guru Tetap',
-    },
-    {
-      'nama': 'Ustadzah Khadijah, S.Pd',
-      'subtitle': 'Guru Kelas',
-      'avatar': 'https://i.pravatar.cc/150?img=44',
-      'lembaga': 'Taman Pendidikan Al-Quran Al-Ittifaqiah',
-      'tempatLahir': 'Palembang',
-      'tanggalLahir': '10 Maret 1988',
-      'gender': 'Perempuan',
-      'agama': 'Islam',
-      'noTelephone': '0814-5678-9012',
-      'namaIbu': 'Maryam',
-      'nik': '1671055003880001',
-      'kategoriPersonil': 'Tenaga Pendidik',
-      'keteranganTugas': 'Guru Kelas 1, Mengajar Bahasa Arab',
-      'statusKepegawaian': 'Tetap',
-      'mulaiTugas': '01 Juli 2012',
-      'aktif': true,
-      'pendidikanTerakhir': 'S1',
-      'lulusan': 'UNSRI Palembang',
-      'statusPNS': 'Non PNS',
-      'statusGuruTetap': 'Guru Tetap',
-    },
-    {
-      'nama': 'Ahmad Subhan, S.Kom',
-      'subtitle': 'Staff Administrasi',
-      'avatar': 'https://i.pravatar.cc/150?img=53',
-      'lembaga': 'Taman Pendidikan Al-Quran Al-Ittifaqiah',
-      'tempatLahir': 'Palembang',
-      'tanggalLahir': '25 September 1990',
-      'gender': 'Laki-laki',
-      'agama': 'Islam',
-      'noTelephone': '0815-6789-0123',
-      'namaIbu': 'Zainab',
-      'nik': '1671052509900001',
-      'kategoriPersonil': 'Tenaga Kependidikan',
-      'keteranganTugas': 'Administrasi Umum, IT Support',
-      'statusKepegawaian': 'Kontrak',
-      'mulaiTugas': '01 Februari 2015',
-      'aktif': true,
-      'pendidikanTerakhir': 'S1',
-      'lulusan': 'STMIK MDP Palembang',
-      'statusPNS': 'Non PNS',
-      'statusGuruTetap': 'Non Guru',
-    },
-  ];
-
-  List<dynamic> get filteredStaff {
+  List<Staff> get filteredStaff {
     if (searchQuery.isEmpty) {
-      return _usesFallback ? staffData : _staffList;
+      return _staffList;
     }
 
-    if (_usesFallback) {
-      return staffData
-          .where((staff) =>
-              staff['nama']
-                  .toString()
-                  .toLowerCase()
-                  .contains(searchQuery.toLowerCase()) ||
-              staff['subtitle']
-                  .toString()
-                  .toLowerCase()
-                  .contains(searchQuery.toLowerCase()) ||
-              staff['kategoriPersonil']
-                  .toString()
-                  .toLowerCase()
-                  .contains(searchQuery.toLowerCase()))
-          .toList();
-    } else {
-      return _staffList
-          .where((staff) =>
-              staff.nama.toLowerCase().contains(searchQuery.toLowerCase()) ||
-              staff.kategoriPersonil
-                  .toLowerCase()
-                  .contains(searchQuery.toLowerCase()))
-          .toList();
-    }
-  }
-
-  @override
-  void dispose() {
-    _searchController.dispose();
-    super.dispose();
+    return _staffList
+        .where((staff) =>
+            staff.nama.toLowerCase().contains(searchQuery.toLowerCase()) ||
+            staff.kategoriPersonil
+                .toLowerCase()
+                .contains(searchQuery.toLowerCase()))
+        .toList();
   }
 
   void _showSearchDialog() {
@@ -456,119 +294,6 @@ class _DaftarStaffTabState extends State<DaftarStaffTab> {
               child: const Text('Tutup'),
             ),
           ],
-        );
-      },
-    );
-  }
-
-  void _showStaffDetail(Map<String, dynamic> staff) {
-    showDialog(
-      context: context,
-      barrierColor: Colors.black.withOpacity(0.7),
-      builder: (BuildContext context) {
-        return Dialog(
-          backgroundColor: Colors.transparent,
-          child: Container(
-            width: MediaQuery.of(context).size.width * 0.9,
-            height: MediaQuery.of(context).size.height * 0.8,
-            decoration: BoxDecoration(
-              color: Colors.white,
-              borderRadius: BorderRadius.circular(16),
-              boxShadow: [
-                BoxShadow(
-                  color: Colors.black.withOpacity(0.3),
-                  blurRadius: 20,
-                  offset: const Offset(0, 10),
-                ),
-              ],
-            ),
-            child: Column(
-              children: [
-                Container(
-                  padding: const EdgeInsets.all(20),
-                  decoration: BoxDecoration(
-                    color: Colors.blue,
-                    borderRadius: const BorderRadius.only(
-                      topLeft: Radius.circular(16),
-                      topRight: Radius.circular(16),
-                    ),
-                  ),
-                  child: Row(
-                    children: [
-                      CircleAvatar(
-                        radius: 30,
-                        backgroundImage: NetworkImage(staff['avatar']),
-                        child: staff['avatar'] == null
-                            ? const Icon(Icons.person,
-                                color: Colors.white, size: 30)
-                            : null,
-                      ),
-                      const SizedBox(width: 15),
-                      Expanded(
-                        child: Column(
-                          crossAxisAlignment: CrossAxisAlignment.start,
-                          children: [
-                            const Text(
-                              'Detail Staff',
-                              style: TextStyle(
-                                color: Colors.white,
-                                fontSize: 18,
-                                fontWeight: FontWeight.bold,
-                              ),
-                            ),
-                            Text(
-                              staff['subtitle'],
-                              style: const TextStyle(
-                                color: Colors.white70,
-                                fontSize: 14,
-                              ),
-                            ),
-                          ],
-                        ),
-                      ),
-                      IconButton(
-                        onPressed: () => Navigator.of(context).pop(),
-                        icon: const Icon(Icons.close, color: Colors.white),
-                      ),
-                    ],
-                  ),
-                ),
-                Expanded(
-                  child: SingleChildScrollView(
-                    padding: const EdgeInsets.all(20),
-                    child: Column(
-                      crossAxisAlignment: CrossAxisAlignment.start,
-                      children: [
-                        _buildDetailSection('Data Pribadi', [
-                          _buildDetailRow('Nama Lengkap', staff['nama']),
-                          _buildDetailRow('Tempat Lahir', staff['tempatLahir']),
-                          _buildDetailRow(
-                              'Tanggal Lahir', staff['tanggalLahir']),
-                          _buildDetailRow('Jenis Kelamin', staff['gender']),
-                          _buildDetailRow('Agama', staff['agama']),
-                          _buildDetailRow('No. Telepon', staff['noTelephone']),
-                          _buildDetailRow('NIK', staff['nik']),
-                        ]),
-                        const SizedBox(height: 20),
-                        _buildDetailSection('Data Kepegawaian', [
-                          _buildDetailRow(
-                              'Kategori Personil', staff['kategoriPersonil']),
-                          _buildDetailRow(
-                              'Keterangan Tugas', staff['keteranganTugas']),
-                          _buildDetailRow(
-                              'Status Kepegawaian', staff['statusKepegawaian']),
-                          _buildDetailRow('Mulai Tugas', staff['mulaiTugas']),
-                          _buildDetailRow('Status Aktif',
-                              staff['aktif'] ? 'Aktif' : 'Tidak Aktif'),
-                          _buildDetailRow('Status PNS', staff['statusPNS']),
-                        ]),
-                      ],
-                    ),
-                  ),
-                ),
-              ],
-            ),
-          ),
         );
       },
     );
@@ -1059,7 +784,6 @@ class _KehadiranStaffTabState extends State<KehadiranStaffTab> {
   bool _isLoading = true;
   String? _errorMessage;
   List<KehadiranGuru> _kehadiranList = [];
-  bool _usesFallback = false;
 
   DateTime? startDate;
   DateTime? endDate;
@@ -1089,30 +813,15 @@ class _KehadiranStaffTabState extends State<KehadiranStaffTab> {
       );
       final state = provider.guruState(slug);
 
-      if (state.errorMessage != null && kehadiranList.isEmpty) {
-        setState(() {
-          _kehadiranList = fallbackKehadiranGuruData
-              .map((json) => KehadiranGuru.fromJson(json))
-              .toList();
-          _usesFallback = true;
-          _errorMessage = state.errorMessage;
-          _isLoading = false;
-        });
-      } else {
-        setState(() {
-          _kehadiranList = kehadiranList;
-          _usesFallback = false;
-          _isLoading = false;
-        });
-      }
+      setState(() {
+        _kehadiranList = kehadiranList;
+        _errorMessage = state.errorMessage;
+        _isLoading = false;
+      });
     } catch (e) {
       print('Error fetching kehadiran guru: $e');
       setState(() {
-        _kehadiranList = fallbackKehadiranGuruData
-            .map((json) => KehadiranGuru.fromJson(json))
-            .toList();
-        _usesFallback = true;
-        _errorMessage = 'Using offline data';
+        _errorMessage = 'Gagal memuat data kehadiran';
         _isLoading = false;
       });
     }
@@ -1194,28 +903,16 @@ class _KehadiranStaffTabState extends State<KehadiranStaffTab> {
   ];
 
   List<dynamic> get filteredKehadiran {
-    if (_usesFallback) {
-      if (startDate == null || endDate == null) {
-        return kehadiranData;
-      }
-
-      return kehadiranData.where((kehadiran) {
-        final tanggal = kehadiran['tanggalObj'] as DateTime;
-        return tanggal.isAfter(startDate!.subtract(const Duration(days: 1))) &&
-            tanggal.isBefore(endDate!.add(const Duration(days: 1)));
-      }).toList();
-    } else {
-      // Using API data
-      if (startDate == null || endDate == null) {
-        return _kehadiranList;
-      }
-
-      return _kehadiranList.where((kehadiran) {
-        final tanggal = DateTime.parse(kehadiran.tanggal);
-        return tanggal.isAfter(startDate!.subtract(const Duration(days: 1))) &&
-            tanggal.isBefore(endDate!.add(const Duration(days: 1)));
-      }).toList();
+    // Using API data only
+    if (startDate == null || endDate == null) {
+      return _kehadiranList;
     }
+
+    return _kehadiranList.where((kehadiran) {
+      final tanggal = DateTime.parse(kehadiran.tanggal);
+      return tanggal.isAfter(startDate!.subtract(const Duration(days: 1))) &&
+          tanggal.isBefore(endDate!.add(const Duration(days: 1)));
+    }).toList();
   }
 
   Future<void> _selectDateRange() async {
@@ -1234,10 +931,8 @@ class _KehadiranStaffTabState extends State<KehadiranStaffTab> {
         endDate = picked.end;
       });
 
-      // Fetch data with date range if using API
-      if (!_usesFallback) {
-        await _fetchKehadiranDataByDateRange();
-      }
+      // Always fetch data with date range
+      await _fetchKehadiranDataByDateRange();
     }
   }
 
@@ -1268,22 +963,11 @@ class _KehadiranStaffTabState extends State<KehadiranStaffTab> {
         endDate: endDate,
       );
 
-      if (state.errorMessage != null && kehadiranList.isEmpty) {
-        setState(() {
-          _kehadiranList = fallbackKehadiranGuruData
-              .map((json) => KehadiranGuru.fromJson(json))
-              .toList();
-          _usesFallback = true;
-          _errorMessage = state.errorMessage;
-          _isLoading = false;
-        });
-      } else {
-        setState(() {
-          _kehadiranList = kehadiranList;
-          _usesFallback = false;
-          _isLoading = false;
-        });
-      }
+      setState(() {
+        _kehadiranList = kehadiranList;
+        _errorMessage = state.errorMessage;
+        _isLoading = false;
+      });
     } catch (e) {
       print('Error fetching kehadiran guru by date range: $e');
       setState(() {
@@ -1299,18 +983,16 @@ class _KehadiranStaffTabState extends State<KehadiranStaffTab> {
       endDate = null;
     });
 
-    // Reload all data if using API
-    if (!_usesFallback) {
-      _fetchKehadiranData();
-    }
+    // Always reload all data
+    _fetchKehadiranData();
   }
 
-  Color _getJenisColor(String jenis) {
+  Color _getStatusColor(String jenis) {
     // Normalize jenis to uppercase for consistency
     final jenisUpper = jenis.toUpperCase();
     switch (jenisUpper) {
       case 'HADIR':
-        return AppColors.primaryGreen;
+        return Colors.green;
       case 'IZIN':
         return Colors.blue;
       case 'SAKIT':
@@ -1321,25 +1003,6 @@ class _KehadiranStaffTabState extends State<KehadiranStaffTab> {
         return Colors.purple;
       default:
         return Colors.grey;
-    }
-  }
-
-  IconData _getJenisIcon(String jenis) {
-    // Normalize jenis to uppercase for consistency
-    final jenisUpper = jenis.toUpperCase();
-    switch (jenisUpper) {
-      case 'HADIR':
-        return Icons.check_circle;
-      case 'IZIN':
-        return Icons.info;
-      case 'SAKIT':
-        return Icons.local_hospital;
-      case 'ALPHA':
-        return Icons.cancel;
-      case 'TERLAMBAT':
-        return Icons.access_time;
-      default:
-        return Icons.help;
     }
   }
 
@@ -1551,40 +1214,14 @@ class _KehadiranStaffTabState extends State<KehadiranStaffTab> {
                 padding: const EdgeInsets.all(20),
                 itemCount: filteredKehadiran.length,
                 itemBuilder: (context, index) {
-                  final kehadiran = filteredKehadiran[index];
+                  final kehadiran = filteredKehadiran[index] as KehadiranGuru;
 
-                  // Handle both KehadiranGuru model and Map (fallback)
-                  String nama;
-                  String tanggal;
-                  String jenis;
-                  String keterangan;
-                  String? avatar;
-                  String? tugasInfo;
-
-                  if (kehadiran is KehadiranGuru) {
-                    // API data
-                    nama = kehadiran.namaStaff;
-                    tanggal = _formatTanggalKehadiran(kehadiran.tanggal);
-                    jenis = kehadiran.jenis;
-                    keterangan = kehadiran.keterangan;
-                    avatar = null;
-                    tugasInfo = kehadiran.staff?.keteranganTugas;
-                  } else if (kehadiran is Map<String, dynamic>) {
-                    // Fallback data
-                    nama = kehadiran['nama'] ?? '';
-                    tanggal = kehadiran['tanggal'] ?? '';
-                    jenis = kehadiran['jenis'] ?? '';
-                    keterangan = kehadiran['keterangan'] ?? '';
-                    avatar = kehadiran['avatar'];
-                    tugasInfo = null;
-                  } else {
-                    nama = 'Unknown';
-                    tanggal = '';
-                    jenis = '';
-                    keterangan = '';
-                    avatar = null;
-                    tugasInfo = null;
-                  }
+                  // Using API KehadiranGuru model only
+                  final nama = kehadiran.namaStaff;
+                  final tanggal = _formatTanggalKehadiran(kehadiran.tanggal);
+                  final jenis = kehadiran.jenis;
+                  final keterangan = kehadiran.keterangan;
+                  final tugasInfo = kehadiran.staff?.keteranganTugas;
 
                   return Container(
                     margin: const EdgeInsets.only(bottom: 12),
@@ -1601,39 +1238,14 @@ class _KehadiranStaffTabState extends State<KehadiranStaffTab> {
                     ),
                     child: ListTile(
                       contentPadding: const EdgeInsets.all(16),
-                      leading: Stack(
-                        children: [
-                          CircleAvatar(
-                            radius: 25,
-                            backgroundColor: Colors.blue.shade100,
-                            backgroundImage:
-                                avatar != null ? NetworkImage(avatar) : null,
-                            child: avatar == null
-                                ? Icon(
-                                    Icons.person,
-                                    color: Colors.blue.shade700,
-                                    size: 25,
-                                  )
-                                : null,
-                          ),
-                          Positioned(
-                            right: -2,
-                            bottom: -2,
-                            child: Container(
-                              padding: const EdgeInsets.all(2),
-                              decoration: BoxDecoration(
-                                color: Colors.white,
-                                shape: BoxShape.circle,
-                                border: Border.all(color: Colors.grey.shade200),
-                              ),
-                              child: Icon(
-                                _getJenisIcon(jenis),
-                                color: _getJenisColor(jenis),
-                                size: 16,
-                              ),
-                            ),
-                          ),
-                        ],
+                      leading: CircleAvatar(
+                        radius: 25,
+                        backgroundColor: Colors.blue.shade100,
+                        child: Icon(
+                          Icons.person,
+                          color: Colors.blue.shade700,
+                          size: 25,
+                        ),
                       ),
                       title: Row(
                         children: [
@@ -1693,7 +1305,7 @@ class _KehadiranStaffTabState extends State<KehadiranStaffTab> {
                         padding: const EdgeInsets.symmetric(
                             horizontal: 8, vertical: 4),
                         decoration: BoxDecoration(
-                          color: _getJenisColor(jenis),
+                          color: _getStatusColor(jenis),
                           borderRadius: BorderRadius.circular(12),
                         ),
                         child: Text(

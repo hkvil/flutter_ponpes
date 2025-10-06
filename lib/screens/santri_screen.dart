@@ -7,8 +7,6 @@ import '../models/models.dart';
 import '../providers/santri_provider.dart';
 import '../providers/kelas_provider.dart';
 import '../providers/kehadiran_provider.dart';
-import '../data/fallback/santri_fallback.dart';
-import '../data/fallback/kehadiran_fallback.dart';
 
 class SantriScreen extends StatefulWidget {
   final String title;
@@ -108,55 +106,26 @@ class _DaftarSantriTabState extends State<DaftarSantriTab> {
   bool _isLoading = false;
   String? _errorMessage;
   List<Santri> _santriList = [];
-  bool _usesFallback = false;
 
   // State untuk kelas dari API
   List<String> kelasList = ['Semua Kelas'];
-  bool _isLoadingKelas = false;
 
-  List<dynamic> get filteredSantri {
-    List<dynamic> filtered;
+  List<Santri> get filteredSantri {
+    // Use API data only
+    var filtered = _santriList.where((santri) {
+      // Filter by kelas name
+      bool matchesKelas = selectedKelas == 'Semua Kelas' ||
+          (santri.kelasAktif == selectedKelas);
 
-    if (_usesFallback) {
-      // Use fallback data
-      if (selectedKelas == 'Semua Kelas') {
-        filtered = fallbackSantriData.toList();
-      } else {
-        filtered = fallbackSantriData
-            .where((santri) => santri['kelas'] == selectedKelas)
-            .toList();
-      }
+      // Filter by search query
+      bool matchesSearch = searchQuery.isEmpty ||
+          santri.nama.toLowerCase().contains(searchQuery.toLowerCase()) ||
+          (santri.alamatLengkap
+              .toLowerCase()
+              .contains(searchQuery.toLowerCase()));
 
-      if (searchQuery.isNotEmpty) {
-        filtered = filtered
-            .where((santri) =>
-                santri['nama']
-                    .toString()
-                    .toLowerCase()
-                    .contains(searchQuery.toLowerCase()) ||
-                santri['subtitle']
-                    .toString()
-                    .toLowerCase()
-                    .contains(searchQuery.toLowerCase()))
-            .toList();
-      }
-    } else {
-      // Use API data - santri.kelasAktif contains class name
-      filtered = _santriList.where((santri) {
-        // Filter by kelas name
-        bool matchesKelas = selectedKelas == 'Semua Kelas' ||
-            (santri.kelasAktif == selectedKelas);
-
-        // Filter by search query
-        bool matchesSearch = searchQuery.isEmpty ||
-            santri.nama.toLowerCase().contains(searchQuery.toLowerCase()) ||
-            (santri.alamatLengkap
-                .toLowerCase()
-                .contains(searchQuery.toLowerCase()));
-
-        return matchesKelas && matchesSearch;
-      }).toList();
-    }
+      return matchesKelas && matchesSearch;
+    }).toList();
 
     return filtered;
   }
@@ -174,17 +143,10 @@ class _DaftarSantriTabState extends State<DaftarSantriTab> {
   }
 
   Future<void> _fetchKelasData() async {
-    setState(() {
-      _isLoadingKelas = true;
-    });
-
     try {
       final lembagaSlug = _getLembagaSlug();
       if (lembagaSlug.isEmpty) {
         // No slug, keep default kelas list
-        setState(() {
-          _isLoadingKelas = false;
-        });
         return;
       }
 
@@ -198,16 +160,12 @@ class _DaftarSantriTabState extends State<DaftarSantriTab> {
       setState(() {
         final sortedKelas = [...kelasNames]..sort();
         kelasList = ['Semua Kelas', ...sortedKelas];
-        _isLoadingKelas = false;
       });
 
       print('✅ [KELAS] Loaded ${kelasList.length - 1} kelas from API');
     } catch (e) {
       print('❌ [KELAS] Error fetching kelas: $e');
       // Keep default kelas list on error
-      setState(() {
-        _isLoadingKelas = false;
-      });
     }
   }
 
@@ -232,28 +190,17 @@ class _DaftarSantriTabState extends State<DaftarSantriTab> {
       );
       final state = provider.santriState(lembagaSlug);
 
-      if (state.errorMessage != null && santriList.isEmpty) {
-        setState(() {
-          _usesFallback = true;
-          _isLoading = false;
-          _errorMessage = state.errorMessage;
-          _updateJumlahSantri();
-        });
-      } else {
-        setState(() {
-          _santriList = santriList;
-          _usesFallback = false;
-          _isLoading = false;
-          _updateJumlahSantri();
-        });
-      }
+      setState(() {
+        _santriList = santriList;
+        _isLoading = false;
+        _errorMessage = state.errorMessage;
+        _updateJumlahSantri();
+      });
     } catch (e) {
       print('Error fetching santri data: $e');
-      // Fallback to static data
       setState(() {
-        _usesFallback = true;
         _isLoading = false;
-        _errorMessage = 'Menggunakan data offline';
+        _errorMessage = 'Gagal memuat data santri';
         _updateJumlahSantri();
       });
     }
@@ -1023,7 +970,6 @@ class _KehadiranSantriTabState extends State<KehadiranSantriTab> {
   bool _isLoading = true;
   String? _errorMessage;
   List<KehadiranSantri> _kehadiranList = [];
-  bool _usesFallback = false;
 
   DateTime? startDate;
   DateTime? endDate;
@@ -1053,30 +999,15 @@ class _KehadiranSantriTabState extends State<KehadiranSantriTab> {
       );
       final state = provider.santriState(slug);
 
-      if (state.errorMessage != null && kehadiranList.isEmpty) {
-        setState(() {
-          _kehadiranList = fallbackKehadiranSantriData
-              .map((json) => KehadiranSantri.fromJson(json))
-              .toList();
-          _usesFallback = true;
-          _errorMessage = state.errorMessage;
-          _isLoading = false;
-        });
-      } else {
-        setState(() {
-          _kehadiranList = kehadiranList;
-          _usesFallback = false;
-          _isLoading = false;
-        });
-      }
+      setState(() {
+        _kehadiranList = kehadiranList;
+        _errorMessage = state.errorMessage;
+        _isLoading = false;
+      });
     } catch (e) {
       print('Error fetching kehadiran: $e');
       setState(() {
-        _kehadiranList = fallbackKehadiranSantriData
-            .map((json) => KehadiranSantri.fromJson(json))
-            .toList();
-        _usesFallback = true;
-        _errorMessage = 'Using offline data';
+        _errorMessage = 'Gagal memuat data kehadiran';
         _isLoading = false;
       });
     }
@@ -1190,28 +1121,16 @@ class _KehadiranSantriTabState extends State<KehadiranSantriTab> {
   ];
 
   List<dynamic> get filteredKehadiran {
-    if (_usesFallback) {
-      if (startDate == null || endDate == null) {
-        return kehadiranData;
-      }
-
-      return kehadiranData.where((kehadiran) {
-        final tanggal = kehadiran['tanggalObj'] as DateTime;
-        return tanggal.isAfter(startDate!.subtract(const Duration(days: 1))) &&
-            tanggal.isBefore(endDate!.add(const Duration(days: 1)));
-      }).toList();
-    } else {
-      // Using API data
-      if (startDate == null || endDate == null) {
-        return _kehadiranList;
-      }
-
-      return _kehadiranList.where((kehadiran) {
-        final tanggal = DateTime.parse(kehadiran.tanggal);
-        return tanggal.isAfter(startDate!.subtract(const Duration(days: 1))) &&
-            tanggal.isBefore(endDate!.add(const Duration(days: 1)));
-      }).toList();
+    // Using API data only
+    if (startDate == null || endDate == null) {
+      return _kehadiranList;
     }
+
+    return _kehadiranList.where((kehadiran) {
+      final tanggal = DateTime.parse(kehadiran.tanggal);
+      return tanggal.isAfter(startDate!.subtract(const Duration(days: 1))) &&
+          tanggal.isBefore(endDate!.add(const Duration(days: 1)));
+    }).toList();
   }
 
   Future<void> _selectDateRange() async {
@@ -1230,10 +1149,8 @@ class _KehadiranSantriTabState extends State<KehadiranSantriTab> {
         endDate = picked.end;
       });
 
-      // Fetch data with date range if using API
-      if (!_usesFallback) {
-        await _fetchKehadiranDataByDateRange();
-      }
+      // Always fetch data with date range
+      await _fetchKehadiranDataByDateRange();
     }
   }
 
@@ -1266,17 +1183,13 @@ class _KehadiranSantriTabState extends State<KehadiranSantriTab> {
 
       if (state.errorMessage != null && kehadiranList.isEmpty) {
         setState(() {
-          _kehadiranList = fallbackKehadiranSantriData
-              .map((json) => KehadiranSantri.fromJson(json))
-              .toList();
-          _usesFallback = true;
+          _kehadiranList = kehadiranList;
           _errorMessage = state.errorMessage;
           _isLoading = false;
         });
       } else {
         setState(() {
           _kehadiranList = kehadiranList;
-          _usesFallback = false;
           _isLoading = false;
         });
       }
@@ -1295,10 +1208,8 @@ class _KehadiranSantriTabState extends State<KehadiranSantriTab> {
       endDate = null;
     });
 
-    // Reload all data if using API
-    if (!_usesFallback) {
-      _fetchKehadiranData();
-    }
+    // Always reload all data
+    _fetchKehadiranData();
   }
 
   String _formatDate(DateTime date) {

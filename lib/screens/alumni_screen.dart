@@ -5,7 +5,6 @@ import '../core/theme/app_colors.dart';
 import '../core/utils/menu_slug_mapper.dart';
 import '../models/models.dart';
 import '../providers/santri_provider.dart';
-import '../data/fallback/santri_fallback.dart';
 
 class AlumniScreen extends StatefulWidget {
   final String title;
@@ -25,7 +24,6 @@ class _AlumniScreenState extends State<AlumniScreen> {
   bool _isLoading = true;
   String? _errorMessage;
   List<Santri> _alumniList = [];
-  bool _usesFallback = false;
 
   String? selectedYear; // This will be tahunMasuk (angkatan)
   String searchQuery = '';
@@ -59,26 +57,21 @@ class _AlumniScreenState extends State<AlumniScreen> {
 
       if (state.errorMessage != null && alumniList.isEmpty) {
         setState(() {
-          _alumniList =
-              fallbackSantriData.map((json) => Santri.fromJson(json)).toList();
-          _usesFallback = true;
+          _alumniList = []; // Don't use fallback data
           _errorMessage = state.errorMessage;
           _isLoading = false;
         });
       } else {
         setState(() {
           _alumniList = alumniList;
-          _usesFallback = false;
           _isLoading = false;
         });
       }
     } catch (e) {
       print('Error fetching alumni: $e');
       setState(() {
-        _alumniList =
-            fallbackSantriData.map((json) => Santri.fromJson(json)).toList();
-        _usesFallback = true;
-        _errorMessage = 'Using offline data';
+        _alumniList = []; // Don't use fallback data
+        _errorMessage = 'Gagal memuat data alumni';
         _isLoading = false;
       });
     }
@@ -89,141 +82,25 @@ class _AlumniScreenState extends State<AlumniScreen> {
     return slug ?? ''; // Return empty string if no mapping found
   }
 
-  // Static data alumni dengan tahun lulus
-  final List<Map<String, dynamic>> alumniData = [
-    {
-      'nama': 'Ahmad Fauzi',
-      'nisn': '1001',
-      'tahun_lulus': '2023',
-      'kelas_terakhir': 'XII IPA 1',
-      'tempat_lahir': 'Bandung',
-      'tanggal_lahir': '15 Januari 2005',
-      'alamat': 'Jl. Merdeka No. 123, Bandung',
-      'pekerjaan': 'Mahasiswa',
-      'institusi': 'ITB',
-    },
-    {
-      'nama': 'Siti Nurhaliza',
-      'nisn': '1002',
-      'tahun_lulus': '2023',
-      'kelas_terakhir': 'XII IPS 1',
-      'tempat_lahir': 'Jakarta',
-      'tanggal_lahir': '22 Maret 2005',
-      'alamat': 'Jl. Sudirman No. 456, Jakarta',
-      'pekerjaan': 'Wirausaha',
-      'institusi': 'Toko Online',
-    },
-    {
-      'nama': 'Muhammad Rizki',
-      'nisn': '1003',
-      'tahun_lulus': '2022',
-      'kelas_terakhir': 'XII IPA 2',
-      'tempat_lahir': 'Surabaya',
-      'tanggal_lahir': '10 Juli 2004',
-      'alamat': 'Jl. Pahlawan No. 789, Surabaya',
-      'pekerjaan': 'Mahasiswa',
-      'institusi': 'ITS',
-    },
-    {
-      'nama': 'Fatimah Az-Zahra',
-      'nisn': '1004',
-      'tahun_lulus': '2022',
-      'kelas_terakhir': 'XII IPS 2',
-      'tempat_lahir': 'Yogyakarta',
-      'tanggal_lahir': '5 September 2004',
-      'alamat': 'Jl. Malioboro No. 321, Yogyakarta',
-      'pekerjaan': 'Guru',
-      'institusi': 'SDN 1 Yogyakarta',
-    },
-    {
-      'nama': 'Abdul Rahman',
-      'nisn': '1005',
-      'tahun_lulus': '2021',
-      'kelas_terakhir': 'XII IPA 1',
-      'tempat_lahir': 'Medan',
-      'tanggal_lahir': '18 November 2003',
-      'alamat': 'Jl. Asia No. 654, Medan',
-      'pekerjaan': 'Engineer',
-      'institusi': 'PT. Teknologi Indonesia',
-    },
-    {
-      'nama': 'Khadijah Binti Ali',
-      'nisn': '1006',
-      'tahun_lulus': '2021',
-      'kelas_terakhir': 'XII IPS 1',
-      'tempat_lahir': 'Makassar',
-      'tanggal_lahir': '30 April 2003',
-      'alamat': 'Jl. Veteran No. 987, Makassar',
-      'pekerjaan': 'Dokter',
-      'institusi': 'RS. Wahidin Sudirohusodo',
-    },
-    {
-      'nama': 'Ibrahim Khalil',
-      'nisn': '1007',
-      'tahun_lulus': '2020',
-      'kelas_terakhir': 'XII IPA 2',
-      'tempat_lahir': 'Padang',
-      'tanggal_lahir': '12 Desember 2002',
-      'alamat': 'Jl. Minang No. 147, Padang',
-      'pekerjaan': 'Programmer',
-      'institusi': 'PT. Software Nusantara',
-    },
-    {
-      'nama': 'Aisyah Ummu Salamah',
-      'nisn': '1008',
-      'tahun_lulus': '2020',
-      'kelas_terakhir': 'XII IPS 2',
-      'tempat_lahir': 'Semarang',
-      'tanggal_lahir': '25 Februari 2002',
-      'alamat': 'Jl. Gajah Mada No. 258, Semarang',
-      'pekerjaan': 'Pengusaha',
-      'institusi': 'CV. Berkah Mandiri',
-    },
-  ];
+  List<Santri> get filteredAlumni {
+    // Using API data (Santri list) - filter by tahunMasuk already done in API
+    var filtered = _alumniList.where((alumni) {
+      final matchesSearch = searchQuery.isEmpty ||
+          alumni.nama.toLowerCase().contains(searchQuery.toLowerCase()) ||
+          alumni.nisn.toLowerCase().contains(searchQuery.toLowerCase());
 
-  List<dynamic> get filteredAlumni {
-    if (_usesFallback) {
-      var filtered = alumniData.where((alumni) {
-        final matchesSearch = searchQuery.isEmpty ||
-            alumni['nama'].toLowerCase().contains(searchQuery.toLowerCase()) ||
-            alumni['nisn'].toLowerCase().contains(searchQuery.toLowerCase());
+      return matchesSearch;
+    }).toList();
 
-        final matchesYear =
-            selectedYear == null || alumni['tahun_lulus'] == selectedYear;
-
-        return matchesSearch && matchesYear;
-      }).toList();
-
-      return filtered;
-    } else {
-      // Using API data (Santri list) - filter by tahunMasuk already done in API
-      var filtered = _alumniList.where((alumni) {
-        final matchesSearch = searchQuery.isEmpty ||
-            alumni.nama.toLowerCase().contains(searchQuery.toLowerCase()) ||
-            alumni.nisn.toLowerCase().contains(searchQuery.toLowerCase());
-
-        return matchesSearch;
-      }).toList();
-
-      return filtered;
-    }
+    return filtered;
   }
 
   List<String> get availableYears {
-    if (_usesFallback) {
-      final years = alumniData
-          .map((alumni) => alumni['tahun_lulus'] as String)
-          .toSet()
-          .toList();
-      years.sort((a, b) => b.compareTo(a)); // Sort descending (newest first)
-      return years;
-    } else {
-      // Get unique tahunMasuk from API data
-      final years =
-          _alumniList.map((alumni) => alumni.tahunMasuk).toSet().toList();
-      years.sort((a, b) => b.compareTo(a)); // Sort descending (newest first)
-      return years;
-    }
+    // Get unique tahunMasuk from API data
+    final years =
+        _alumniList.map((alumni) => alumni.tahunMasuk).toSet().toList();
+    years.sort((a, b) => b.compareTo(a)); // Sort descending (newest first)
+    return years;
   }
 
   @override
@@ -461,9 +338,7 @@ class _AlumniScreenState extends State<AlumniScreen> {
                         setState(() {
                           selectedYear = value;
                         });
-                        if (!_usesFallback) {
-                          _fetchAlumniData(tahunMasuk: value);
-                        }
+                        _fetchAlumniData(tahunMasuk: value);
                       },
                     ),
                   ),
@@ -478,7 +353,7 @@ class _AlumniScreenState extends State<AlumniScreen> {
 
   Widget _buildAlumniCount() {
     final count = filteredAlumni.length;
-    final totalCount = _usesFallback ? alumniData.length : _alumniList.length;
+    final totalCount = _alumniList.length;
 
     return Container(
       margin: const EdgeInsets.symmetric(horizontal: 20, vertical: 10),
@@ -619,23 +494,15 @@ class _AlumniScreenState extends State<AlumniScreen> {
     );
   }
 
-  Widget _buildAlumniCard(dynamic alumni, int index) {
-    // Handle both Santri model and Map (fallback data)
-    final String nama = alumni is Santri ? alumni.nama : alumni['nama'];
-    final String? nisn = alumni is Santri ? alumni.nisn : alumni['nisn'];
-    final String? tahunMasuk =
-        alumni is Santri ? alumni.tahunMasuk : alumni['tahun_masuk'] ?? '2020';
-    final String? tahunLulus =
-        alumni is Santri ? alumni.tahunLulus : alumni['tahun_lulus'];
+  Widget _buildAlumniCard(Santri alumni, int index) {
+    // Using API Santri model only
+    final String nama = alumni.nama;
+    final String? nisn = alumni.nisn;
+    final String? tahunMasuk = alumni.tahunMasuk;
+    final String? tahunLulus = alumni.tahunLulus;
 
     return GestureDetector(
-      onTap: () {
-        if (alumni is Santri) {
-          _showAlumniDetailFromModel(alumni);
-        } else {
-          _showAlumniDetailFromMap(alumni);
-        }
-      },
+      onTap: () => _showAlumniDetailFromModel(alumni),
       child: Container(
         margin: const EdgeInsets.only(bottom: 15),
         decoration: BoxDecoration(
@@ -889,127 +756,6 @@ class _AlumniScreenState extends State<AlumniScreen> {
                           if (alumni.tahunIjazah != null)
                             _buildDetailRow(
                                 'Tahun Ijazah', alumni.tahunIjazah!),
-                        ]),
-                      ],
-                    ),
-                  ),
-                ),
-              ],
-            ),
-          ),
-        );
-      },
-    );
-  }
-
-  void _showAlumniDetailFromMap(Map<String, dynamic> alumni) {
-    showDialog(
-      context: context,
-      barrierColor: Colors.black.withOpacity(0.7),
-      builder: (BuildContext context) {
-        return Dialog(
-          backgroundColor: Colors.transparent,
-          child: Container(
-            width: MediaQuery.of(context).size.width * 0.9,
-            height: MediaQuery.of(context).size.height * 0.8,
-            decoration: BoxDecoration(
-              color: Colors.white,
-              borderRadius: BorderRadius.circular(16),
-              boxShadow: [
-                BoxShadow(
-                  color: Colors.black.withOpacity(0.3),
-                  blurRadius: 20,
-                  offset: const Offset(0, 10),
-                ),
-              ],
-            ),
-            child: Column(
-              children: [
-                // Header
-                Container(
-                  padding: const EdgeInsets.all(20),
-                  decoration: BoxDecoration(
-                    color: AppColors.primaryGreen,
-                    borderRadius: const BorderRadius.only(
-                      topLeft: Radius.circular(16),
-                      topRight: Radius.circular(16),
-                    ),
-                  ),
-                  child: Row(
-                    children: [
-                      CircleAvatar(
-                        radius: 30,
-                        backgroundColor: Colors.white,
-                        child: Icon(
-                          Icons.school,
-                          color: AppColors.primaryGreen,
-                          size: 30,
-                        ),
-                      ),
-                      const SizedBox(width: 15),
-                      Expanded(
-                        child: Column(
-                          crossAxisAlignment: CrossAxisAlignment.start,
-                          children: [
-                            const Text(
-                              'Detail Alumni',
-                              style: TextStyle(
-                                color: Colors.white,
-                                fontSize: 18,
-                                fontWeight: FontWeight.bold,
-                              ),
-                            ),
-                            Text(
-                              alumni['kelas_terakhir'] ?? '-',
-                              style: TextStyle(
-                                color: Colors.white.withOpacity(0.9),
-                                fontSize: 14,
-                              ),
-                            ),
-                          ],
-                        ),
-                      ),
-                      IconButton(
-                        onPressed: () => Navigator.of(context).pop(),
-                        icon: const Icon(Icons.close, color: Colors.white),
-                      ),
-                    ],
-                  ),
-                ),
-                // Content
-                Expanded(
-                  child: SingleChildScrollView(
-                    padding: const EdgeInsets.all(20),
-                    child: Column(
-                      crossAxisAlignment: CrossAxisAlignment.start,
-                      children: [
-                        // Data Pribadi
-                        _buildDetailSection('Data Pribadi', [
-                          _buildDetailRow('Nama Lengkap', alumni['nama']),
-                          _buildDetailRow('NISN', alumni['nisn']),
-                          _buildDetailRow('Tempat, Tanggal Lahir',
-                              '${alumni['tempat_lahir']}, ${alumni['tanggal_lahir']}'),
-                        ]),
-                        const SizedBox(height: 20),
-                        // Alamat
-                        _buildDetailSection('Alamat', [
-                          _buildDetailRow('Alamat', alumni['alamat']),
-                        ]),
-                        const SizedBox(height: 20),
-                        // Data Alumni
-                        _buildDetailSection('Data Alumni', [
-                          _buildDetailRow(
-                              'Tahun Lulus', alumni['tahun_lulus'] ?? '-'),
-                          _buildDetailRow('Kelas Terakhir',
-                              alumni['kelas_terakhir'] ?? '-'),
-                        ]),
-                        const SizedBox(height: 20),
-                        // Karir
-                        _buildDetailSection('Karir', [
-                          _buildDetailRow(
-                              'Pekerjaan Saat Ini', alumni['pekerjaan'] ?? '-'),
-                          _buildDetailRow('Institusi/Perusahaan',
-                              alumni['institusi'] ?? '-'),
                         ]),
                       ],
                     ),

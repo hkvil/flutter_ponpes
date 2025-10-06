@@ -6,10 +6,10 @@ import '../widgets/top_bar.dart';
 import '../widgets/section_header.dart';
 import '../models/informasi_al_ittifaqiah_model.dart';
 
-class BlueprintIsciDynamicScreen extends StatelessWidget {
+class BlueprintIsciScreen extends StatelessWidget {
   final List<GaleriItem> blueprintItems;
 
-  const BlueprintIsciDynamicScreen({
+  const BlueprintIsciScreen({
     super.key,
     required this.blueprintItems,
   });

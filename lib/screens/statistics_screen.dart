@@ -3,114 +3,130 @@ import '../widgets/top_banner.dart';
 import '../widgets/bottom_banner.dart';
 import '../widgets/responsive_wrapper.dart';
 import '../widgets/top_bar.dart';
+import '../models/informasi_al_ittifaqiah_model.dart';
 
 enum StatisticsType { santri, sdm, alumni }
 
 class StatisticsScreen extends StatelessWidget {
   final StatisticsType type;
   final String title;
-  final List<Map<String, dynamic>> data;
-  final int total;
+  final List<StatistikItem> data;
 
   const StatisticsScreen({
     super.key,
     required this.type,
     required this.title,
     required this.data,
-    required this.total,
   });
 
   // Factory constructors untuk kemudahan
-  factory StatisticsScreen.santri() {
+  factory StatisticsScreen.santri(List<StatistikItem> santriData) {
     return StatisticsScreen(
       type: StatisticsType.santri,
       title: 'Jumlah Santri Al-Ittifaqiah',
-      total: 5120,
-      data: const [
-        {'lembaga': 'Taman Kanak-Kanak', 'jumlah': 430},
-        {'lembaga': 'Taman Pendidikan Al-Quran', 'jumlah': 120},
-        {'lembaga': 'Madrasah Tahfidz Lil Ath Fal', 'jumlah': 110},
-        {'lembaga': 'Madrasah Diniyah', 'jumlah': 130},
-        {'lembaga': 'Madrasah Ibtidaiyah', 'jumlah': 700},
-        {'lembaga': 'Madrasah Tsanawiyah Putra', 'jumlah': 430},
-        {'lembaga': 'Madrasah Tsanawiyah Putri', 'jumlah': 560},
-        {'lembaga': 'Madrasah Aliyah Putra', 'jumlah': 429},
-        {'lembaga': 'Madrasah Aliyah Putri', 'jumlah': 580},
-        {'lembaga': 'IAIQI Indralaya', 'jumlah': 590},
-      ],
+      data: santriData,
     );
   }
 
-  factory StatisticsScreen.sdm() {
+  factory StatisticsScreen.sdm(List<StatistikItem> sdmData) {
     return StatisticsScreen(
       type: StatisticsType.sdm,
       title: 'Jumlah SDM Al-Ittifaqiah',
-      total: 195,
-      data: const [
-        {'lembaga': 'Taman Kanak-Kanak', 'jumlah': 12},
-        {'lembaga': 'Taman Pendidikan Al-Quran', 'jumlah': 8},
-        {'lembaga': 'Madrasah Tahfidz Lil Ath Fal', 'jumlah': 6},
-        {'lembaga': 'Madrasah Diniyah', 'jumlah': 10},
-        {'lembaga': 'Madrasah Ibtidaiyah', 'jumlah': 25},
-        {'lembaga': 'Madrasah Tsanawiyah Putra', 'jumlah': 18},
-        {'lembaga': 'Madrasah Tsanawiyah Putri', 'jumlah': 20},
-        {'lembaga': 'Madrasah Aliyah Putra', 'jumlah': 22},
-        {'lembaga': 'Madrasah Aliyah Putri', 'jumlah': 24},
-        {'lembaga': 'IAIQI Indralaya', 'jumlah': 35},
-        {'lembaga': 'Administrasi Pusat', 'jumlah': 15},
-      ],
+      data: sdmData,
     );
   }
 
-  factory StatisticsScreen.alumni() {
+  factory StatisticsScreen.alumni(List<StatistikItem> alumniData) {
     return StatisticsScreen(
       type: StatisticsType.alumni,
       title: 'Jumlah Alumni Al-Ittifaqiah',
-      total: 10000,
-      data: const [
-        {'lembaga': 'Madrasah Ibtidaiyah', 'jumlah': 2500},
-        {'lembaga': 'Madrasah Tsanawiyah Putra', 'jumlah': 1800},
-        {'lembaga': 'Madrasah Tsanawiyah Putri', 'jumlah': 1900},
-        {'lembaga': 'Madrasah Aliyah Putra', 'jumlah': 1600},
-        {'lembaga': 'Madrasah Aliyah Putri', 'jumlah': 1700},
-        {'lembaga': 'IAIQI Indralaya', 'jumlah': 500},
-      ],
+      data: alumniData,
     );
+  }
+
+  // Hitung total dari data API
+  int get total {
+    return data.fold(0, (sum, item) => sum + int.parse(item.jumlah.toString()));
   }
 
   @override
   Widget build(BuildContext context) {
+    if (data.isEmpty) {
+      return ResponsiveWrapper(
+        child: Scaffold(
+          backgroundColor: Colors.grey[100],
+          appBar: TopBar(title: title),
+          body: const Center(
+            child: Column(
+              mainAxisAlignment: MainAxisAlignment.center,
+              children: [
+                Icon(
+                  Icons.info_outline,
+                  size: 64,
+                  color: Colors.grey,
+                ),
+                SizedBox(height: 16),
+                Text(
+                  'Tidak ada data statistik tersedia',
+                  style: TextStyle(
+                    fontSize: 18,
+                    color: Colors.grey,
+                    fontWeight: FontWeight.w500,
+                  ),
+                ),
+              ],
+            ),
+          ),
+          bottomNavigationBar:
+              const BottomBanner(assetPath: 'assets/banners/bottom.png'),
+        ),
+      );
+    }
+
+    // Convert StatistikItem to Map format yang digunakan desain asli
+    final List<Map<String, dynamic>> convertedData = data
+        .map((item) => {
+              'lembaga': 'Tahun ${item.tahun}',
+              'jumlah': item.jumlah,
+            })
+        .toList();
+
     return ResponsiveWrapper(
       child: Scaffold(
+        backgroundColor: Colors.grey[100],
         appBar: TopBar(title: title),
         body: Column(
           children: [
             const TopBanner(assetPath: 'assets/banners/top.png'),
-            const SizedBox(height: 16),
             Expanded(
-              child: ListView(
+              child: Padding(
                 padding: const EdgeInsets.symmetric(horizontal: 16),
-                children: [
-                  // Total Card
-                  _CustomListTile(
-                    title: title,
-                    value: total.toString(),
-                    isTotal: true,
-                  ),
-                  const SizedBox(height: 16),
-                  // List per lembaga
-                  ...data
-                      .map((item) => Padding(
-                            padding: const EdgeInsets.only(bottom: 8),
-                            child: _CustomListTile(
-                              title: item['lembaga'],
-                              value: item['jumlah'].toString(),
-                              isTotal: false,
-                            ),
-                          ))
-                      .toList(),
-                  const SizedBox(height: 16),
-                ],
+                child: Column(
+                  children: [
+                    // Header dengan total - menggunakan desain asli
+                    Padding(
+                      padding: const EdgeInsets.only(top: 16, bottom: 16),
+                      child: _CustomListTile(
+                        title: 'TOTAL',
+                        value: total.toString(),
+                        isTotal: true,
+                      ),
+                    ),
+                    const SizedBox(height: 16),
+                    // List per tahun - menggunakan desain asli
+                    ...convertedData
+                        .map((item) => Padding(
+                              padding: const EdgeInsets.only(bottom: 8),
+                              child: _CustomListTile(
+                                title: item['lembaga'],
+                                value: item['jumlah'].toString(),
+                                isTotal: false,
+                              ),
+                            ))
+                        .toList(),
+                    const SizedBox(height: 16),
+                  ],
+                ),
               ),
             ),
           ],
@@ -122,6 +138,7 @@ class StatisticsScreen extends StatelessWidget {
   }
 }
 
+// Widget yang sama dengan StatisticsScreen asli
 class _CustomListTile extends StatelessWidget {
   final String title;
   final String value;

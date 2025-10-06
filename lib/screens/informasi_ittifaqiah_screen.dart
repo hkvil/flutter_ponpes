@@ -8,9 +8,9 @@ import 'package:pesantren_app/widgets/top_bar.dart';
 import 'package:pesantren_app/widgets/reusable_list_tile.dart';
 
 import 'berita_al_ittifaqiah_screen.dart';
-import 'statistics_real_screen.dart';
+import 'statistics_screen.dart';
 import 'galeri_screen.dart';
-import 'blueprint_isci_dynamic_screen.dart';
+import 'blueprint_isci__screen.dart';
 import '../models/lembaga_model.dart';
 import '../models/informasi_al_ittifaqiah_model.dart';
 import '../providers/informasi_al_ittifaqiah_provider.dart';
@@ -189,7 +189,7 @@ class _InformasiIttifaqiahScreenState extends State<InformasiIttifaqiahScreen> {
                                   context,
                                   MaterialPageRoute(
                                     builder: (context) =>
-                                        StatisticsRealScreen.santri(santriData),
+                                        StatisticsScreen.santri(santriData),
                                   ),
                                 );
                               },
@@ -206,7 +206,7 @@ class _InformasiIttifaqiahScreenState extends State<InformasiIttifaqiahScreen> {
                                   context,
                                   MaterialPageRoute(
                                     builder: (context) =>
-                                        StatisticsRealScreen.sdm(sdmData),
+                                        StatisticsScreen.sdm(sdmData),
                                   ),
                                 );
                               },
@@ -223,7 +223,7 @@ class _InformasiIttifaqiahScreenState extends State<InformasiIttifaqiahScreen> {
                                   context,
                                   MaterialPageRoute(
                                     builder: (context) =>
-                                        StatisticsRealScreen.alumni(alumniData),
+                                        StatisticsScreen.alumni(alumniData),
                                   ),
                                 );
                               },
@@ -293,7 +293,7 @@ class _InformasiIttifaqiahScreenState extends State<InformasiIttifaqiahScreen> {
                                   context,
                                   MaterialPageRoute(
                                     builder: (context) =>
-                                        BlueprintIsciDynamicScreen(
+                                        BlueprintIsciScreen(
                                       blueprintItems: bluePrintData,
                                     ),
                                   ),

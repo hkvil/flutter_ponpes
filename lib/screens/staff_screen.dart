@@ -6,6 +6,7 @@ import '../models/staff.dart';
 import '../models/kehadiran_guru.dart';
 import '../providers/staff_provider.dart';
 import '../providers/kehadiran_provider.dart';
+import '../widgets/detail_dialog.dart';
 
 class StaffScreen extends StatefulWidget {
   final String title;
@@ -238,7 +239,91 @@ class _DaftarStaffTabState extends State<DaftarStaffTab> {
           ],
         ),
         trailing: const Icon(Icons.chevron_right, color: Colors.grey),
-        onTap: () => _showStaffDetailFromModel(staff),
+        onTap: () {
+          DetailDialog.show(
+            context: context,
+            icon: Icons.person,
+            title: 'Detail Staff',
+            subtitle: staff.kategoriPersonil.isNotEmpty
+                ? staff.kategoriPersonil
+                : 'Kategori tidak tersedia',
+            contentSections: [
+              // Data Pribadi
+              DetailSection(
+                title: 'Data Pribadi',
+                children: [
+                  DetailRow(label: 'Nama Lengkap', value: staff.nama),
+                  DetailRow(label: 'NIP', value: staff.nip),
+                  DetailRow(label: 'NIK', value: staff.nik),
+                  DetailRow(
+                    label: 'Tempat, Tanggal Lahir',
+                    value:
+                        '${staff.tempatLahir}, ${_formatDateString(staff.tanggalLahir)}',
+                  ),
+                  DetailRow(
+                    label: 'Jenis Kelamin',
+                    value: staff.gender == 'L' ? 'Laki-laki' : 'Perempuan',
+                  ),
+                  DetailRow(label: 'Agama', value: staff.agama),
+                  if (staff.noTelepon != null && staff.noTelepon!.isNotEmpty)
+                    DetailRow(label: 'No. Telepon', value: staff.noTelepon!),
+                  if (staff.namaIbu != null && staff.namaIbu!.isNotEmpty)
+                    DetailRow(label: 'Nama Ibu', value: staff.namaIbu!),
+                ],
+              ),
+              const SizedBox(height: 20),
+              // Data Kepegawaian
+              DetailSection(
+                title: 'Data Kepegawaian',
+                children: [
+                  DetailRow(
+                      label: 'Kategori Personil',
+                      value: staff.kategoriPersonil),
+                  if (staff.keteranganTugas.isNotEmpty)
+                    DetailRow(
+                        label: 'Keterangan Tugas',
+                        value: staff.keteranganTugas),
+                  if (staff.statusKepegawaian != null &&
+                      staff.statusKepegawaian!.isNotEmpty)
+                    DetailRow(
+                        label: 'Status Kepegawaian',
+                        value: staff.statusKepegawaian!),
+                  if (staff.mulaiTugas != null)
+                    DetailRow(
+                        label: 'Mulai Tugas',
+                        value: _formatDateString(staff.mulaiTugas!)),
+                  DetailRow(
+                    label: 'Status',
+                    value: staff.aktif ? 'Aktif' : 'Tidak Aktif',
+                  ),
+                ],
+              ),
+              const SizedBox(height: 20),
+              // Data Pendidikan
+              DetailSection(
+                title: 'Data Pendidikan',
+                children: [
+                  if (staff.pendidikanTerakhir != null &&
+                      staff.pendidikanTerakhir!.isNotEmpty)
+                    DetailRow(
+                        label: 'Pendidikan Terakhir',
+                        value: staff.pendidikanTerakhir!),
+                  if (staff.lulusan != null && staff.lulusan!.isNotEmpty)
+                    DetailRow(label: 'Lulusan', value: staff.lulusan!),
+                  if (staff.statusPNS != null && staff.statusPNS!.isNotEmpty)
+                    DetailRow(label: 'Status PNS', value: staff.statusPNS!),
+                  if (staff.statusGuruTetap != null &&
+                      staff.statusGuruTetap!.isNotEmpty)
+                    DetailRow(
+                        label: 'Status Guru', value: staff.statusGuruTetap!),
+                  if (staff.sertifikasi != null &&
+                      staff.sertifikasi!.isNotEmpty)
+                    DetailRow(label: 'Sertifikasi', value: staff.sertifikasi!),
+                ],
+              ),
+            ],
+          );
+        },
       ),
     );
   }
@@ -294,156 +379,6 @@ class _DaftarStaffTabState extends State<DaftarStaffTab> {
               child: const Text('Tutup'),
             ),
           ],
-        );
-      },
-    );
-  }
-
-  void _showStaffDetailFromModel(Staff staff) {
-    showDialog(
-      context: context,
-      barrierColor: Colors.black.withOpacity(0.7),
-      builder: (BuildContext context) {
-        return Dialog(
-          backgroundColor: Colors.transparent,
-          child: Container(
-            width: MediaQuery.of(context).size.width * 0.9,
-            height: MediaQuery.of(context).size.height * 0.8,
-            decoration: BoxDecoration(
-              color: Colors.white,
-              borderRadius: BorderRadius.circular(16),
-              boxShadow: [
-                BoxShadow(
-                  color: Colors.black.withOpacity(0.3),
-                  blurRadius: 20,
-                  offset: const Offset(0, 10),
-                ),
-              ],
-            ),
-            child: Column(
-              children: [
-                // Header
-                Container(
-                  padding: const EdgeInsets.all(20),
-                  decoration: const BoxDecoration(
-                    color: Colors.blue,
-                    borderRadius: BorderRadius.only(
-                      topLeft: Radius.circular(16),
-                      topRight: Radius.circular(16),
-                    ),
-                  ),
-                  child: Row(
-                    children: [
-                      CircleAvatar(
-                        radius: 30,
-                        backgroundColor: Colors.white,
-                        child: Icon(
-                          Icons.person,
-                          color: Colors.blue,
-                          size: 30,
-                        ),
-                      ),
-                      const SizedBox(width: 15),
-                      Expanded(
-                        child: Column(
-                          crossAxisAlignment: CrossAxisAlignment.start,
-                          children: [
-                            const Text(
-                              'Detail Staff',
-                              style: TextStyle(
-                                color: Colors.white,
-                                fontSize: 18,
-                                fontWeight: FontWeight.bold,
-                              ),
-                            ),
-                            if (staff.kategoriPersonil.isNotEmpty)
-                              Text(
-                                staff.kategoriPersonil,
-                                style: TextStyle(
-                                  color: Colors.white.withOpacity(0.9),
-                                  fontSize: 14,
-                                ),
-                              ),
-                          ],
-                        ),
-                      ),
-                      IconButton(
-                        onPressed: () => Navigator.of(context).pop(),
-                        icon: const Icon(Icons.close, color: Colors.white),
-                      ),
-                    ],
-                  ),
-                ),
-                // Content
-                Expanded(
-                  child: SingleChildScrollView(
-                    padding: const EdgeInsets.all(20),
-                    child: Column(
-                      crossAxisAlignment: CrossAxisAlignment.start,
-                      children: [
-                        // Data Pribadi
-                        _buildDetailSection('Data Pribadi', [
-                          _buildDetailRow('Nama Lengkap', staff.nama),
-                          _buildDetailRow('NIP', staff.nip),
-                          _buildDetailRow('NIK', staff.nik),
-                          _buildDetailRow('Tempat, Tanggal Lahir',
-                              '${staff.tempatLahir}, ${_formatDateString(staff.tanggalLahir)}'),
-                          _buildDetailRow('Jenis Kelamin',
-                              staff.gender == 'L' ? 'Laki-laki' : 'Perempuan'),
-                          _buildDetailRow('Agama', staff.agama),
-                          if (staff.noTelepon != null &&
-                              staff.noTelepon!.isNotEmpty)
-                            _buildDetailRow('No. Telepon', staff.noTelepon!),
-                          if (staff.namaIbu != null &&
-                              staff.namaIbu!.isNotEmpty)
-                            _buildDetailRow('Nama Ibu', staff.namaIbu!),
-                        ]),
-                        const SizedBox(height: 20),
-                        // Data Kepegawaian
-                        _buildDetailSection('Data Kepegawaian', [
-                          _buildDetailRow(
-                              'Kategori Personil', staff.kategoriPersonil),
-                          if (staff.keteranganTugas.isNotEmpty)
-                            _buildDetailRow(
-                                'Keterangan Tugas', staff.keteranganTugas),
-                          if (staff.statusKepegawaian != null &&
-                              staff.statusKepegawaian!.isNotEmpty)
-                            _buildDetailRow(
-                                'Status Kepegawaian', staff.statusKepegawaian!),
-                          if (staff.mulaiTugas != null)
-                            _buildDetailRow('Mulai Tugas',
-                                _formatDateString(staff.mulaiTugas!)),
-                          _buildDetailRow(
-                              'Status', staff.aktif ? 'Aktif' : 'Tidak Aktif'),
-                        ]),
-                        const SizedBox(height: 20),
-                        // Data Pendidikan
-                        _buildDetailSection('Data Pendidikan', [
-                          if (staff.pendidikanTerakhir != null &&
-                              staff.pendidikanTerakhir!.isNotEmpty)
-                            _buildDetailRow('Pendidikan Terakhir',
-                                staff.pendidikanTerakhir!),
-                          if (staff.lulusan != null &&
-                              staff.lulusan!.isNotEmpty)
-                            _buildDetailRow('Lulusan', staff.lulusan!),
-                          if (staff.statusPNS != null &&
-                              staff.statusPNS!.isNotEmpty)
-                            _buildDetailRow('Status PNS', staff.statusPNS!),
-                          if (staff.statusGuruTetap != null &&
-                              staff.statusGuruTetap!.isNotEmpty)
-                            _buildDetailRow(
-                                'Status Guru', staff.statusGuruTetap!),
-                          if (staff.sertifikasi != null &&
-                              staff.sertifikasi!.isNotEmpty)
-                            _buildDetailRow('Sertifikasi', staff.sertifikasi!),
-                        ]),
-                      ],
-                    ),
-                  ),
-                ),
-              ],
-            ),
-          ),
         );
       },
     );
@@ -710,63 +645,6 @@ class _DaftarStaffTabState extends State<DaftarStaffTab> {
           ),
         ),
       ],
-    );
-  }
-
-  Widget _buildDetailSection(String title, List<Widget> children) {
-    return Container(
-      decoration: BoxDecoration(
-        color: Colors.grey.shade50,
-        borderRadius: BorderRadius.circular(12),
-        border: Border.all(color: Colors.grey.shade200),
-      ),
-      padding: const EdgeInsets.all(16),
-      child: Column(
-        crossAxisAlignment: CrossAxisAlignment.start,
-        children: [
-          Text(
-            title,
-            style: const TextStyle(
-              fontSize: 16,
-              fontWeight: FontWeight.bold,
-              color: Colors.blue,
-            ),
-          ),
-          const SizedBox(height: 12),
-          ...children,
-        ],
-      ),
-    );
-  }
-
-  Widget _buildDetailRow(String label, String? value) {
-    return Padding(
-      padding: const EdgeInsets.only(bottom: 8),
-      child: Row(
-        crossAxisAlignment: CrossAxisAlignment.start,
-        children: [
-          SizedBox(
-            width: 140,
-            child: Text(
-              '$label:',
-              style: TextStyle(
-                fontWeight: FontWeight.w500,
-                color: Colors.grey.shade700,
-                fontSize: 14,
-              ),
-            ),
-          ),
-          Expanded(
-            child: Text(
-              value ?? '-',
-              style: const TextStyle(
-                fontSize: 14,
-                color: Colors.black87,
-              ),
-            ),
-          ),
-        ],
-      ),
     );
   }
 }

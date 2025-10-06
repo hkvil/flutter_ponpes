@@ -5,6 +5,7 @@ import '../core/theme/app_colors.dart';
 import '../core/utils/menu_slug_mapper.dart';
 import '../models/models.dart';
 import '../providers/santri_provider.dart';
+import '../widgets/detail_dialog.dart';
 
 class AlumniScreen extends StatefulWidget {
   final String title;
@@ -502,7 +503,68 @@ class _AlumniScreenState extends State<AlumniScreen> {
     final String? tahunLulus = alumni.tahunLulus;
 
     return GestureDetector(
-      onTap: () => _showAlumniDetailFromModel(alumni),
+      onTap: () {
+        DetailDialog.show(
+          context: context,
+          icon: Icons.school,
+          title: 'Detail Alumni',
+          subtitle: 'Angkatan ${alumni.tahunMasuk}',
+          contentSections: [
+            // Data Pribadi
+            DetailSection(
+              title: 'Data Pribadi',
+              children: [
+                DetailRow(label: 'Nama Lengkap', value: alumni.nama),
+                DetailRow(label: 'NISN', value: alumni.nisn),
+                DetailRow(
+                  label: 'Jenis Kelamin',
+                  value: alumni.gender == 'L' ? 'Laki-laki' : 'Perempuan',
+                ),
+                DetailRow(
+                  label: 'Tempat, Tanggal Lahir',
+                  value:
+                      '${alumni.tempatLahir}, ${_formatDateString(alumni.tanggalLahir)}',
+                ),
+              ],
+            ),
+            const SizedBox(height: 20),
+            // Data Orang Tua
+            DetailSection(
+              title: 'Data Orang Tua',
+              children: [
+                DetailRow(label: 'Nama Ayah', value: alumni.namaAyah),
+                DetailRow(label: 'Nama Ibu', value: alumni.namaIbu),
+              ],
+            ),
+            const SizedBox(height: 20),
+            // Alamat
+            DetailSection(
+              title: 'Alamat',
+              children: [
+                DetailRow(label: 'Kelurahan', value: alumni.kelurahan),
+                DetailRow(label: 'Kecamatan', value: alumni.kecamatan),
+                DetailRow(label: 'Kota', value: alumni.kota),
+              ],
+            ),
+            const SizedBox(height: 20),
+            // Data Alumni
+            DetailSection(
+              title: 'Data Alumni',
+              children: [
+                DetailRow(label: 'Tahun Masuk', value: alumni.tahunMasuk),
+                if (alumni.tahunLulus != null)
+                  DetailRow(label: 'Tahun Lulus', value: alumni.tahunLulus!),
+                if (alumni.kelasAktif != null)
+                  DetailRow(label: 'Kelas Terakhir', value: alumni.kelasAktif!),
+                if (alumni.nomorIjazah != null)
+                  DetailRow(label: 'Nomor Ijazah', value: alumni.nomorIjazah!),
+                if (alumni.tahunIjazah != null)
+                  DetailRow(label: 'Tahun Ijazah', value: alumni.tahunIjazah!),
+              ],
+            ),
+          ],
+        );
+      },
       child: Container(
         margin: const EdgeInsets.only(bottom: 15),
         decoration: BoxDecoration(
@@ -636,199 +698,5 @@ class _AlumniScreenState extends State<AlumniScreen> {
     } catch (e) {
       return dateString;
     }
-  }
-
-  void _showAlumniDetailFromModel(Santri alumni) {
-    showDialog(
-      context: context,
-      barrierColor: Colors.black.withOpacity(0.7),
-      builder: (BuildContext context) {
-        return Dialog(
-          backgroundColor: Colors.transparent,
-          child: Container(
-            width: MediaQuery.of(context).size.width * 0.9,
-            height: MediaQuery.of(context).size.height * 0.8,
-            decoration: BoxDecoration(
-              color: Colors.white,
-              borderRadius: BorderRadius.circular(16),
-              boxShadow: [
-                BoxShadow(
-                  color: Colors.black.withOpacity(0.3),
-                  blurRadius: 20,
-                  offset: const Offset(0, 10),
-                ),
-              ],
-            ),
-            child: Column(
-              children: [
-                // Header
-                Container(
-                  padding: const EdgeInsets.all(20),
-                  decoration: BoxDecoration(
-                    color: AppColors.primaryGreen,
-                    borderRadius: const BorderRadius.only(
-                      topLeft: Radius.circular(16),
-                      topRight: Radius.circular(16),
-                    ),
-                  ),
-                  child: Row(
-                    children: [
-                      CircleAvatar(
-                        radius: 30,
-                        backgroundColor: Colors.white,
-                        child: Icon(
-                          Icons.school,
-                          color: AppColors.primaryGreen,
-                          size: 30,
-                        ),
-                      ),
-                      const SizedBox(width: 15),
-                      Expanded(
-                        child: Column(
-                          crossAxisAlignment: CrossAxisAlignment.start,
-                          children: [
-                            const Text(
-                              'Detail Alumni',
-                              style: TextStyle(
-                                color: Colors.white,
-                                fontSize: 18,
-                                fontWeight: FontWeight.bold,
-                              ),
-                            ),
-                            Text(
-                              'Angkatan ${alumni.tahunMasuk}',
-                              style: TextStyle(
-                                color: Colors.white.withOpacity(0.9),
-                                fontSize: 14,
-                              ),
-                            ),
-                          ],
-                        ),
-                      ),
-                      IconButton(
-                        onPressed: () => Navigator.of(context).pop(),
-                        icon: const Icon(Icons.close, color: Colors.white),
-                      ),
-                    ],
-                  ),
-                ),
-                // Content
-                Expanded(
-                  child: SingleChildScrollView(
-                    padding: const EdgeInsets.all(20),
-                    child: Column(
-                      crossAxisAlignment: CrossAxisAlignment.start,
-                      children: [
-                        // Data Pribadi
-                        _buildDetailSection('Data Pribadi', [
-                          _buildDetailRow('Nama Lengkap', alumni.nama),
-                          _buildDetailRow('NISN', alumni.nisn),
-                          _buildDetailRow('Jenis Kelamin',
-                              alumni.gender == 'L' ? 'Laki-laki' : 'Perempuan'),
-                          _buildDetailRow('Tempat, Tanggal Lahir',
-                              '${alumni.tempatLahir}, ${_formatDateString(alumni.tanggalLahir)}'),
-                        ]),
-                        const SizedBox(height: 20),
-                        // Data Orang Tua
-                        _buildDetailSection('Data Orang Tua', [
-                          _buildDetailRow('Nama Ayah', alumni.namaAyah),
-                          _buildDetailRow('Nama Ibu', alumni.namaIbu),
-                        ]),
-                        const SizedBox(height: 20),
-                        // Alamat
-                        _buildDetailSection('Alamat', [
-                          _buildDetailRow('Kelurahan', alumni.kelurahan),
-                          _buildDetailRow('Kecamatan', alumni.kecamatan),
-                          _buildDetailRow('Kota', alumni.kota),
-                        ]),
-                        const SizedBox(height: 20),
-                        // Data Alumni
-                        _buildDetailSection('Data Alumni', [
-                          _buildDetailRow('Tahun Masuk', alumni.tahunMasuk),
-                          if (alumni.tahunLulus != null)
-                            _buildDetailRow('Tahun Lulus', alumni.tahunLulus!),
-                          if (alumni.kelasAktif != null)
-                            _buildDetailRow(
-                                'Kelas Terakhir', alumni.kelasAktif!),
-                          if (alumni.nomorIjazah != null)
-                            _buildDetailRow(
-                                'Nomor Ijazah', alumni.nomorIjazah!),
-                          if (alumni.tahunIjazah != null)
-                            _buildDetailRow(
-                                'Tahun Ijazah', alumni.tahunIjazah!),
-                        ]),
-                      ],
-                    ),
-                  ),
-                ),
-              ],
-            ),
-          ),
-        );
-      },
-    );
-  }
-
-  Widget _buildDetailSection(String title, List<Widget> children) {
-    return Column(
-      crossAxisAlignment: CrossAxisAlignment.start,
-      children: [
-        Text(
-          title,
-          style: TextStyle(
-            fontSize: 16,
-            fontWeight: FontWeight.bold,
-            color: AppColors.primaryGreen,
-          ),
-        ),
-        const SizedBox(height: 12),
-        Container(
-          width: double.infinity,
-          padding: const EdgeInsets.all(15),
-          decoration: BoxDecoration(
-            color: Colors.grey.shade50,
-            borderRadius: BorderRadius.circular(10),
-            border: Border.all(color: Colors.grey.shade200),
-          ),
-          child: Column(
-            crossAxisAlignment: CrossAxisAlignment.start,
-            children: children,
-          ),
-        ),
-      ],
-    );
-  }
-
-  Widget _buildDetailRow(String label, String value) {
-    return Padding(
-      padding: const EdgeInsets.only(bottom: 12),
-      child: Row(
-        crossAxisAlignment: CrossAxisAlignment.start,
-        children: [
-          SizedBox(
-            width: 140,
-            child: Text(
-              label,
-              style: TextStyle(
-                color: Colors.grey.shade700,
-                fontSize: 13,
-                fontWeight: FontWeight.w500,
-              ),
-            ),
-          ),
-          const Text(': ', style: TextStyle(color: Colors.grey)),
-          Expanded(
-            child: Text(
-              value,
-              style: const TextStyle(
-                fontSize: 13,
-                fontWeight: FontWeight.w600,
-                color: Colors.black87,
-              ),
-            ),
-          ),
-        ],
-      ),
-    );
   }
 }

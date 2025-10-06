@@ -7,6 +7,7 @@ import '../models/models.dart';
 import '../providers/santri_provider.dart';
 import '../providers/kelas_provider.dart';
 import '../providers/kehadiran_provider.dart';
+import '../widgets/detail_dialog.dart';
 
 class SantriScreen extends StatefulWidget {
   final String title;
@@ -357,145 +358,77 @@ class _DaftarSantriTabState extends State<DaftarSantriTab> {
           ),
         ),
         onTap: () {
-          _showSantriDetailFromModel(santri);
+          DetailDialog.show(
+            context: context,
+            icon: Icons.person,
+            title: 'Detail Santri',
+            subtitle: santri.kelasAktif ?? 'Kelas tidak tersedia',
+            contentSections: [
+              // Data Pribadi
+              DetailSection(
+                title: 'Data Pribadi',
+                children: [
+                  DetailRow(label: 'Nama Lengkap', value: santri.nama),
+                  DetailRow(label: 'NISN', value: santri.nisn),
+                  DetailRow(
+                    label: 'Jenis Kelamin',
+                    value: santri.gender == 'L' ? 'Laki-laki' : 'Perempuan',
+                  ),
+                  DetailRow(
+                    label: 'Tempat, Tanggal Lahir',
+                    value:
+                        '${santri.tempatLahir}, ${_formatDateString(santri.tanggalLahir)}',
+                  ),
+                ],
+              ),
+              const SizedBox(height: 20),
+              // Data Orang Tua
+              DetailSection(
+                title: 'Data Orang Tua',
+                children: [
+                  DetailRow(label: 'Nama Ayah', value: santri.namaAyah),
+                  DetailRow(label: 'Nama Ibu', value: santri.namaIbu),
+                ],
+              ),
+              const SizedBox(height: 20),
+              // Alamat
+              DetailSection(
+                title: 'Alamat',
+                children: [
+                  DetailRow(label: 'Kelurahan', value: santri.kelurahan),
+                  DetailRow(label: 'Kecamatan', value: santri.kecamatan),
+                  DetailRow(label: 'Kota', value: santri.kota),
+                ],
+              ),
+              const SizedBox(height: 20),
+              // Data Akademik
+              DetailSection(
+                title: 'Data Akademik',
+                children: [
+                  DetailRow(label: 'Tahun Masuk', value: santri.tahunMasuk),
+                  if (santri.kelasAktif != null)
+                    DetailRow(label: 'Kelas Aktif', value: santri.kelasAktif!),
+                  if (santri.tahunAjaranAktif != null)
+                    DetailRow(
+                        label: 'Tahun Ajaran', value: santri.tahunAjaranAktif!),
+                  DetailRow(
+                    label: 'Status',
+                    value: santri.isAlumni ? 'Alumni' : 'Aktif',
+                  ),
+                  if (santri.tahunLulus != null)
+                    DetailRow(label: 'Tahun Lulus', value: santri.tahunLulus!),
+                  if (santri.nomorIjazah != null)
+                    DetailRow(
+                        label: 'Nomor Ijazah', value: santri.nomorIjazah!),
+                  if (santri.tahunIjazah != null)
+                    DetailRow(
+                        label: 'Tahun Ijazah', value: santri.tahunIjazah!),
+                ],
+              ),
+            ],
+          );
         },
       ),
-    );
-  }
-
-  void _showSantriDetailFromModel(Santri santri) {
-    showDialog(
-      context: context,
-      barrierColor: Colors.black.withOpacity(0.7),
-      builder: (BuildContext context) {
-        return Dialog(
-          backgroundColor: Colors.transparent,
-          child: Container(
-            width: MediaQuery.of(context).size.width * 0.9,
-            height: MediaQuery.of(context).size.height * 0.8,
-            decoration: BoxDecoration(
-              color: Colors.white,
-              borderRadius: BorderRadius.circular(16),
-              boxShadow: [
-                BoxShadow(
-                  color: Colors.black.withOpacity(0.3),
-                  blurRadius: 20,
-                  offset: const Offset(0, 10),
-                ),
-              ],
-            ),
-            child: Column(
-              children: [
-                // Header
-                Container(
-                  padding: const EdgeInsets.all(20),
-                  decoration: BoxDecoration(
-                    color: AppColors.primaryGreen,
-                    borderRadius: const BorderRadius.only(
-                      topLeft: Radius.circular(16),
-                      topRight: Radius.circular(16),
-                    ),
-                  ),
-                  child: Row(
-                    children: [
-                      CircleAvatar(
-                        radius: 30,
-                        backgroundColor: Colors.white,
-                        child: Icon(
-                          Icons.person,
-                          color: AppColors.primaryGreen,
-                          size: 30,
-                        ),
-                      ),
-                      const SizedBox(width: 15),
-                      Expanded(
-                        child: Column(
-                          crossAxisAlignment: CrossAxisAlignment.start,
-                          children: [
-                            const Text(
-                              'Detail Santri',
-                              style: TextStyle(
-                                color: Colors.white,
-                                fontSize: 18,
-                                fontWeight: FontWeight.bold,
-                              ),
-                            ),
-                            if (santri.kelasAktif != null)
-                              Text(
-                                santri.kelasAktif!,
-                                style: TextStyle(
-                                  color: Colors.white.withOpacity(0.9),
-                                  fontSize: 14,
-                                ),
-                              ),
-                          ],
-                        ),
-                      ),
-                      IconButton(
-                        onPressed: () => Navigator.of(context).pop(),
-                        icon: const Icon(Icons.close, color: Colors.white),
-                      ),
-                    ],
-                  ),
-                ),
-                // Content
-                Expanded(
-                  child: SingleChildScrollView(
-                    padding: const EdgeInsets.all(20),
-                    child: Column(
-                      crossAxisAlignment: CrossAxisAlignment.start,
-                      children: [
-                        // Data Pribadi
-                        _buildDetailSection('Data Pribadi', [
-                          _buildDetailRow('Nama Lengkap', santri.nama),
-                          _buildDetailRow('NISN', santri.nisn),
-                          _buildDetailRow('Jenis Kelamin',
-                              santri.gender == 'L' ? 'Laki-laki' : 'Perempuan'),
-                          _buildDetailRow('Tempat, Tanggal Lahir',
-                              '${santri.tempatLahir}, ${_formatDateString(santri.tanggalLahir)}'),
-                        ]),
-                        const SizedBox(height: 20),
-                        // Data Orang Tua
-                        _buildDetailSection('Data Orang Tua', [
-                          _buildDetailRow('Nama Ayah', santri.namaAyah),
-                          _buildDetailRow('Nama Ibu', santri.namaIbu),
-                        ]),
-                        const SizedBox(height: 20),
-                        // Alamat
-                        _buildDetailSection('Alamat', [
-                          _buildDetailRow('Kelurahan', santri.kelurahan),
-                          _buildDetailRow('Kecamatan', santri.kecamatan),
-                          _buildDetailRow('Kota', santri.kota),
-                        ]),
-                        const SizedBox(height: 20),
-                        // Data Akademik
-                        _buildDetailSection('Data Akademik', [
-                          _buildDetailRow('Tahun Masuk', santri.tahunMasuk),
-                          if (santri.kelasAktif != null)
-                            _buildDetailRow('Kelas Aktif', santri.kelasAktif!),
-                          if (santri.tahunAjaranAktif != null)
-                            _buildDetailRow(
-                                'Tahun Ajaran', santri.tahunAjaranAktif!),
-                          _buildDetailRow(
-                              'Status', santri.isAlumni ? 'Alumni' : 'Aktif'),
-                          if (santri.tahunLulus != null)
-                            _buildDetailRow('Tahun Lulus', santri.tahunLulus!),
-                          if (santri.nomorIjazah != null)
-                            _buildDetailRow(
-                                'Nomor Ijazah', santri.nomorIjazah!),
-                          if (santri.tahunIjazah != null)
-                            _buildDetailRow(
-                                'Tahun Ijazah', santri.tahunIjazah!),
-                        ]),
-                      ],
-                    ),
-                  ),
-                ),
-              ],
-            ),
-          ),
-        );
-      },
     );
   }
 
@@ -747,63 +680,6 @@ class _DaftarSantriTabState extends State<DaftarSantriTab> {
           ),
         ),
       ],
-    );
-  }
-
-  Widget _buildDetailSection(String title, List<Widget> children) {
-    return Container(
-      decoration: BoxDecoration(
-        color: Colors.grey.shade50,
-        borderRadius: BorderRadius.circular(12),
-        border: Border.all(color: Colors.grey.shade200),
-      ),
-      padding: const EdgeInsets.all(16),
-      child: Column(
-        crossAxisAlignment: CrossAxisAlignment.start,
-        children: [
-          Text(
-            title,
-            style: TextStyle(
-              fontSize: 16,
-              fontWeight: FontWeight.bold,
-              color: AppColors.primaryGreen,
-            ),
-          ),
-          const SizedBox(height: 12),
-          ...children,
-        ],
-      ),
-    );
-  }
-
-  Widget _buildDetailRow(String label, String? value) {
-    return Padding(
-      padding: const EdgeInsets.only(bottom: 8),
-      child: Row(
-        crossAxisAlignment: CrossAxisAlignment.start,
-        children: [
-          SizedBox(
-            width: 120,
-            child: Text(
-              '$label:',
-              style: TextStyle(
-                fontWeight: FontWeight.w500,
-                color: Colors.grey.shade700,
-                fontSize: 14,
-              ),
-            ),
-          ),
-          Expanded(
-            child: Text(
-              value ?? '-',
-              style: const TextStyle(
-                fontSize: 14,
-                color: Colors.black87,
-              ),
-            ),
-          ),
-        ],
-      ),
     );
   }
 

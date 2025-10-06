@@ -268,38 +268,19 @@ class _DaftarSantriTabState extends State<DaftarSantriTab> {
     );
   }
 
-  Widget _buildSantriCard(dynamic santri, int index) {
-    // Handle both Santri model and Map (fallback data)
-    String nama;
-    String? subtitle;
-    String? avatar;
+  Widget _buildSantriCard(Santri santri, int index) {
+    // Handle Santri model from API
+    String nama = santri.namaLengkap;
+    String? subtitle = santri.alamatLengkap;
     String? kelasInfo;
 
-    if (santri is Santri) {
-      // API data
-      nama = santri.namaLengkap;
-      subtitle = santri.alamatLengkap;
-      avatar = null; // API doesn't have avatar yet
-
-      // Tambahkan info kelas
-      if (santri.kelasAktif != null && santri.kelasAktif!.isNotEmpty) {
-        kelasInfo = santri.kelasAktif;
-        if (santri.tahunAjaranAktif != null &&
-            santri.tahunAjaranAktif!.isNotEmpty) {
-          kelasInfo = '$kelasInfo • ${santri.tahunAjaranAktif}';
-        }
+    // Tambahkan info kelas
+    if (santri.kelasAktif != null && santri.kelasAktif!.isNotEmpty) {
+      kelasInfo = santri.kelasAktif;
+      if (santri.tahunAjaranAktif != null &&
+          santri.tahunAjaranAktif!.isNotEmpty) {
+        kelasInfo = '$kelasInfo • ${santri.tahunAjaranAktif}';
       }
-    } else if (santri is Map<String, dynamic>) {
-      // Fallback data
-      nama = santri['nama'] ?? '';
-      subtitle = santri['subtitle'];
-      avatar = santri['avatar'];
-      kelasInfo = null;
-    } else {
-      nama = 'Unknown';
-      subtitle = null;
-      avatar = null;
-      kelasInfo = null;
     }
 
     return Container(
@@ -319,14 +300,12 @@ class _DaftarSantriTabState extends State<DaftarSantriTab> {
         contentPadding: const EdgeInsets.all(16),
         leading: CircleAvatar(
           radius: 30,
-          backgroundImage: avatar != null ? NetworkImage(avatar) : null,
-          child: avatar == null
-              ? Icon(
-                  Icons.person,
-                  color: Colors.grey.shade400,
-                  size: 30,
-                )
-              : null,
+          backgroundColor: Colors.white,
+          child: Icon(
+            Icons.person,
+            color: Colors.grey.shade400,
+            size: 30,
+          ),
         ),
         title: Text(
           nama,
@@ -338,14 +317,13 @@ class _DaftarSantriTabState extends State<DaftarSantriTab> {
         subtitle: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
-            if (subtitle != null)
-              Text(
-                subtitle,
-                style: TextStyle(
-                  color: Colors.grey.shade600,
-                  fontSize: 12,
-                ),
+            Text(
+              subtitle,
+              style: TextStyle(
+                color: Colors.grey.shade600,
+                fontSize: 12,
               ),
+            ),
             if (kelasInfo != null) ...[
               const SizedBox(height: 4),
               Container(
@@ -379,112 +357,9 @@ class _DaftarSantriTabState extends State<DaftarSantriTab> {
           ),
         ),
         onTap: () {
-          if (santri is Map<String, dynamic>) {
-            _showSantriDetail(santri);
-          } else if (santri is Santri) {
-            _showSantriDetailFromModel(santri);
-          }
+          _showSantriDetailFromModel(santri);
         },
       ),
-    );
-  }
-
-  void _showSantriDetail(Map<String, dynamic> santri) {
-    showDialog(
-      context: context,
-      barrierColor: Colors.black.withOpacity(0.7),
-      builder: (BuildContext context) {
-        return Dialog(
-          backgroundColor: Colors.transparent,
-          child: Container(
-            width: MediaQuery.of(context).size.width * 0.9,
-            height: MediaQuery.of(context).size.height * 0.8,
-            decoration: BoxDecoration(
-              color: Colors.white,
-              borderRadius: BorderRadius.circular(16),
-              boxShadow: [
-                BoxShadow(
-                  color: Colors.black.withOpacity(0.3),
-                  blurRadius: 20,
-                  offset: const Offset(0, 10),
-                ),
-              ],
-            ),
-            child: Column(
-              children: [
-                Container(
-                  padding: const EdgeInsets.all(20),
-                  decoration: BoxDecoration(
-                    color: AppColors.primaryGreen,
-                    borderRadius: const BorderRadius.only(
-                      topLeft: Radius.circular(16),
-                      topRight: Radius.circular(16),
-                    ),
-                  ),
-                  child: Row(
-                    children: [
-                      CircleAvatar(
-                        radius: 30,
-                        backgroundImage: NetworkImage(santri['avatar']),
-                        child: santri['avatar'] == null
-                            ? const Icon(Icons.person,
-                                color: Colors.white, size: 30)
-                            : null,
-                      ),
-                      const SizedBox(width: 15),
-                      Expanded(
-                        child: Column(
-                          crossAxisAlignment: CrossAxisAlignment.start,
-                          children: [
-                            const Text(
-                              'Detail Santri',
-                              style: TextStyle(
-                                color: Colors.white,
-                                fontSize: 18,
-                                fontWeight: FontWeight.bold,
-                              ),
-                            ),
-                            Text(
-                              santri['kelas'] ?? '-',
-                              style: TextStyle(
-                                color: Colors.white.withOpacity(0.9),
-                                fontSize: 14,
-                              ),
-                            ),
-                          ],
-                        ),
-                      ),
-                      IconButton(
-                        onPressed: () => Navigator.of(context).pop(),
-                        icon: const Icon(Icons.close, color: Colors.white),
-                      ),
-                    ],
-                  ),
-                ),
-                Expanded(
-                  child: SingleChildScrollView(
-                    padding: const EdgeInsets.all(20),
-                    child: Column(
-                      crossAxisAlignment: CrossAxisAlignment.start,
-                      children: [
-                        _buildDetailSection('Data Pribadi', [
-                          _buildDetailRow('Nama Lengkap', santri['nama']),
-                          _buildDetailRow('NISN', santri['nisn']),
-                          _buildDetailRow('Jenis Kelamin', santri['gender']),
-                          _buildDetailRow(
-                              'Tempat Lahir', santri['tempatLahir']),
-                          _buildDetailRow(
-                              'Tanggal Lahir', santri['tanggalLahir']),
-                        ]),
-                      ],
-                    ),
-                  ),
-                ),
-              ],
-            ),
-          ),
-        );
-      },
     );
   }
 
@@ -1020,106 +895,6 @@ class _KehadiranSantriTabState extends State<KehadiranSantriTab> {
     return slug ?? ''; // Return empty string if no mapping found
   }
 
-  // Data static kehadiran
-  final List<Map<String, dynamic>> kehadiranData = [
-    {
-      'nama': 'Muhammad Arkia Bin Wazdan',
-      'tanggal': '29 September 2025',
-      'tanggalObj': DateTime(2025, 9, 29),
-      'keterangan': 'Hadir tepat waktu',
-      'jenis': 'Hadir',
-      'avatar': 'https://i.pravatar.cc/150?img=1',
-    },
-    {
-      'nama': 'Ahmad Fadhil Bin Ibrahim',
-      'tanggal': '29 September 2025',
-      'tanggalObj': DateTime(2025, 9, 29),
-      'keterangan': 'Izin karena sakit',
-      'jenis': 'Izin',
-      'avatar': 'https://i.pravatar.cc/150?img=2',
-    },
-    {
-      'nama': 'Umar Abdillah Bin Sulaiman',
-      'tanggal': '29 September 2025',
-      'tanggalObj': DateTime(2025, 9, 29),
-      'keterangan': 'Tidak hadir tanpa keterangan',
-      'jenis': 'Alpha',
-      'avatar': 'https://i.pravatar.cc/150?img=3',
-    },
-    {
-      'nama': 'Ali Hasan Bin Ahmad',
-      'tanggal': '29 September 2025',
-      'tanggalObj': DateTime(2025, 9, 29),
-      'keterangan': 'Hadir, terlambat 15 menit',
-      'jenis': 'Terlambat',
-      'avatar': 'https://i.pravatar.cc/150?img=4',
-    },
-    {
-      'nama': 'Muhammad Yusuf Bin Omar',
-      'tanggal': '28 September 2025',
-      'tanggalObj': DateTime(2025, 9, 28),
-      'keterangan': 'Izin keperluan keluarga',
-      'jenis': 'Izin',
-      'avatar': 'https://i.pravatar.cc/150?img=5',
-    },
-    {
-      'nama': 'Abdullah Rahman Bin Ali',
-      'tanggal': '28 September 2025',
-      'tanggalObj': DateTime(2025, 9, 28),
-      'keterangan': 'Hadir tepat waktu',
-      'jenis': 'Hadir',
-      'avatar': 'https://i.pravatar.cc/150?img=6',
-    },
-    {
-      'nama': 'Hassan Bin Muhammad',
-      'tanggal': '28 September 2025',
-      'tanggalObj': DateTime(2025, 9, 28),
-      'keterangan': 'Sakit demam',
-      'jenis': 'Sakit',
-      'avatar': 'https://i.pravatar.cc/150?img=7',
-    },
-    {
-      'nama': 'Ibrahim Bin Yusuf',
-      'tanggal': '27 September 2025',
-      'tanggalObj': DateTime(2025, 9, 27),
-      'keterangan': 'Hadir tepat waktu',
-      'jenis': 'Hadir',
-      'avatar': 'https://i.pravatar.cc/150?img=8',
-    },
-    {
-      'nama': 'Omar Bin Khattab',
-      'tanggal': '27 September 2025',
-      'tanggalObj': DateTime(2025, 9, 27),
-      'keterangan': 'Alpha tanpa keterangan',
-      'jenis': 'Alpha',
-      'avatar': 'https://i.pravatar.cc/150?img=9',
-    },
-    {
-      'nama': 'Sulaiman Bin Ahmad',
-      'tanggal': '27 September 2025',
-      'tanggalObj': DateTime(2025, 9, 27),
-      'keterangan': 'Terlambat 10 menit',
-      'jenis': 'Terlambat',
-      'avatar': 'https://i.pravatar.cc/150?img=10',
-    },
-    {
-      'nama': 'Muhammad Arkia Bin Wazdan',
-      'tanggal': '26 September 2025',
-      'tanggalObj': DateTime(2025, 9, 26),
-      'keterangan': 'Hadir tepat waktu',
-      'jenis': 'Hadir',
-      'avatar': 'https://i.pravatar.cc/150?img=1',
-    },
-    {
-      'nama': 'Ahmad Fadhil Bin Ibrahim',
-      'tanggal': '25 September 2025',
-      'tanggalObj': DateTime(2025, 9, 25),
-      'keterangan': 'Hadir tepat waktu',
-      'jenis': 'Hadir',
-      'avatar': 'https://i.pravatar.cc/150?img=2',
-    },
-  ];
-
   List<dynamic> get filteredKehadiran {
     // Using API data only
     if (startDate == null || endDate == null) {
@@ -1460,7 +1235,7 @@ class _KehadiranSantriTabState extends State<KehadiranSantriTab> {
                 itemBuilder: (context, index) {
                   final kehadiran = filteredKehadiran[index];
 
-                  // Handle both KehadiranSantri model and Map (fallback)
+                  // Handle KehadiranSantri model from API
                   String nama;
                   String tanggal;
                   String jenis;
@@ -1468,30 +1243,13 @@ class _KehadiranSantriTabState extends State<KehadiranSantriTab> {
                   String? avatar;
                   String? kelasInfo;
 
-                  if (kehadiran is KehadiranSantri) {
-                    // API data
-                    nama = kehadiran.namaSantri;
-                    tanggal = _formatTanggalKehadiran(kehadiran.tanggal);
-                    jenis = kehadiran.jenis;
-                    keterangan = kehadiran.keterangan;
-                    avatar = null;
-                    kelasInfo = kehadiran.santri?.kelasAktif;
-                  } else if (kehadiran is Map<String, dynamic>) {
-                    // Fallback data
-                    nama = kehadiran['nama'] ?? '';
-                    tanggal = kehadiran['tanggal'] ?? '';
-                    jenis = kehadiran['jenis'] ?? '';
-                    keterangan = kehadiran['keterangan'] ?? '';
-                    avatar = kehadiran['avatar'];
-                    kelasInfo = null;
-                  } else {
-                    nama = 'Unknown';
-                    tanggal = '';
-                    jenis = '';
-                    keterangan = '';
-                    avatar = null;
-                    kelasInfo = null;
-                  }
+                  // Handle KehadiranSantri model from API
+                  nama = kehadiran.namaSantri;
+                  tanggal = _formatTanggalKehadiran(kehadiran.tanggal);
+                  jenis = kehadiran.jenis;
+                  keterangan = kehadiran.keterangan;
+                  avatar = null;
+                  kelasInfo = kehadiran.santri?.kelasAktif;
 
                   return Container(
                     margin: const EdgeInsets.only(bottom: 12),

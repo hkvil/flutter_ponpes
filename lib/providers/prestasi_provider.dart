@@ -41,7 +41,7 @@ class PrestasiProvider extends ChangeNotifier {
     }
 
     state.startLoading();
-    notifyListeners();
+    // Remove immediate notifyListeners() to avoid calling during build phase
 
     try {
       final result = await _repository.getPrestasiByLembaga(

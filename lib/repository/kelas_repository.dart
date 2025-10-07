@@ -90,7 +90,7 @@ class KelasRepository extends BaseRepository {
         queryParameters: {
           'populate': 'deep',
         },
-        options: buildOptions(),
+        options: buildPublicOptions(), // Public endpoint - no auth required
       );
 
       final body = ensureMap(response.data);
@@ -116,7 +116,7 @@ class KelasRepository extends BaseRepository {
       final response = await dio.get(
         '/api/kelass',
         queryParameters: queryParameters,
-        options: buildOptions(),
+        options: buildPublicOptions(), // Public endpoint - no auth required
       );
 
       final body = ensureMap(response.data);

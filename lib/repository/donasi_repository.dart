@@ -21,7 +21,7 @@ class DonasiRepository extends BaseRepository {
           'pagination[pageSize]': pageSize.toString(),
           'populate': 'media',
         },
-        options: buildOptions(),
+        options: buildPublicOptions(), // Public endpoint - no auth required
       );
 
       final jsonData = ensureMap(response.data);
@@ -40,7 +40,7 @@ class DonasiRepository extends BaseRepository {
         queryParameters: {
           'populate': 'media',
         },
-        options: buildOptions(),
+        options: buildPublicOptions(), // Public endpoint - no auth required
       );
 
       final jsonData = ensureMap(response.data);
@@ -84,7 +84,7 @@ class DonasiRepository extends BaseRepository {
           'populate': 'media',
           ...filters,
         },
-        options: buildOptions(),
+        options: buildPublicOptions(), // Public endpoint - no auth required
       );
 
       final jsonData = ensureMap(response.data);
@@ -110,7 +110,7 @@ class DonasiRepository extends BaseRepository {
           'populate': 'media',
           'filters[title][\$containsi]': query,
         },
-        options: buildOptions(),
+        options: buildPublicOptions(), // Public endpoint - no auth required
       );
 
       final jsonData = ensureMap(response.data);

@@ -181,7 +181,8 @@ class KehadiranRepository extends BaseRepository {
       final response = await dio.get(
         '/api/kehadiran-santris',
         queryParameters: queryParameters,
-        options: buildOptions(),
+        options:
+            await buildAuthenticatedOptions(), // Authenticated endpoint - requires JWT
       );
 
       final body = ensureMap(response.data);
@@ -210,7 +211,8 @@ class KehadiranRepository extends BaseRepository {
       final response = await dio.get(
         '/api/kehadiran-gurus',
         queryParameters: queryParameters,
-        options: buildOptions(),
+        options:
+            await buildAuthenticatedOptions(), // Authenticated endpoint - requires JWT
       );
 
       final body = ensureMap(response.data);

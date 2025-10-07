@@ -85,7 +85,7 @@ class TahunAjaranRepository extends BaseRepository {
         queryParameters: {
           'populate': 'lembaga',
         },
-        options: buildOptions(),
+        options: buildPublicOptions(), // Public endpoint - no auth required
       );
 
       final body = ensureMap(response.data);
@@ -111,7 +111,7 @@ class TahunAjaranRepository extends BaseRepository {
       final response = await dio.get(
         '/api/tahun-ajarans',
         queryParameters: queryParameters,
-        options: buildOptions(),
+        options: buildPublicOptions(), // Public endpoint - no auth required
       );
 
       final body = ensureMap(response.data);

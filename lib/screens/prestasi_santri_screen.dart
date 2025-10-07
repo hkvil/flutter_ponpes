@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:pesantren_app/widgets/responsive_wrapper.dart';
 import 'package:provider/provider.dart';
 
 import '../core/theme/app_colors.dart';
@@ -33,7 +34,10 @@ class _PrestasiSantriScreenState extends State<PrestasiSantriScreen> {
   @override
   void initState() {
     super.initState();
-    _fetchPrestasiData();
+    // Defer the data fetching to after the build is complete
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      _fetchPrestasiData();
+    });
   }
 
   Future<void> _fetchPrestasiData({String? tahun, String? tingkat}) async {
@@ -126,59 +130,63 @@ class _PrestasiSantriScreenState extends State<PrestasiSantriScreen> {
   @override
   Widget build(BuildContext context) {
     if (_isLoading) {
-      return Scaffold(
-        backgroundColor: AppColors.primaryGreen,
-        body:
-            const Center(child: CircularProgressIndicator(color: Colors.white)),
+      return ResponsiveWrapper(
+        child: Scaffold(
+          backgroundColor: AppColors.primaryGreen,
+          body: const Center(
+              child: CircularProgressIndicator(color: Colors.white)),
+        ),
       );
     }
 
-    return Scaffold(
-      backgroundColor: AppColors.primaryGreen,
-      body: Column(
-        children: [
-          if (_errorMessage != null)
-            Container(
-              width: double.infinity,
-              padding: const EdgeInsets.all(12),
-              color: Colors.orange.shade100,
-              child: Row(
-                children: [
-                  Icon(Icons.info_outline,
-                      color: Colors.orange.shade700, size: 20),
-                  const SizedBox(width: 8),
-                  Expanded(
-                    child: Text(
-                      _errorMessage!,
-                      style: TextStyle(
-                          color: Colors.orange.shade900, fontSize: 12),
-                      maxLines: 2,
-                      overflow: TextOverflow.ellipsis,
+    return ResponsiveWrapper(
+      child: Scaffold(
+        backgroundColor: AppColors.primaryGreen,
+        body: Column(
+          children: [
+            if (_errorMessage != null)
+              Container(
+                width: double.infinity,
+                padding: const EdgeInsets.all(12),
+                color: Colors.orange.shade100,
+                child: Row(
+                  children: [
+                    Icon(Icons.info_outline,
+                        color: Colors.orange.shade700, size: 20),
+                    const SizedBox(width: 8),
+                    Expanded(
+                      child: Text(
+                        _errorMessage!,
+                        style: TextStyle(
+                            color: Colors.orange.shade900, fontSize: 12),
+                        maxLines: 2,
+                        overflow: TextOverflow.ellipsis,
+                      ),
                     ),
-                  ),
-                ],
-              ),
-            ),
-          _buildHeader(),
-          Expanded(
-            child: Container(
-              decoration: const BoxDecoration(
-                color: Colors.white,
-                borderRadius: BorderRadius.only(
-                  topLeft: Radius.circular(30),
-                  topRight: Radius.circular(30),
+                  ],
                 ),
               ),
-              child: Column(
-                children: [
-                  _buildFilters(),
-                  _buildStats(),
-                  Expanded(child: _buildPrestasiList()),
-                ],
+            _buildHeader(),
+            Expanded(
+              child: Container(
+                decoration: const BoxDecoration(
+                  color: Colors.white,
+                  borderRadius: BorderRadius.only(
+                    topLeft: Radius.circular(30),
+                    topRight: Radius.circular(30),
+                  ),
+                ),
+                child: Column(
+                  children: [
+                    _buildFilters(),
+                    _buildStats(),
+                    Expanded(child: _buildPrestasiList()),
+                  ],
+                ),
               ),
             ),
-          ),
-        ],
+          ],
+        ),
       ),
     );
   }

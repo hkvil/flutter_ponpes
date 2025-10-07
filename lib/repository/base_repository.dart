@@ -42,6 +42,18 @@ abstract class BaseRepository {
     return Options(headers: resolvedHeaders);
   }
 
+  /// Builds [Options] with default JSON headers without authorization.
+  Options buildPublicOptions({
+    Map<String, String>? headers,
+  }) {
+    final resolvedHeaders = <String, String>{
+      'Content-Type': 'application/json',
+      if (headers != null) ...headers,
+    };
+
+    return Options(headers: resolvedHeaders);
+  }
+
   /// Ensures the provided response body can be treated as a map.
   Map<String, dynamic> ensureMap(dynamic data) {
     if (data is Map<String, dynamic>) {

@@ -1,5 +1,5 @@
 # Ignore environment file
-.env
+*.env
 # Ignore playground folder
 playground/
 # Miscellaneous

@@ -17,7 +17,7 @@ class InformasiAlIttifaqiahRepository extends BaseRepository {
         queryParameters: {
           'populate': 'all',
         },
-        options: buildOptions(),
+        options: buildPublicOptions(), // Public endpoint - no auth required
       );
 
       print('🔧 [API_DEBUG] URL called with populate=all');

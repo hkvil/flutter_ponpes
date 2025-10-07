@@ -15,7 +15,7 @@ class SliderRepository extends BaseRepository {
         queryParameters: {
           'populate': '*',
         },
-        options: buildOptions(),
+        options: buildPublicOptions(), // Public endpoint - no auth required
       );
 
       final body = ensureMap(response.data);

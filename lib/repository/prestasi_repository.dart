@@ -6,7 +6,6 @@ import 'base_repository.dart';
 class PrestasiRepository extends BaseRepository {
   PrestasiRepository({Dio? dio}) : super(dio: dio);
 
-  /// Get all prestasi by lembaga (filter by santri's lembaga)
   Future<List<Prestasi>> getPrestasiByLembaga(
     String lembagaSlug, {
     int? page,
@@ -17,10 +16,10 @@ class PrestasiRepository extends BaseRepository {
     return _fetchPrestasi(
       'lembaga:$lembagaSlug',
       {
+        'populate[santri]': true,
         'filters[santri][lembaga][slug][\$eq]': lembagaSlug,
         if (tahun != null) 'filters[tahun][\$eq]': tahun,
         if (tingkat != null) 'filters[tingkat][\$eq]': tingkat,
-        'populate[santri]': true,
         'sort': 'tahun:desc',
         'pagination[pageSize]': pageSize ?? 100,
         if (page != null) 'pagination[page]': page,
@@ -114,7 +113,7 @@ class PrestasiRepository extends BaseRepository {
       final response = await dio.get(
         '/api/prestasis',
         queryParameters: queryParameters,
-        options: buildOptions(),
+        options: await buildAuthenticatedOptions(),
       );
 
       final body = ensureMap(response.data);

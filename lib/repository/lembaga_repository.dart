@@ -19,7 +19,7 @@ class LembagaRepository extends BaseRepository {
           'sort': 'nama:asc',
           'pagination[pageSize]': 200,
         },
-        options: buildOptions(),
+        options: buildPublicOptions(), // Public endpoint - no auth required
       );
 
       final body = ensureMap(response.data);
@@ -43,7 +43,7 @@ class LembagaRepository extends BaseRepository {
           'filters[slug][\$eq]': slug,
           'populate': 'all',
         },
-        options: buildOptions(),
+        options: buildPublicOptions(), // Public endpoint - no auth required
       );
 
       print(

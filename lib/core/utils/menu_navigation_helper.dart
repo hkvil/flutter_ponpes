@@ -8,9 +8,11 @@ import '../../screens/staff_screen.dart';
 import '../../screens/informasi_screen.dart';
 import '../../screens/alumni_screen.dart';
 import '../../screens/prestasi_santri_screen.dart';
+import '../../screens/pelanggaran_screen.dart';
 import '../../models/profile_section.dart';
 import '../../models/lembaga_model.dart';
 import '../../providers/lembaga_provider.dart';
+import '../../providers/auth_provider.dart';
 import 'banner_manager.dart';
 import '../constants/profil.dart';
 
@@ -61,8 +63,7 @@ class MenuNavigationHelper {
         if (context.mounted) {
           ScaffoldMessenger.of(context).showSnackBar(
             SnackBar(
-              content: Text(
-                  errorMessage ?? 'Data lembaga tidak ditemukan'),
+              content: Text(errorMessage ?? 'Data lembaga tidak ditemukan'),
               backgroundColor: Colors.red,
             ),
           );
@@ -159,6 +160,7 @@ class MenuNavigationHelper {
         break;
 
       case 'santri':
+        if (!_requireAuthentication(context)) return;
         Navigator.push(
           context,
           MaterialPageRoute(
@@ -171,6 +173,7 @@ class MenuNavigationHelper {
         break;
 
       case 'sdm':
+        if (!_requireAuthentication(context)) return;
         Navigator.push(
           context,
           MaterialPageRoute(
@@ -183,6 +186,7 @@ class MenuNavigationHelper {
         break;
 
       case 'guru':
+        if (!_requireAuthentication(context)) return;
         Navigator.push(
           context,
           MaterialPageRoute(
@@ -208,11 +212,25 @@ class MenuNavigationHelper {
         break;
 
       case 'alumni':
+        if (!_requireAuthentication(context)) return;
         Navigator.push(
           context,
           MaterialPageRoute(
             builder: (context) => AlumniScreen(
               title: '${lembaga.nama} - Data Alumni',
+              lembagaName: lembaga.nama,
+            ),
+          ),
+        );
+        break;
+
+      case 'pelanggaran':
+        if (!_requireAuthentication(context)) return;
+        Navigator.push(
+          context,
+          MaterialPageRoute(
+            builder: (context) => PelanggaranScreen(
+              title: '${lembaga.nama} - Data Pelanggaran',
               lembagaName: lembaga.nama,
             ),
           ),
@@ -333,6 +351,7 @@ class MenuNavigationHelper {
         break;
 
       case 'santri':
+        if (!_requireAuthentication(context)) return;
         Navigator.push(
           context,
           MaterialPageRoute(
@@ -345,6 +364,7 @@ class MenuNavigationHelper {
         break;
 
       case 'sdm':
+        if (!_requireAuthentication(context)) return;
         Navigator.push(
           context,
           MaterialPageRoute(
@@ -357,6 +377,7 @@ class MenuNavigationHelper {
         break;
 
       case 'guru':
+        if (!_requireAuthentication(context)) return;
         Navigator.push(
           context,
           MaterialPageRoute(
@@ -369,6 +390,7 @@ class MenuNavigationHelper {
         break;
 
       case 'alumni':
+        if (!_requireAuthentication(context)) return;
         Navigator.push(
           context,
           MaterialPageRoute(
@@ -494,5 +516,22 @@ class MenuNavigationHelper {
         backgroundColor: Colors.orange.shade700,
       ),
     );
+  }
+
+  /// Check if user is authenticated, show snackbar if not
+  static bool _requireAuthentication(BuildContext context) {
+    final authProvider = Provider.of<AuthProvider>(context, listen: false);
+    if (!authProvider.isLoggedIn) {
+      ScaffoldMessenger.of(context).showSnackBar(
+        const SnackBar(
+          content:
+              Text('Silakan login terlebih dahulu untuk mengakses halaman ini'),
+          backgroundColor: Colors.orange,
+          duration: Duration(seconds: 3),
+        ),
+      );
+      return false;
+    }
+    return true;
   }
 }

@@ -114,7 +114,8 @@ class SantriRepository extends BaseRepository {
       final response = await dio.get(
         '/api/santris',
         queryParameters: queryParameters,
-        options: buildOptions(),
+        options:
+            await buildAuthenticatedOptions(), // Authenticated endpoint - requires login
       );
 
       final body = ensureMap(response.data);

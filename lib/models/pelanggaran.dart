@@ -1,3 +1,5 @@
+import 'santri.dart';
+
 class Pelanggaran {
   final int id;
   final String documentId;
@@ -8,6 +10,7 @@ class Pelanggaran {
   final DateTime createdAt;
   final DateTime updatedAt;
   final DateTime publishedAt;
+  final Santri? santri; // Relasi dengan santri
 
   Pelanggaran({
     required this.id,
@@ -19,6 +22,7 @@ class Pelanggaran {
     required this.createdAt,
     required this.updatedAt,
     required this.publishedAt,
+    this.santri,
   });
 
   factory Pelanggaran.fromJson(Map<String, dynamic> json) {
@@ -32,6 +36,9 @@ class Pelanggaran {
       createdAt: DateTime.parse(json['createdAt'] as String),
       updatedAt: DateTime.parse(json['updatedAt'] as String),
       publishedAt: DateTime.parse(json['publishedAt'] as String),
+      santri: json['santri'] != null
+          ? Santri.fromJson(json['santri'] as Map<String, dynamic>)
+          : null,
     );
   }
 
@@ -46,6 +53,7 @@ class Pelanggaran {
       'createdAt': createdAt.toIso8601String(),
       'updatedAt': updatedAt.toIso8601String(),
       'publishedAt': publishedAt.toIso8601String(),
+      'santri': santri?.toJson(),
     };
   }
 

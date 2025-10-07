@@ -244,15 +244,15 @@ class DetailLayout extends StatelessWidget {
       cachedLembaga: cachedLembaga, // Pass cached data
     );
 
-    ScaffoldMessenger.of(context).showSnackBar(
-      SnackBar(
-        content: Text(cachedLembaga != null
-            ? 'Buka "$item" (data sudah siap)'
-            : lembagaSlug != null
-                ? 'Mengambil data "$item" dari API...'
-                : 'Menampilkan "$title - $item"'),
-        duration: const Duration(seconds: 1),
-      ),
-    );
+    // ScaffoldMessenger.of(context).showSnackBar(
+    //   SnackBar(
+    //     content: Text(cachedLembaga != null
+    //         ? 'Buka "$item" (data sudah siap)'
+    //         : lembagaSlug != null
+    //             ? 'Mengambil data "$item" dari API...'
+    //             : 'Menampilkan "$title - $item"'),
+    //     duration: const Duration(seconds: 1),
+    //   ),
+    // );
   }
 }

@@ -15,6 +15,7 @@ const List<String> menuItemsJenis2 = [
   'Santri',
   'Guru',
   'Prestasi',
+  'Pelanggaran',
   'Alumni',
   'Galeri',
   'Informasi',

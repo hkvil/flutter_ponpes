@@ -16,6 +16,7 @@ import 'providers/informasi_al_ittifaqiah_provider.dart';
 import 'providers/kehadiran_provider.dart';
 import 'providers/kelas_provider.dart';
 import 'providers/lembaga_provider.dart';
+import 'providers/pelanggaran_provider.dart';
 import 'providers/prestasi_provider.dart';
 import 'providers/santri_provider.dart';
 import 'providers/slider_provider.dart';
@@ -56,6 +57,7 @@ class PesantrenApp extends StatelessWidget {
         ChangeNotifierProvider(create: (_) => StaffProvider()),
         ChangeNotifierProvider(create: (_) => KehadiranProvider()),
         ChangeNotifierProvider(create: (_) => PrestasiProvider()),
+        ChangeNotifierProvider(create: (_) => PelanggaranProvider()),
         ChangeNotifierProvider(create: (_) => InformasiAlIttifaqiahProvider()),
         ChangeNotifierProvider(create: (_) => TahunAjaranProvider()),
       ],

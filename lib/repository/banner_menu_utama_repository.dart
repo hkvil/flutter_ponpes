@@ -18,7 +18,7 @@ class BannerMenuUtamaRepository extends BaseRepository {
           'filters[title][\$contains]': title,
           'populate': 'all',
         },
-        options: buildOptions(),
+        options: buildPublicOptions(), // Public endpoint - no auth required
       );
 
       print(
@@ -62,7 +62,7 @@ class BannerMenuUtamaRepository extends BaseRepository {
         queryParameters: {
           'sort': 'title:asc',
         },
-        options: buildOptions(),
+        options: buildPublicOptions(), // Public endpoint - no auth required
       );
 
       print(

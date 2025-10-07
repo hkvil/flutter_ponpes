@@ -12,6 +12,20 @@ import '../core/router/app_router.dart';
 import 'menu_screen.dart';
 import '../providers/slider_provider.dart';
 
+void showComingSoonSnackbar(BuildContext context) {
+  ScaffoldMessenger.of(context).showSnackBar(
+    SnackBar(
+      content: const Text('Coming Soon!'),
+      duration: const Duration(seconds: 2),
+      behavior: SnackBarBehavior.floating,
+      backgroundColor: Colors.orangeAccent,
+      shape: RoundedRectangleBorder(
+        borderRadius: BorderRadius.circular(8),
+      ),
+    ),
+  );
+}
+
 /// The home screen shows the main menu grid and achievements.
 ///
 /// It consists of a carousel slider with autoplay, a grid of ten menu buttons,
@@ -158,11 +172,7 @@ class _HomeScreenState extends State<HomeScreen> {
                         items: HomeScreen._menuItems.sublist(1, 4),
                         buttonSize: 48,
                         onTap: (title) {
-                          Navigator.pushNamed(
-                            context,
-                            AppRouter.menu,
-                            arguments: MenuScreenArgs(title: title),
-                          );
+                          showComingSoonSnackbar(context);
                         },
                       ),
                       const SizedBox(height: 8),
@@ -170,11 +180,7 @@ class _HomeScreenState extends State<HomeScreen> {
                         items: HomeScreen._menuItems.sublist(4, 7),
                         buttonSize: 48,
                         onTap: (title) {
-                          Navigator.pushNamed(
-                            context,
-                            AppRouter.menu,
-                            arguments: MenuScreenArgs(title: title),
-                          );
+                          showComingSoonSnackbar(context);
                         },
                       ),
                       const SizedBox(height: 8),

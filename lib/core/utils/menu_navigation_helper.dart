@@ -238,6 +238,7 @@ class MenuNavigationHelper {
         break;
 
       case 'prestasi':
+        if (!_requireAuthentication(context)) return;
         Navigator.push(
           context,
           MaterialPageRoute(
@@ -312,6 +313,7 @@ class MenuNavigationHelper {
         break;
 
       case 'prestasi':
+        if (!_requireAuthentication(context)) return;
         Navigator.push(
           context,
           MaterialPageRoute(

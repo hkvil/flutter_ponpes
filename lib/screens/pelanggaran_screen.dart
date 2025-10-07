@@ -176,7 +176,9 @@ class _PelanggaranScreenState extends State<PelanggaranScreen> {
                 ? groupedPelanggaran.entries.toList()
                 : groupedPelanggaran.entries.where((entry) {
                     final santri = entry.key;
-                    return santri.nama.toLowerCase().contains(searchQuery.toLowerCase());
+                    return santri.nama
+                        .toLowerCase()
+                        .contains(searchQuery.toLowerCase());
                   }).toList();
 
             return Column(
@@ -209,7 +211,8 @@ class _PelanggaranScreenState extends State<PelanggaranScreen> {
                                 final santri = entry.key;
                                 final pelanggaranSantri = entry.value;
 
-                                return _buildSantriCard(santri, pelanggaranSantri);
+                                return _buildSantriCard(
+                                    santri, pelanggaranSantri);
                               },
                             ),
                           ),
@@ -309,7 +312,8 @@ class _PelanggaranScreenState extends State<PelanggaranScreen> {
     );
   }
 
-  Widget _buildSummaryStats(Map<Santri, PelanggaranSummary> groupedPelanggaran) {
+  Widget _buildSummaryStats(
+      Map<Santri, PelanggaranSummary> groupedPelanggaran) {
     final totalSantri = groupedPelanggaran.length;
     final totalPelanggaran = groupedPelanggaran.values
         .fold(0, (sum, summary) => sum + summary.pelanggaran.length);
@@ -422,7 +426,8 @@ class _PelanggaranScreenState extends State<PelanggaranScreen> {
                 )
               : null,
           border: InputBorder.none,
-          contentPadding: const EdgeInsets.symmetric(horizontal: 16, vertical: 14),
+          contentPadding:
+              const EdgeInsets.symmetric(horizontal: 16, vertical: 14),
         ),
       ),
     );
@@ -548,7 +553,8 @@ class _PelanggaranScreenState extends State<PelanggaranScreen> {
                         borderRadius: BorderRadius.circular(15),
                         boxShadow: [
                           BoxShadow(
-                            color: _getPoinColor(pelanggaran.poin).withOpacity(0.3),
+                            color: _getPoinColor(pelanggaran.poin)
+                                .withOpacity(0.3),
                             blurRadius: 4,
                             offset: const Offset(0, 2),
                           ),
@@ -576,11 +582,15 @@ class _PelanggaranScreenState extends State<PelanggaranScreen> {
   IconData _getPelanggaranIcon(String jenis) {
     final jenisLower = jenis.toLowerCase();
     if (jenisLower.contains('terlambat')) return Icons.access_time;
-    if (jenisLower.contains('bolos') || jenisLower.contains('absen')) return Icons.person_off;
+    if (jenisLower.contains('bolos') || jenisLower.contains('absen'))
+      return Icons.person_off;
     if (jenisLower.contains('merokok')) return Icons.smoking_rooms;
-    if (jenisLower.contains('ribut') || jenisLower.contains('gaduh')) return Icons.volume_up;
-    if (jenisLower.contains('baju') || jenisLower.contains('seragam')) return Icons.checkroom;
-    if (jenisLower.contains('telepon') || jenisLower.contains('hp')) return Icons.phone_android;
+    if (jenisLower.contains('ribut') || jenisLower.contains('gaduh'))
+      return Icons.volume_up;
+    if (jenisLower.contains('baju') || jenisLower.contains('seragam'))
+      return Icons.checkroom;
+    if (jenisLower.contains('telepon') || jenisLower.contains('hp'))
+      return Icons.phone_android;
     return Icons.warning;
   }
 
@@ -595,8 +605,7 @@ class _PelanggaranScreenState extends State<PelanggaranScreen> {
     }
 
     return grouped.map((santri, pelanggaran) {
-      return MapEntry(santri,
-          PelanggaranSummary(pelanggaran: pelanggaran));
+      return MapEntry(santri, PelanggaranSummary(pelanggaran: pelanggaran));
     });
   }
 

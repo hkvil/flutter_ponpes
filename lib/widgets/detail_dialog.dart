@@ -1,5 +1,7 @@
 import 'package:flutter/material.dart';
+import 'package:provider/provider.dart';
 import '../../core/theme/app_colors.dart';
+import '../providers/auth_provider.dart';
 
 class DetailDialog extends StatelessWidget {
   final IconData icon;
@@ -22,6 +24,19 @@ class DetailDialog extends StatelessWidget {
     required String subtitle,
     required List<Widget> contentSections,
   }) {
+    final authProvider = Provider.of<AuthProvider>(context, listen: false);
+
+    if (!authProvider.isLoggedIn) {
+      ScaffoldMessenger.of(context).showSnackBar(
+        const SnackBar(
+          content: Text('Silakan login terlebih dahulu untuk melihat detail'),
+          backgroundColor: Colors.red,
+          duration: Duration(seconds: 3),
+        ),
+      );
+      return;
+    }
+
     showDialog(
       context: context,
       barrierColor: Colors.black.withOpacity(0.7),

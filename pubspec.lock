@@ -121,14 +121,6 @@ packages:
       url: "https://pub.dev"
     source: hosted
     version: "1.19.1"
-  country_pickers:
-    dependency: transitive
-    description:
-      name: country_pickers
-      sha256: b10f6618fa64fbba02ffc4ad1b84dc0ca071cc206e5376de1698bddd980b355a
-      url: "https://pub.dev"
-    source: hosted
-    version: "3.0.1"
   crypto:
     dependency: transitive
     description:
@@ -153,6 +145,22 @@ packages:
       url: "https://pub.dev"
     source: hosted
     version: "2.1.1"
+  dlibphonenumber:
+    dependency: transitive
+    description:
+      name: dlibphonenumber
+      sha256: ae6ee5e852008986e31b50cf87619033cefd9257b0e42596a6779bd2d2ed7688
+      url: "https://pub.dev"
+    source: hosted
+    version: "1.1.48"
+  equatable:
+    dependency: transitive
+    description:
+      name: equatable
+      sha256: "567c64b3cb4cf82397aac55f4f0cbd3ca20d77c6c03bedbc4ceaddc08904aef7"
+      url: "https://pub.dev"
+    source: hosted
+    version: "2.0.7"
   fake_async:
     dependency: transitive
     description:
@@ -206,14 +214,6 @@ packages:
       url: "https://pub.dev"
     source: hosted
     version: "6.0.0"
-  flutter_form_builder:
-    dependency: transitive
-    description:
-      name: flutter_form_builder
-      sha256: ec74389c4af2361a5e9fe9a36fcfe722698be3f681d713cb3ebe099ae15ed863
-      url: "https://pub.dev"
-    source: hosted
-    version: "10.2.0"
   flutter_highlight:
     dependency: transitive
     description:
@@ -230,19 +230,14 @@ packages:
       url: "https://pub.dev"
     source: hosted
     version: "0.14.4"
-  flutter_localizations:
-    dependency: transitive
-    description: flutter
-    source: sdk
-    version: "0.0.0"
   flutter_login:
     dependency: "direct main"
     description:
       name: flutter_login
-      sha256: "13351d09de94741e0920235132318445ff2122a6fa693eeb9f590f49aa5b80f9"
+      sha256: "73ab879fa40cc04778cf4b6342b43586818c7e7a90df23c59a4a1d4a1dd36091"
       url: "https://pub.dev"
     source: hosted
-    version: "6.0.0"
+    version: "5.1.0"
   flutter_secure_storage:
     dependency: "direct main"
     description:
@@ -309,14 +304,6 @@ packages:
       url: "https://pub.dev"
     source: hosted
     version: "10.10.0"
-  form_builder_phone_field:
-    dependency: transitive
-    description:
-      name: form_builder_phone_field
-      sha256: c89ea400428bb22707a8d76e433070bef4a74de15a085060e1d75f9e3b660cab
-      url: "https://pub.dev"
-    source: hosted
-    version: "3.0.0"
   highlight:
     dependency: transitive
     description:
@@ -357,6 +344,14 @@ packages:
       url: "https://pub.dev"
     source: hosted
     version: "0.20.2"
+  intl_phone_number_input:
+    dependency: transitive
+    description:
+      name: intl_phone_number_input
+      sha256: "9d4d7f174cfc3a85b238e0b465ec0e7232fc0815a779e5a58fbf118dee26dfa0"
+      url: "https://pub.dev"
+    source: hosted
+    version: "0.7.5"
   js:
     dependency: transitive
     description:
@@ -565,6 +560,14 @@ packages:
       url: "https://pub.dev"
     source: hosted
     version: "6.0.3"
+  protobuf:
+    dependency: transitive
+    description:
+      name: protobuf
+      sha256: de9c9eb2c33f8e933a42932fe1dc504800ca45ebc3d673e6ed7f39754ee4053e
+      url: "https://pub.dev"
+    source: hosted
+    version: "4.2.0"
   provider:
     dependency: "direct main"
     description:

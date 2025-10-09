@@ -4,6 +4,7 @@ import 'package:intl/intl.dart';
 import 'package:flutter_dotenv/flutter_dotenv.dart';
 import 'package:pesantren_app/screens/home_screen.dart';
 import 'package:pesantren_app/screens/splash_screen.dart';
+import 'package:pesantren_app/screens/maintenance_screen.dart';
 import 'package:provider/provider.dart';
 
 import 'core/theme/app_colors.dart';
@@ -21,6 +22,7 @@ import 'providers/prestasi_provider.dart';
 import 'providers/santri_provider.dart';
 import 'providers/slider_provider.dart';
 import 'providers/staff_provider.dart';
+import 'providers/maintenance_provider.dart';
 import 'providers/tahun_ajaran_provider.dart';
 
 /// Entry point of the Pesantren application.
@@ -39,14 +41,22 @@ Future<void> main() async {
   runApp(const PesantrenApp());
 }
 
-class PesantrenApp extends StatelessWidget {
+class PesantrenApp extends StatefulWidget {
   const PesantrenApp({super.key});
+
+  @override
+  State<PesantrenApp> createState() => _PesantrenAppState();
+}
+
+class _PesantrenAppState extends State<PesantrenApp> {
+  bool _hasCheckedMaintenance = false;
 
   @override
   Widget build(BuildContext context) {
     return MultiProvider(
       providers: [
         ChangeNotifierProvider(create: (_) => AuthProvider()),
+        ChangeNotifierProvider(create: (_) => MaintenanceProvider()),
         ChangeNotifierProvider(create: (_) => DonasiProvider()),
         ChangeNotifierProvider(create: (_) => SliderProvider()),
         ChangeNotifierProvider(create: (_) => AchievementProvider()),
@@ -61,27 +71,62 @@ class PesantrenApp extends StatelessWidget {
         ChangeNotifierProvider(create: (_) => InformasiAlIttifaqiahProvider()),
         ChangeNotifierProvider(create: (_) => TahunAjaranProvider()),
       ],
-      child: Consumer<AuthProvider>(
-        builder: (context, auth, _) {
-          return MaterialApp(
-            debugShowCheckedModeBanner: false,
-            title: 'Pesantren UI',
-            theme: ThemeData(
-              colorScheme:
-                  ColorScheme.fromSeed(seedColor: AppColors.primaryGreen),
-              useMaterial3: true,
-              scaffoldBackgroundColor: Colors.white,
-              appBarTheme: const AppBarTheme(
-                backgroundColor: AppColors.primaryGreen,
-                foregroundColor: Colors.white,
-                centerTitle: false,
+      child: Consumer<MaintenanceProvider>(
+        builder: (context, maintenance, _) {
+          // Check maintenance status only once on app start
+          if (!_hasCheckedMaintenance) {
+            _hasCheckedMaintenance = true;
+            WidgetsBinding.instance.addPostFrameCallback((_) {
+              maintenance.checkBackendStatus();
+            });
+          }
+
+          // Show maintenance screen if backend is down (BEFORE auth check)
+          if (maintenance.isInMaintenance) {
+            return MaterialApp(
+              debugShowCheckedModeBanner: false,
+              title: 'Pesantren UI',
+              theme: ThemeData(
+                colorScheme:
+                    ColorScheme.fromSeed(seedColor: AppColors.primaryGreen),
+                useMaterial3: true,
+                scaffoldBackgroundColor: Colors.white,
+                appBarTheme: const AppBarTheme(
+                  backgroundColor: AppColors.primaryGreen,
+                  foregroundColor: Colors.white,
+                  centerTitle: false,
+                ),
               ),
-            ),
-            home: auth.isInitialized
-                ? (auth.isLoggedIn ? const HomeScreen() : const SplashScreen())
-                : const Scaffold(
-                    body: Center(child: CircularProgressIndicator())),
-            onGenerateRoute: AppRouter.onGenerateRoute,
+              home: const MaintenanceScreen(),
+            );
+          }
+
+          // If not in maintenance, proceed with normal auth flow
+          return Consumer<AuthProvider>(
+            builder: (context, auth, _) {
+              return MaterialApp(
+                debugShowCheckedModeBanner: false,
+                title: 'Pesantren UI',
+                theme: ThemeData(
+                  colorScheme:
+                      ColorScheme.fromSeed(seedColor: AppColors.primaryGreen),
+                  useMaterial3: true,
+                  scaffoldBackgroundColor: Colors.white,
+                  appBarTheme: const AppBarTheme(
+                    backgroundColor: AppColors.primaryGreen,
+                    foregroundColor: Colors.white,
+                    centerTitle: false,
+                  ),
+                ),
+                home: auth.isInitialized
+                    ? (auth.isLoggedIn
+                        ? const HomeScreen()
+                        : const SplashScreen())
+                    : const Scaffold(
+                        body: Center(child: CircularProgressIndicator())),
+                onGenerateRoute: AppRouter.onGenerateRoute,
+              );
+            },
           );
         },
       ),

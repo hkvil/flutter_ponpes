@@ -7,21 +7,23 @@ import '../core/utils/menu_slug_mapper.dart';
 import '../models/models.dart';
 import '../providers/prestasi_provider.dart';
 
-class PrestasiSantriScreen extends StatefulWidget {
+class PrestasiScreen extends StatefulWidget {
   final String title;
   final String lembagaName;
+  final bool showOnlyStaff;
 
-  const PrestasiSantriScreen({
+  const PrestasiScreen({
     super.key,
     required this.title,
     required this.lembagaName,
+    this.showOnlyStaff = false,
   });
 
   @override
-  State<PrestasiSantriScreen> createState() => _PrestasiSantriScreenState();
+  State<PrestasiScreen> createState() => _PrestasiScreenState();
 }
 
-class _PrestasiSantriScreenState extends State<PrestasiSantriScreen> {
+class _PrestasiScreenState extends State<PrestasiScreen> {
   bool _isLoading = true;
   String? _errorMessage;
   List<Prestasi> _prestasiList = [];
@@ -41,6 +43,8 @@ class _PrestasiSantriScreenState extends State<PrestasiSantriScreen> {
   @override
   void initState() {
     super.initState();
+    // Set default type based on showOnlyStaff parameter
+    selectedType = widget.showOnlyStaff ? 'staff' : 'santri';
     // Defer the data fetching to after the build is complete
     WidgetsBinding.instance.addPostFrameCallback((_) {
       _fetchPrestasiData();
@@ -351,41 +355,43 @@ class _PrestasiSantriScreenState extends State<PrestasiSantriScreen> {
                       ),
                     ),
                     const SizedBox(height: 5),
-                    Container(
-                      padding: const EdgeInsets.symmetric(horizontal: 12),
-                      decoration: BoxDecoration(
-                        color: Colors.grey.shade100,
-                        borderRadius: BorderRadius.circular(10),
-                        border: Border.all(color: Colors.grey.shade300),
-                      ),
-                      child: DropdownButtonHideUnderline(
-                        child: DropdownButton<String>(
-                          value: selectedType,
-                          isExpanded: true,
-                          items: const [
-                            DropdownMenuItem<String>(
-                              value: 'santri',
-                              child: Text('Santri'),
-                            ),
-                            DropdownMenuItem<String>(
-                              value: 'staff',
-                              child: Text('Staff'),
-                            ),
-                          ],
-                          onChanged: (value) {
-                            if (value != null) {
-                              setState(() {
-                                selectedType = value;
-                              });
-                              _fetchPrestasiData(
-                                  tahun: selectedYear,
-                                  tingkat: selectedTingkat,
-                                  type: value);
-                            }
-                          },
+                    if (!widget.showOnlyStaff) ...[
+                      Container(
+                        padding: const EdgeInsets.symmetric(horizontal: 12),
+                        decoration: BoxDecoration(
+                          color: Colors.grey.shade100,
+                          borderRadius: BorderRadius.circular(10),
+                          border: Border.all(color: Colors.grey.shade300),
+                        ),
+                        child: DropdownButtonHideUnderline(
+                          child: DropdownButton<String>(
+                            value: selectedType,
+                            isExpanded: true,
+                            items: const [
+                              DropdownMenuItem<String>(
+                                value: 'santri',
+                                child: Text('Santri'),
+                              ),
+                              DropdownMenuItem<String>(
+                                value: 'staff',
+                                child: Text('Staff'),
+                              ),
+                            ],
+                            onChanged: (value) {
+                              if (value != null) {
+                                setState(() {
+                                  selectedType = value;
+                                });
+                                _fetchPrestasiData(
+                                    tahun: selectedYear,
+                                    tingkat: selectedTingkat,
+                                    type: value);
+                              }
+                            },
+                          ),
                         ),
                       ),
-                    ),
+                    ],
                   ],
                 ),
               ),

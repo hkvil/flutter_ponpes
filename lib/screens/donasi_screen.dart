@@ -6,6 +6,7 @@ import 'package:provider/provider.dart';
 
 import '../models/donasi_model.dart';
 import '../providers/donasi_provider.dart';
+import 'donasi_detail_screen.dart';
 
 class DonationScreen extends StatefulWidget {
   const DonationScreen({super.key});
@@ -134,7 +135,7 @@ class _DonationScreenState extends State<DonationScreen> {
                           ),
                           const SizedBox(height: 8),
                           Text(
-                            errorMessage!,
+                            errorMessage,
                             style: TextStyle(
                               fontSize: 12,
                               color: Colors.grey[500],
@@ -190,154 +191,162 @@ class _DonationScreenState extends State<DonationScreen> {
                     itemBuilder: (context, index) {
                       final donation = donations[index];
 
-                      return Container(
-                        margin: const EdgeInsets.only(bottom: 16),
-                        height: 80,
-                        decoration: BoxDecoration(
-                          color: Colors.white,
-                          borderRadius: BorderRadius.circular(12),
-                          boxShadow: [
-                            BoxShadow(
-                              color: Colors.grey.withOpacity(0.1),
-                              spreadRadius: 1,
-                              blurRadius: 6,
-                              offset: const Offset(0, 2),
+                      return GestureDetector(
+                        onTap: () {
+                          Navigator.push(
+                            context,
+                            MaterialPageRoute(
+                              builder: (context) => DonasiDetailScreen(donasi: donation),
                             ),
-                          ],
-                        ),
-                        child: Row(
-                          children: [
-                            // Thumbnail image
-                            Container(
-                              width: 120,
-                              height: double.infinity,
-                              child: ClipRRect(
-                                borderRadius: const BorderRadius.only(
-                                  topLeft: Radius.circular(12),
-                                  bottomLeft: Radius.circular(12),
-                                ),
-                                child: Image.network(
-                                  donation.getImageUrl(
-                                      dotenv.env['API_HOST'] ??
-                                          'http://localhost:1337',
-                                      size: 'small'),
-                                  fit: BoxFit.cover,
-                                  errorBuilder: (context, error, stackTrace) {
-                                    return Container(
-                                      color: Colors.green.shade100,
-                                      child: Icon(
-                                        Icons.mosque,
-                                        color: Colors.green,
-                                        size: 30,
-                                      ),
-                                    );
-                                  },
+                          );
+                        },
+                        child: Container(
+                          margin: const EdgeInsets.only(bottom: 16),
+                          height: 80,
+                          decoration: BoxDecoration(
+                            color: Colors.white,
+                            borderRadius: BorderRadius.circular(12),
+                            boxShadow: [
+                              BoxShadow(
+                                color: Colors.grey.withOpacity(0.1),
+                                spreadRadius: 1,
+                                blurRadius: 6,
+                                offset: const Offset(0, 2),
+                              ),
+                            ],
+                          ),
+                          child: Row(
+                            children: [
+                              // Thumbnail image
+                              Container(
+                                width: 120,
+                                height: double.infinity,
+                                child: ClipRRect(
+                                  borderRadius: const BorderRadius.only(
+                                    topLeft: Radius.circular(12),
+                                    bottomLeft: Radius.circular(12),
+                                  ),
+                                  child: Image.network(
+                                    donation.getImageUrl(
+                                        dotenv.env['API_HOST'] ??
+                                            'http://localhost:1337',
+                                        size: 'small'),
+                                    fit: BoxFit.cover,
+                                    errorBuilder: (context, error, stackTrace) {
+                                      return Container(
+                                        color: Colors.green.shade100,
+                                        child: Icon(
+                                          Icons.mosque,
+                                          color: Colors.green,
+                                          size: 30,
+                                        ),
+                                      );
+                                    },
+                                  ),
                                 ),
                               ),
-                            ),
 
-                            // Content
-                            Expanded(
-                              child: Padding(
-                                padding: const EdgeInsets.all(8),
-                                child: Column(
-                                  crossAxisAlignment: CrossAxisAlignment.start,
-                                  children: [
-                                    // Title
-                                    Text(
-                                      donation.title,
-                                      style: const TextStyle(
-                                        fontSize: 12,
-                                        fontWeight: FontWeight.bold,
-                                        color: Colors.black87,
+                              // Content
+                              Expanded(
+                                child: Padding(
+                                  padding: const EdgeInsets.all(8),
+                                  child: Column(
+                                    crossAxisAlignment: CrossAxisAlignment.start,
+                                    children: [
+                                      // Title
+                                      Text(
+                                        donation.title,
+                                        style: const TextStyle(
+                                          fontSize: 12,
+                                          fontWeight: FontWeight.bold,
+                                          color: Colors.black87,
+                                        ),
+                                        maxLines: 1,
+                                        overflow: TextOverflow.ellipsis,
                                       ),
-                                      maxLines: 1,
-                                      overflow: TextOverflow.ellipsis,
-                                    ),
 
-                                    const SizedBox(height: 3),
+                                      const SizedBox(height: 3),
 
-                                    // Progress bar
-                                    ClipRRect(
-                                      borderRadius: BorderRadius.circular(3),
-                                      child: LinearProgressIndicator(
-                                        value: donation.progress,
-                                        minHeight: 3,
-                                        backgroundColor: Colors.grey.shade200,
-                                        valueColor:
-                                            AlwaysStoppedAnimation<Color>(
-                                          Colors.green,
+                                      // Progress bar
+                                      ClipRRect(
+                                        borderRadius: BorderRadius.circular(3),
+                                        child: LinearProgressIndicator(
+                                          value: donation.progress,
+                                          minHeight: 3,
+                                          backgroundColor: Colors.grey.shade200,
+                                          valueColor:
+                                              AlwaysStoppedAnimation<Color>(
+                                            Colors.green,
+                                          ),
                                         ),
                                       ),
-                                    ),
 
-                                    const Spacer(),
+                                      const Spacer(),
 
-                                    // Bottom info
-                                    Row(
-                                      children: [
-                                        Expanded(
-                                          child: Column(
+                                      // Bottom info
+                                      Row(
+                                        children: [
+                                          Expanded(
+                                            child: Column(
+                                              crossAxisAlignment:
+                                                  CrossAxisAlignment.start,
+                                              mainAxisSize: MainAxisSize.min,
+                                              children: [
+                                                Text(
+                                                  "Terkumpul",
+                                                  style: TextStyle(
+                                                    fontSize: 8,
+                                                    color: Colors.grey.shade600,
+                                                  ),
+                                                ),
+                                                Text(
+                                                  donation
+                                                      .getFormattedTerkumpul(),
+                                                  style: const TextStyle(
+                                                    fontSize: 9,
+                                                    fontWeight: FontWeight.bold,
+                                                    color: Colors.black87,
+                                                  ),
+                                                  maxLines: 1,
+                                                  overflow: TextOverflow.ellipsis,
+                                                ),
+                                              ],
+                                            ),
+                                          ),
+                                          Column(
                                             crossAxisAlignment:
-                                                CrossAxisAlignment.start,
+                                                CrossAxisAlignment.end,
                                             mainAxisSize: MainAxisSize.min,
                                             children: [
                                               Text(
-                                                "Terkumpul",
+                                                "Sisa hari",
                                                 style: TextStyle(
                                                   fontSize: 8,
                                                   color: Colors.grey.shade600,
                                                 ),
                                               ),
                                               Text(
-                                                donation
-                                                    .getFormattedTerkumpul(),
+                                                "${donation.sisaHari}",
                                                 style: const TextStyle(
                                                   fontSize: 9,
                                                   fontWeight: FontWeight.bold,
                                                   color: Colors.black87,
                                                 ),
-                                                maxLines: 1,
-                                                overflow: TextOverflow.ellipsis,
                                               ),
                                             ],
                                           ),
-                                        ),
-                                        Column(
-                                          crossAxisAlignment:
-                                              CrossAxisAlignment.end,
-                                          mainAxisSize: MainAxisSize.min,
-                                          children: [
-                                            Text(
-                                              "Sisa hari",
-                                              style: TextStyle(
-                                                fontSize: 8,
-                                                color: Colors.grey.shade600,
-                                              ),
-                                            ),
-                                            Text(
-                                              "${donation.sisaHari}",
-                                              style: const TextStyle(
-                                                fontSize: 9,
-                                                fontWeight: FontWeight.bold,
-                                                color: Colors.black87,
-                                              ),
-                                            ),
-                                          ],
-                                        ),
-                                      ],
-                                    ),
-                                  ],
+                                        ],
+                                      ),
+                                    ],
+                                  ),
                                 ),
                               ),
-                            ),
-                          ],
+                            ],
+                          ),
                         ),
                       );
                     },
-                  ),
-
-                const SizedBox(height: 16),
+                  ),                const SizedBox(height: 16),
               ],
             ),
           ),

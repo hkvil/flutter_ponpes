@@ -19,7 +19,8 @@ class DonasiRepository extends BaseRepository {
         queryParameters: {
           'pagination[page]': page.toString(),
           'pagination[pageSize]': pageSize.toString(),
-          'populate': 'media',
+          'populate[media]': true,
+          'populate[transaksi]': true,
         },
         options: buildPublicOptions(), // Public endpoint - no auth required
       );
@@ -38,7 +39,8 @@ class DonasiRepository extends BaseRepository {
       final response = await dio.get(
         '$_endpoint/$id',
         queryParameters: {
-          'populate': 'media',
+          'populate[media]': true,
+          'populate[transaksi]': true,
         },
         options: buildPublicOptions(), // Public endpoint - no auth required
       );

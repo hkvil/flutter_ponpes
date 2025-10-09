@@ -1,5 +1,57 @@
 import 'media_model.dart';
 
+class TransaksiModel {
+  final int id;
+  final String name;
+  final int amount;
+  final String date;
+
+  TransaksiModel({
+    required this.id,
+    required this.name,
+    required this.amount,
+    required this.date,
+  });
+
+  factory TransaksiModel.fromJson(Map<String, dynamic> json) {
+    return TransaksiModel(
+      id: json['id'] ?? 0,
+      name: json['name'] ?? '',
+      amount: int.tryParse(json['amount'].toString()) ?? 0,
+      date: json['date'] ?? '',
+    );
+  }
+
+  Map<String, dynamic> toJson() {
+    return {
+      'id': id,
+      'name': name,
+      'amount': amount.toString(),
+      'date': date,
+    };
+  }
+
+  String getFormattedAmount() {
+    return _formatCurrency(amount);
+  }
+
+  String _formatCurrency(int amount) {
+    String str = amount.toString();
+    String result = '';
+    int counter = 0;
+
+    for (int i = str.length - 1; i >= 0; i--) {
+      counter++;
+      result = str[i] + result;
+      if (counter % 3 == 0 && i != 0) {
+        result = '.' + result;
+      }
+    }
+
+    return 'Rp. $result';
+  }
+}
+
 class DonasiModel {
   final int id;
   final String documentId;
@@ -11,6 +63,7 @@ class DonasiModel {
   final int target;
   final int terkumpul;
   final MediaModel? media;
+  final List<TransaksiModel> transaksi;
 
   DonasiModel({
     required this.id,
@@ -23,9 +76,25 @@ class DonasiModel {
     required this.target,
     required this.terkumpul,
     this.media,
+    this.transaksi = const [],
   });
 
   factory DonasiModel.fromJson(Map<String, dynamic> json) {
+    // Calculate terkumpul from transaksi if not provided
+    int calculatedTerkumpul = int.tryParse(json['terkumpul'].toString()) ?? 0;
+    List<TransaksiModel> transaksiList = [];
+
+    if (json['transaksi'] != null && json['transaksi'] is List) {
+      transaksiList = (json['transaksi'] as List)
+          .map((item) => TransaksiModel.fromJson(item))
+          .toList();
+
+      // If terkumpul is null, calculate from transaksi
+      if (json['terkumpul'] == null) {
+        calculatedTerkumpul = transaksiList.fold(0, (sum, transaksi) => sum + transaksi.amount);
+      }
+    }
+
     return DonasiModel(
       id: json['id'] ?? 0,
       documentId: json['documentId'] ?? '',
@@ -35,8 +104,9 @@ class DonasiModel {
       updatedAt: json['updatedAt'] ?? '',
       publishedAt: json['publishedAt'] ?? '',
       target: int.tryParse(json['target'].toString()) ?? 0,
-      terkumpul: int.tryParse(json['terkumpul'].toString()) ?? 0,
+      terkumpul: calculatedTerkumpul,
       media: json['media'] != null ? MediaModel.fromJson(json['media']) : null,
+      transaksi: transaksiList,
     );
   }
 
@@ -52,6 +122,7 @@ class DonasiModel {
       'target': target.toString(),
       'terkumpul': terkumpul.toString(),
       'media': media?.toJson(),
+      'transaksi': transaksi.map((t) => t.toJson()).toList(),
     };
   }
 

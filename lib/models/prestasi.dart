@@ -11,6 +11,7 @@ class Prestasi {
   final DateTime updatedAt;
   final DateTime publishedAt;
   final PrestasiSantriData? santri;
+  final PrestasiStaffData? staff;
 
   Prestasi({
     required this.id,
@@ -25,6 +26,7 @@ class Prestasi {
     required this.updatedAt,
     required this.publishedAt,
     this.santri,
+    this.staff,
   });
 
   factory Prestasi.fromJson(Map<String, dynamic> json) {
@@ -43,6 +45,9 @@ class Prestasi {
       santri: json['santri'] != null
           ? PrestasiSantriData.fromJson(json['santri'] as Map<String, dynamic>)
           : null,
+      staff: json['staff'] != null
+          ? PrestasiStaffData.fromJson(json['staff'] as Map<String, dynamic>)
+          : null,
     );
   }
 
@@ -60,12 +65,13 @@ class Prestasi {
       'updatedAt': updatedAt.toIso8601String(),
       'publishedAt': publishedAt.toIso8601String(),
       if (santri != null) 'santri': santri!.toJson(),
+      if (staff != null) 'staff': staff!.toJson(),
     };
   }
 
   // Helper getters
-  String get namaSantri => santri?.nama ?? '-';
-  String get kelasSantri => santri?.kelasAktif ?? '-';
+  String get namaSantri => santri?.nama ?? staff?.nama ?? '-';
+  String get kelasSantri => santri?.kelasAktif ?? staff?.jabatan ?? '-';
 
   bool get isJuara1 =>
       peringkat.contains('1') || peringkat.toLowerCase().contains('juara 1');
@@ -127,6 +133,42 @@ class PrestasiSantriData {
       'gender': gender,
       'kelasAktif': kelasAktif,
       'tahunAjaranAktif': tahunAjaranAktif,
+    };
+  }
+}
+
+class PrestasiStaffData {
+  final int id;
+  final String documentId;
+  final String nama;
+  final String? nip;
+  final String? jabatan;
+
+  PrestasiStaffData({
+    required this.id,
+    required this.documentId,
+    required this.nama,
+    this.nip,
+    this.jabatan,
+  });
+
+  factory PrestasiStaffData.fromJson(Map<String, dynamic> json) {
+    return PrestasiStaffData(
+      id: json['id'] as int,
+      documentId: json['documentId'] as String,
+      nama: json['nama'] as String,
+      nip: json['nip'] as String?,
+      jabatan: json['keteranganTugas'] as String?,
+    );
+  }
+
+  Map<String, dynamic> toJson() {
+    return {
+      'id': id,
+      'documentId': documentId,
+      'nama': nama,
+      'nip': nip,
+      'keteranganTugas': jabatan,
     };
   }
 }

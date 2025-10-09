@@ -28,8 +28,15 @@ class _PrestasiSantriScreenState extends State<PrestasiSantriScreen> {
 
   String? selectedYear;
   String? selectedTingkat;
+  String selectedType = 'santri'; // 'santri' or 'staff'
   String searchQuery = '';
   final TextEditingController _searchController = TextEditingController();
+
+  String get _pageTitle =>
+      selectedType == 'staff' ? 'Prestasi Staff' : 'Prestasi Santri';
+  String get _pageSubtitle => selectedType == 'staff'
+      ? 'Pencapaian dan penghargaan staff'
+      : 'Pencapaian dan penghargaan santri';
 
   @override
   void initState() {
@@ -40,7 +47,9 @@ class _PrestasiSantriScreenState extends State<PrestasiSantriScreen> {
     });
   }
 
-  Future<void> _fetchPrestasiData({String? tahun, String? tingkat}) async {
+  Future<void> _fetchPrestasiData(
+      {String? tahun, String? tingkat, String? type}) async {
+    final prestasiType = type ?? selectedType;
     setState(() {
       _isLoading = true;
       _errorMessage = null;
@@ -53,12 +62,14 @@ class _PrestasiSantriScreenState extends State<PrestasiSantriScreen> {
         slug,
         tahun: tahun,
         tingkat: tingkat,
+        type: prestasiType,
         forceRefresh: true,
       );
       final state = provider.prestasiState(
         slug,
         tahun: tahun,
         tingkat: tingkat,
+        type: prestasiType,
       );
 
       setState(() {
@@ -240,21 +251,21 @@ class _PrestasiSantriScreenState extends State<PrestasiSantriScreen> {
                   ),
                 ),
                 const SizedBox(width: 15),
-                const Expanded(
+                Expanded(
                   child: Column(
                     crossAxisAlignment: CrossAxisAlignment.start,
                     children: [
                       Text(
-                        'Prestasi Santri',
+                        _pageTitle,
                         style: TextStyle(
                           fontSize: 24,
                           fontWeight: FontWeight.bold,
                           color: Colors.white,
                         ),
                       ),
-                      SizedBox(height: 5),
+                      const SizedBox(height: 5),
                       Text(
-                        'Pencapaian dan penghargaan santri',
+                        _pageSubtitle,
                         style: TextStyle(
                           fontSize: 16,
                           color: Colors.white70,
@@ -293,8 +304,10 @@ class _PrestasiSantriScreenState extends State<PrestasiSantriScreen> {
                         searchQuery = value;
                       });
                     },
-                    decoration: const InputDecoration(
-                      hintText: 'Cari nama lomba, santri, atau bidang...',
+                    decoration: InputDecoration(
+                      hintText: selectedType == 'staff'
+                          ? 'Cari nama lomba, staff, atau bidang...'
+                          : 'Cari nama lomba, santri, atau bidang...',
                       prefixIcon: Icon(Icons.search, color: Colors.grey),
                       border: InputBorder.none,
                       contentPadding: EdgeInsets.all(15),
@@ -317,6 +330,63 @@ class _PrestasiSantriScreenState extends State<PrestasiSantriScreen> {
                       ? Colors.blue.shade600
                       : Colors.grey.shade600,
                   size: 24,
+                ),
+              ),
+            ],
+          ),
+          const SizedBox(height: 15),
+          // Type filter (Santri/Staff)
+          Row(
+            children: [
+              Expanded(
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    const Text(
+                      'Tipe:',
+                      style: TextStyle(
+                        fontSize: 14,
+                        fontWeight: FontWeight.w500,
+                        color: Colors.grey,
+                      ),
+                    ),
+                    const SizedBox(height: 5),
+                    Container(
+                      padding: const EdgeInsets.symmetric(horizontal: 12),
+                      decoration: BoxDecoration(
+                        color: Colors.grey.shade100,
+                        borderRadius: BorderRadius.circular(10),
+                        border: Border.all(color: Colors.grey.shade300),
+                      ),
+                      child: DropdownButtonHideUnderline(
+                        child: DropdownButton<String>(
+                          value: selectedType,
+                          isExpanded: true,
+                          items: const [
+                            DropdownMenuItem<String>(
+                              value: 'santri',
+                              child: Text('Santri'),
+                            ),
+                            DropdownMenuItem<String>(
+                              value: 'staff',
+                              child: Text('Staff'),
+                            ),
+                          ],
+                          onChanged: (value) {
+                            if (value != null) {
+                              setState(() {
+                                selectedType = value;
+                              });
+                              _fetchPrestasiData(
+                                  tahun: selectedYear,
+                                  tingkat: selectedTingkat,
+                                  type: value);
+                            }
+                          },
+                        ),
+                      ),
+                    ),
+                  ],
                 ),
               ),
             ],
@@ -554,7 +624,9 @@ class _PrestasiSantriScreenState extends State<PrestasiSantriScreen> {
                 ? _buildEmptyState()
                 : RefreshIndicator(
                     onRefresh: () => _fetchPrestasiData(
-                        tahun: selectedYear, tingkat: selectedTingkat),
+                        tahun: selectedYear,
+                        tingkat: selectedTingkat,
+                        type: selectedType),
                     child: ListView.builder(
                       itemCount: filteredPrestasi.length,
                       itemBuilder: (context, index) {
@@ -735,8 +807,10 @@ class _PrestasiSantriScreenState extends State<PrestasiSantriScreen> {
           _buildDetailRow('Tingkat', tingkat),
           _buildDetailRow('Peringkat', peringkat),
           _buildDetailRow('Tahun', tahun),
-          _buildDetailRow('Nama Santri', namaSantri),
-          _buildDetailRow('Kelas', kelas),
+          _buildDetailRow(
+              selectedType == 'staff' ? 'Nama Staff' : 'Nama Santri',
+              namaSantri),
+          _buildDetailRow(selectedType == 'staff' ? 'Jabatan' : 'Kelas', kelas),
         ],
       ),
     );

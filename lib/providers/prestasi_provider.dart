@@ -15,8 +15,9 @@ class PrestasiProvider extends ChangeNotifier {
     String lembagaSlug, {
     String? tahun,
     String? tingkat,
+    String? type,
   }) {
-    final key = _buildKey(lembagaSlug, tahun, tingkat);
+    final key = _buildKey(lembagaSlug, tahun, tingkat, type);
     return _prestasiStates.putIfAbsent(
       key,
       () => AsyncValue<List<Prestasi>>(data: const []),
@@ -27,12 +28,14 @@ class PrestasiProvider extends ChangeNotifier {
     String lembagaSlug, {
     String? tahun,
     String? tingkat,
+    String? type,
     bool forceRefresh = false,
   }) async {
     final state = prestasiState(
       lembagaSlug,
       tahun: tahun,
       tingkat: tingkat,
+      type: type,
     );
 
     if (state.isLoading) return state.data ?? const [];
@@ -48,6 +51,7 @@ class PrestasiProvider extends ChangeNotifier {
         lembagaSlug,
         tahun: tahun,
         tingkat: tingkat,
+        type: type,
       );
       state.setData(List.unmodifiable(result));
       return result;
@@ -59,9 +63,10 @@ class PrestasiProvider extends ChangeNotifier {
     }
   }
 
-  String _buildKey(String slug, String? tahun, String? tingkat) {
+  String _buildKey(String slug, String? tahun, String? tingkat, String? type) {
     final tahunKey = tahun ?? 'all';
     final tingkatKey = tingkat ?? 'all';
-    return '$slug|$tahunKey|$tingkatKey';
+    final typeKey = type ?? 'santri';
+    return '$slug|$tahunKey|$tingkatKey|$typeKey';
   }
 }

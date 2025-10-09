@@ -12,12 +12,17 @@ class PrestasiRepository extends BaseRepository {
     int? pageSize,
     String? tahun,
     String? tingkat,
+    String? type,
   }) {
+    final prestasiType = type ?? 'santri';
+    final populateSantri = prestasiType == 'santri';
+    final populateStaff = prestasiType == 'staff';
     return _fetchPrestasi(
-      'lembaga:$lembagaSlug',
+      'lembaga:$lembagaSlug:$prestasiType',
       {
-        'populate[santri]': true,
-        'filters[santri][lembaga][slug][\$eq]': lembagaSlug,
+        'populate[santri]': populateSantri,
+        'populate[staff]': populateStaff,
+        'filters[$prestasiType][lembaga][slug][\$eq]': lembagaSlug,
         if (tahun != null) 'filters[tahun][\$eq]': tahun,
         if (tingkat != null) 'filters[tingkat][\$eq]': tingkat,
         'sort': 'tahun:desc',

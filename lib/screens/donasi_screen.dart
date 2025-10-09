@@ -16,21 +16,25 @@ class DonationScreen extends StatefulWidget {
 }
 
 class _DonationScreenState extends State<DonationScreen> {
-  // Dummy slider data - can be replaced with API data later
-  final List<Map<String, String>> sliderImages = [
-    {
-      "image":
-          "${dotenv.env['API_HOST'] ?? 'http://localhost:1337'}/uploads/medium_default_image_c7eeb5b3b0.png",
-    },
-    {
-      "image":
-          "${dotenv.env['API_HOST'] ?? 'http://localhost:1337'}/uploads/medium_beautiful_picture_69d0581d2e.jpeg",
-    },
-    {
-      "image":
-          "${dotenv.env['API_HOST'] ?? 'http://localhost:1337'}/uploads/medium_coffee_art_b88bab6c4b.jpeg",
-    },
-  ];
+  // Get slider images from donations that have media
+  List<Map<String, dynamic>> get sliderImages {
+    final donasiProvider = context.watch<DonasiProvider>();
+    final donations = donasiProvider.donations;
+
+    // Take first 5 donations that have media
+    final donationsWithMedia =
+        donations.where((donation) => donation.media != null).take(5).toList();
+
+    return donationsWithMedia.map((donation) {
+      return {
+        "image": donation.getImageUrl(
+            dotenv.env['API_HOST'] ?? 'http://localhost:1337',
+            size: 'medium'),
+        "title": donation.title,
+        "donasi": donation,
+      };
+    }).toList();
+  }
 
   @override
   void initState() {
@@ -72,36 +76,74 @@ class _DonationScreenState extends State<DonationScreen> {
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
-                // Carousel Slider
-                Container(
-                  margin: const EdgeInsets.only(top: 16, bottom: 24),
-                  child: CarouselSlider(
-                    options: CarouselOptions(
-                      height: 250,
-                      autoPlay: true,
-                      autoPlayInterval: const Duration(seconds: 3),
-                      enlargeCenterPage: true,
-                      viewportFraction: 0.9,
-                    ),
-                    items: sliderImages.map((item) {
-                      return Builder(
-                        builder: (BuildContext context) {
-                          return Container(
-                            width: MediaQuery.of(context).size.width,
-                            margin: const EdgeInsets.symmetric(horizontal: 5.0),
-                            decoration: BoxDecoration(
-                              borderRadius: BorderRadius.circular(12),
-                              image: DecorationImage(
-                                image: NetworkImage(item["image"]!),
-                                fit: BoxFit.cover,
+                // Carousel Slider - only show if we have donations with media and not loading
+                if (!isLoading && sliderImages.isNotEmpty)
+                  Container(
+                    margin: const EdgeInsets.only(top: 16, bottom: 24),
+                    child: CarouselSlider(
+                      options: CarouselOptions(
+                        height: 250,
+                        autoPlay: true,
+                        autoPlayInterval: const Duration(seconds: 4),
+                        enlargeCenterPage: true,
+                        viewportFraction: 0.9,
+                      ),
+                      items: sliderImages.map((item) {
+                        return Builder(
+                          builder: (BuildContext context) {
+                            return GestureDetector(
+                              onTap: () {
+                                final donasi = item["donasi"] as DonasiModel;
+                                Navigator.push(
+                                  context,
+                                  MaterialPageRoute(
+                                    builder: (context) =>
+                                        DonasiDetailScreen(donasi: donasi),
+                                  ),
+                                );
+                              },
+                              child: Container(
+                                width: MediaQuery.of(context).size.width,
+                                margin:
+                                    const EdgeInsets.symmetric(horizontal: 5.0),
+                                decoration: BoxDecoration(
+                                  borderRadius: BorderRadius.circular(12),
+                                  image: DecorationImage(
+                                    image: NetworkImage(item["image"]!),
+                                    fit: BoxFit.cover,
+                                  ),
+                                ),
+                                child: Container(
+                                  decoration: BoxDecoration(
+                                    borderRadius: BorderRadius.circular(12),
+                                    gradient: LinearGradient(
+                                      begin: Alignment.topCenter,
+                                      end: Alignment.bottomCenter,
+                                      colors: [
+                                        Colors.transparent,
+                                        Colors.black.withOpacity(0.6),
+                                      ],
+                                    ),
+                                  ),
+                                  child: Padding(
+                                    padding: const EdgeInsets.all(16),
+                                    child: Column(
+                                      mainAxisAlignment: MainAxisAlignment.end,
+                                      crossAxisAlignment:
+                                          CrossAxisAlignment.start,
+                                      children: [
+                                        // Title and "Lihat Detail" removed as requested
+                                      ],
+                                    ),
+                                  ),
+                                ),
                               ),
-                            ),
-                          );
-                        },
-                      );
-                    }).toList(),
+                            );
+                          },
+                        );
+                      }).toList(),
+                    ),
                   ),
-                ),
 
                 // Loading, Error, or Data
                 if (isLoading)

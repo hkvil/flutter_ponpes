@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:pesantren_app/models/lembaga_model.dart';
+import 'package:pesantren_app/widgets/responsive_wrapper.dart';
 import 'package:url_launcher/url_launcher.dart';
 import 'package:pesantren_app/screens/content_screen.dart';
 
@@ -37,30 +38,32 @@ class _InformasiScreenState extends State<InformasiScreen>
 
   @override
   Widget build(BuildContext context) {
-    return Scaffold(
-      backgroundColor: Colors.grey.shade50,
-      appBar: AppBar(
-        title: Text(widget.title),
-        backgroundColor: Colors.orange,
-        foregroundColor: Colors.white,
-        elevation: 0,
-        bottom: TabBar(
+    return ResponsiveWrapper(
+      child: Scaffold(
+        backgroundColor: Colors.grey.shade50,
+        appBar: AppBar(
+          title: Text(widget.title),
+          backgroundColor: Colors.orange,
+          foregroundColor: Colors.white,
+          elevation: 0,
+          bottom: TabBar(
+            controller: _tabController,
+            indicatorColor: Colors.white,
+            labelColor: Colors.white,
+            unselectedLabelColor: Colors.white.withOpacity(0.7),
+            tabs: const [
+              Tab(text: 'Berita'),
+              Tab(text: 'Dokumen'),
+            ],
+          ),
+        ),
+        body: TabBarView(
           controller: _tabController,
-          indicatorColor: Colors.white,
-          labelColor: Colors.white,
-          unselectedLabelColor: Colors.white.withOpacity(0.7),
-          tabs: const [
-            Tab(text: 'Berita'),
-            Tab(text: 'Dokumen'),
+          children: [
+            BeritaTab(lembaga: widget.lembaga),
+            DokumenTab(lembaga: widget.lembaga),
           ],
         ),
-      ),
-      body: TabBarView(
-        controller: _tabController,
-        children: [
-          BeritaTab(lembaga: widget.lembaga),
-          DokumenTab(lembaga: widget.lembaga),
-        ],
       ),
     );
   }

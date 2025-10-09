@@ -196,7 +196,8 @@ class _DonationScreenState extends State<DonationScreen> {
                           Navigator.push(
                             context,
                             MaterialPageRoute(
-                              builder: (context) => DonasiDetailScreen(donasi: donation),
+                              builder: (context) =>
+                                  DonasiDetailScreen(donasi: donation),
                             ),
                           );
                         },
@@ -251,7 +252,8 @@ class _DonationScreenState extends State<DonationScreen> {
                                 child: Padding(
                                   padding: const EdgeInsets.all(8),
                                   child: Column(
-                                    crossAxisAlignment: CrossAxisAlignment.start,
+                                    crossAxisAlignment:
+                                        CrossAxisAlignment.start,
                                     children: [
                                       // Title
                                       Text(
@@ -308,7 +310,8 @@ class _DonationScreenState extends State<DonationScreen> {
                                                     color: Colors.black87,
                                                   ),
                                                   maxLines: 1,
-                                                  overflow: TextOverflow.ellipsis,
+                                                  overflow:
+                                                      TextOverflow.ellipsis,
                                                 ),
                                               ],
                                             ),
@@ -346,7 +349,8 @@ class _DonationScreenState extends State<DonationScreen> {
                         ),
                       );
                     },
-                  ),                const SizedBox(height: 16),
+                  ),
+                const SizedBox(height: 16),
               ],
             ),
           ),

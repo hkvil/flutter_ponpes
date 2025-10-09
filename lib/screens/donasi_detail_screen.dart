@@ -127,7 +127,9 @@ class DonasiDetailScreen extends StatelessWidget {
                         minHeight: 12,
                         backgroundColor: Colors.grey.shade200,
                         valueColor: AlwaysStoppedAnimation<Color>(
-                          donasi.isTargetReached ? Colors.green : const Color(0xFF2E7D32),
+                          donasi.isTargetReached
+                              ? Colors.green
+                              : const Color(0xFF2E7D32),
                         ),
                       ),
                     ),
@@ -160,7 +162,8 @@ class DonasiDetailScreen extends StatelessWidget {
                           ),
                         ),
                         Container(
-                          padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
+                          padding: const EdgeInsets.symmetric(
+                              horizontal: 8, vertical: 4),
                           decoration: BoxDecoration(
                             color: donasi.status == 'Aktif'
                                 ? Colors.green.shade100
@@ -185,7 +188,6 @@ class DonasiDetailScreen extends StatelessWidget {
                       ],
                     ),
                     const SizedBox(height: 16),
-
                     if (donasi.transaksi.isEmpty)
                       Center(
                         child: Padding(
@@ -257,7 +259,8 @@ class DonasiDetailScreen extends StatelessWidget {
                                 const SizedBox(width: 12),
                                 Expanded(
                                   child: Column(
-                                    crossAxisAlignment: CrossAxisAlignment.start,
+                                    crossAxisAlignment:
+                                        CrossAxisAlignment.start,
                                     children: [
                                       Text(
                                         transaksi.name,

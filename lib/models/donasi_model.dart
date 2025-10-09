@@ -91,7 +91,8 @@ class DonasiModel {
 
       // If terkumpul is null, calculate from transaksi
       if (json['terkumpul'] == null) {
-        calculatedTerkumpul = transaksiList.fold(0, (sum, transaksi) => sum + transaksi.amount);
+        calculatedTerkumpul =
+            transaksiList.fold(0, (sum, transaksi) => sum + transaksi.amount);
       }
     }
 

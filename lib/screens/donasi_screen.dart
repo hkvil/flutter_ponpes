@@ -28,7 +28,7 @@ class _DonationScreenState extends State<DonationScreen> {
     return donationsWithMedia.map((donation) {
       return {
         "image": donation.getImageUrl(
-            dotenv.env['API_HOST'] ?? 'http://localhost:1337',
+            dotenv.env['API_HOST'] ?? 'https://api.hidayat.me',
             size: 'medium'),
         "title": donation.title,
         "donasi": donation,
@@ -272,7 +272,7 @@ class _DonationScreenState extends State<DonationScreen> {
                                   child: Image.network(
                                     donation.getImageUrl(
                                         dotenv.env['API_HOST'] ??
-                                            'http://localhost:1337',
+                                            'https://api.hidayat.me',
                                         size: 'small'),
                                     fit: BoxFit.cover,
                                     errorBuilder: (context, error, stackTrace) {

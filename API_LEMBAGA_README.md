@@ -5,7 +5,7 @@ Integrasi API Lembaga memungkinkan aplikasi mengambil konten `profilMd` dan `pro
 
 ## API Endpoint
 ```
-GET http://localhost:1337/api/lembagas?filters[slug][$eq]={slug}&populate=*
+GET https://api.hidayat.me/api/lembagas?filters[slug][$eq]={slug}&populate=*
 ```
 
 ## Implementation
@@ -166,7 +166,7 @@ DetailLayout(
 
 Pastikan `.env` sudah ada:
 ```env
-API_HOST=http://localhost:1337
+API_HOST=https://api.hidayat.me
 API_TOKEN_READONLY=your_strapi_token
 ```
 

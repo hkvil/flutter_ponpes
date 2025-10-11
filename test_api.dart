@@ -8,7 +8,7 @@ void main() async {
 Future<void> testSimpleApiCall() async {
   try {
     final url =
-        'http://localhost:1337/api/lembagas?filters[slug][\$eq]=taman-kanak-kanak&populate=*';
+        'https://api.hidayat.me/api/lembagas?filters[slug][\$eq]=taman-kanak-kanak&populate=*';
     print('🔄 Testing URL: $url');
 
     final dio = Dio();

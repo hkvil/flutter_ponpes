@@ -13,8 +13,9 @@ class DioClient {
 
   static BaseOptions _createBaseOptions() {
     final apiHost = dotenv.env['API_HOST'];
-    final resolvedBaseUrl =
-        (apiHost == null || apiHost.isEmpty) ? 'http://localhost:1337' : apiHost;
+    final resolvedBaseUrl = (apiHost == null || apiHost.isEmpty)
+        ? 'https://api.hidayat.me'
+        : apiHost;
 
     return BaseOptions(
       baseUrl: resolvedBaseUrl,

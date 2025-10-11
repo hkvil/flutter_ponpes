@@ -3,7 +3,7 @@ import 'dart:convert';
 
 void main() async {
   // Hardcode the values from .env for this test
-  final apiHost = 'http://localhost:1337';
+  final apiHost = 'https://api.hidayat.me';
   final apiToken =
       '12507733eefafbb3f08ca7214834e625ed0c115e05334ac27ea4e85e8045b39c1c58078b93261810ae5e298c59df627a33b3ddd849811df452d9dd81cf20de76dfb6b5349c3f6adbf3c1179fd25ed6f0a1d61418d20aa015c93325108a05b4121a0f6c046f5f85bdb875b7a569ed4b536e93c39b9e30c35c0d5386cffbdd34a0';
 

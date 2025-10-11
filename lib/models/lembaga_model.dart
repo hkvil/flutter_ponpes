@@ -7,7 +7,7 @@ String _absoluteUrl(String maybeRelative) {
       maybeRelative.startsWith('https://')) {
     return maybeRelative;
   }
-  final baseUrl = dotenv.env['API_HOST'] ?? 'http://localhost:1337';
+  final baseUrl = dotenv.env['API_HOST'] ?? 'https://api.hidayat.me';
   final cleanBase = baseUrl.endsWith('/')
       ? baseUrl.substring(0, baseUrl.length - 1)
       : baseUrl;

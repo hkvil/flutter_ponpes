@@ -43,7 +43,7 @@ class DonasiDetailScreen extends StatelessWidget {
                 decoration: BoxDecoration(
                   image: DecorationImage(
                     image: NetworkImage(donasi.getImageUrl(
-                      'http://localhost:1337',
+                      'https://api.hidayat.me',
                       size: 'medium',
                     )),
                     fit: BoxFit.cover,

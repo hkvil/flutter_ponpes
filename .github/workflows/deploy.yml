@@ -24,14 +24,14 @@ jobs:
     - name: Setup Flutter
       uses: subosito/flutter-action@v2
       with:
-        flutter-version: '3.24.0'
+        flutter-version: '3.19.6'  # Downgrade ke versi stabil
         channel: 'stable'
 
     - name: Get dependencies
       run: flutter pub get
 
     - name: Build Flutter Web
-      run: flutter build web --release --web-renderer html
+      run: flutter build web --release --no-wasm-dry-run
 
     - name: Log in to Container Registry
       uses: docker/login-action@v3

@@ -339,7 +339,7 @@ class SocialButtonTile extends StatelessWidget {
                   BoxShadow(
                     blurRadius: 4,
                     offset: const Offset(0, 1),
-                    color: Colors.black.withValues(alpha: 0.12),
+                    color: Colors.black.withOpacity(0.12),
                   )
                 ],
               ),

@@ -976,7 +976,7 @@ class _PrestasiScreenState extends State<PrestasiScreen> {
     // Ensure full URL
     final fullUrl = imageUrl.startsWith('http')
         ? imageUrl
-        : '${dotenv.env['API_HOST'] ?? ''}$imageUrl';
+        : '${dotenv.env['API_HOST']!}$imageUrl';
 
     return Column(
       mainAxisSize: MainAxisSize.min,

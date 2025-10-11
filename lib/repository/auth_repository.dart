@@ -64,7 +64,7 @@ class AuthRepository extends BaseRepository {
 
   /// Test koneksi ke API endpoint
   static Future<void> testApiConnection() async {
-    final apiHost = dotenv.env['API_HOST'] ?? '';
+    final apiHost = dotenv.env['API_HOST']!;
     print('🔗 [API_TEST] Testing connection to: $apiHost');
 
     final repo = AuthRepository();

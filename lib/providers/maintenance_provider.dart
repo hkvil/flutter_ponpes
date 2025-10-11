@@ -27,7 +27,7 @@ class MaintenanceProvider extends ChangeNotifier {
     notifyListeners();
 
     try {
-      final apiHost = dotenv.env['API_HOST'] ?? '';
+      final apiHost = dotenv.env['API_HOST']!;
       final dio = Dio();
 
       // Check status endpoint with Strapi JSON format

@@ -31,7 +31,7 @@ jobs:
       run: flutter pub get
 
     - name: Build Flutter Web
-      run: flutter build web --release --no-wasm-dry-run
+      run: flutter build web --release
 
     - name: Log in to Container Registry
       uses: docker/login-action@v3

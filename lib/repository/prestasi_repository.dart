@@ -22,6 +22,7 @@ class PrestasiRepository extends BaseRepository {
       {
         'populate[santri]': populateSantri,
         'populate[staff]': populateStaff,
+        'populate[sertifikat]': true,
         'filters[$prestasiType][lembaga][slug][\$eq]': lembagaSlug,
         if (tahun != null) 'filters[tahun][\$eq]': tahun,
         if (tingkat != null) 'filters[tingkat][\$eq]': tingkat,

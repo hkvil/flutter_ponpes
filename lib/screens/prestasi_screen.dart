@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:pesantren_app/widgets/responsive_wrapper.dart';
 import 'package:provider/provider.dart';
+import 'package:flutter_dotenv/flutter_dotenv.dart';
 
 import '../core/theme/app_colors.dart';
 import '../core/utils/menu_slug_mapper.dart';
@@ -817,6 +818,8 @@ class _PrestasiScreenState extends State<PrestasiScreen> {
               selectedType == 'staff' ? 'Nama Staff' : 'Nama Santri',
               namaSantri),
           _buildDetailRow(selectedType == 'staff' ? 'Jabatan' : 'Kelas', kelas),
+          const SizedBox(height: 16),
+          _buildSertifikatButton(prestasi),
         ],
       ),
     );
@@ -848,6 +851,224 @@ class _PrestasiScreenState extends State<PrestasiScreen> {
                 fontWeight: FontWeight.w500,
               ),
             ),
+          ),
+        ],
+      ),
+    );
+  }
+
+  Widget _buildSertifikatButton(dynamic prestasi) {
+    Map<String, dynamic>? sertifikat;
+
+    if (prestasi is Prestasi) {
+      sertifikat = prestasi.sertifikat;
+    } else if (prestasi is Map<String, dynamic>) {
+      sertifikat = prestasi['sertifikat'] as Map<String, dynamic>?;
+    }
+
+    return SizedBox(
+      width: double.infinity,
+      child: ElevatedButton.icon(
+        onPressed: () => _showSertifikatDialog(sertifikat),
+        icon: const Icon(Icons.visibility, size: 18),
+        label: const Text('Lihat Sertifikat'),
+        style: ElevatedButton.styleFrom(
+          backgroundColor: AppColors.primaryGreen,
+          foregroundColor: Colors.white,
+          padding: const EdgeInsets.symmetric(vertical: 12),
+          shape: RoundedRectangleBorder(
+            borderRadius: BorderRadius.circular(8),
+          ),
+        ),
+      ),
+    );
+  }
+
+  void _showSertifikatDialog(Map<String, dynamic>? sertifikat) {
+    showDialog(
+      context: context,
+      builder: (BuildContext context) {
+        return Dialog(
+          shape: RoundedRectangleBorder(
+            borderRadius: BorderRadius.circular(16),
+          ),
+          child: Container(
+            constraints: BoxConstraints(
+              maxWidth: MediaQuery.of(context).size.width * 0.9,
+              maxHeight: MediaQuery.of(context).size.height * 0.8,
+            ),
+            child: Column(
+              mainAxisSize: MainAxisSize.min,
+              children: [
+                // Header
+                Container(
+                  padding: const EdgeInsets.all(16),
+                  decoration: BoxDecoration(
+                    color: AppColors.primaryGreen,
+                    borderRadius: const BorderRadius.only(
+                      topLeft: Radius.circular(16),
+                      topRight: Radius.circular(16),
+                    ),
+                  ),
+                  child: Row(
+                    children: [
+                      const Icon(
+                        Icons.description,
+                        color: Colors.white,
+                        size: 24,
+                      ),
+                      const SizedBox(width: 12),
+                      const Expanded(
+                        child: Text(
+                          'Sertifikat Prestasi',
+                          style: TextStyle(
+                            color: Colors.white,
+                            fontSize: 18,
+                            fontWeight: FontWeight.bold,
+                          ),
+                        ),
+                      ),
+                      IconButton(
+                        onPressed: () => Navigator.of(context).pop(),
+                        icon: const Icon(
+                          Icons.close,
+                          color: Colors.white,
+                        ),
+                      ),
+                    ],
+                  ),
+                ),
+                // Content
+                Flexible(
+                  child: Container(
+                    padding: const EdgeInsets.all(16),
+                    child: sertifikat != null
+                        ? _buildSertifikatImage(sertifikat)
+                        : _buildNoSertifikatMessage(),
+                  ),
+                ),
+              ],
+            ),
+          ),
+        );
+      },
+    );
+  }
+
+  Widget _buildSertifikatImage(Map<String, dynamic> sertifikat) {
+    // Get the best available image URL (large > medium > small > original)
+    String? imageUrl;
+    final formats = sertifikat['formats'] as Map<String, dynamic>?;
+
+    if (formats != null) {
+      imageUrl = formats['large']?['url'] ??
+          formats['medium']?['url'] ??
+          formats['small']?['url'] ??
+          sertifikat['url'];
+    } else {
+      imageUrl = sertifikat['url'];
+    }
+
+    if (imageUrl == null) {
+      return _buildNoSertifikatMessage();
+    }
+
+    // Ensure full URL
+    final fullUrl = imageUrl.startsWith('http')
+        ? imageUrl
+        : '${dotenv.env['API_HOST'] ?? ''}$imageUrl';
+
+    return Column(
+      mainAxisSize: MainAxisSize.min,
+      children: [
+        Expanded(
+          child: Container(
+            decoration: BoxDecoration(
+              borderRadius: BorderRadius.circular(8),
+              boxShadow: [
+                BoxShadow(
+                  color: Colors.black.withOpacity(0.1),
+                  blurRadius: 8,
+                  offset: const Offset(0, 4),
+                ),
+              ],
+            ),
+            child: ClipRRect(
+              borderRadius: BorderRadius.circular(8),
+              child: Image.network(
+                fullUrl,
+                fit: BoxFit.contain,
+                loadingBuilder: (context, child, loadingProgress) {
+                  if (loadingProgress == null) return child;
+                  return Center(
+                    child: CircularProgressIndicator(
+                      value: loadingProgress.expectedTotalBytes != null
+                          ? loadingProgress.cumulativeBytesLoaded /
+                              loadingProgress.expectedTotalBytes!
+                          : null,
+                    ),
+                  );
+                },
+                errorBuilder: (context, error, stackTrace) {
+                  return Container(
+                    padding: const EdgeInsets.all(32),
+                    child: Column(
+                      mainAxisSize: MainAxisSize.min,
+                      children: [
+                        Icon(
+                          Icons.broken_image,
+                          size: 64,
+                          color: Colors.grey.shade400,
+                        ),
+                        const SizedBox(height: 16),
+                        Text(
+                          'Gagal memuat gambar sertifikat',
+                          style: TextStyle(
+                            color: Colors.grey.shade600,
+                            fontSize: 16,
+                          ),
+                          textAlign: TextAlign.center,
+                        ),
+                      ],
+                    ),
+                  );
+                },
+              ),
+            ),
+          ),
+        ),
+      ],
+    );
+  }
+
+  Widget _buildNoSertifikatMessage() {
+    return Container(
+      padding: const EdgeInsets.all(32),
+      child: Column(
+        mainAxisSize: MainAxisSize.min,
+        children: [
+          Icon(
+            Icons.description_outlined,
+            size: 64,
+            color: Colors.grey.shade400,
+          ),
+          const SizedBox(height: 16),
+          const Text(
+            'Sertifikat belum tersedia',
+            style: TextStyle(
+              fontSize: 18,
+              fontWeight: FontWeight.w500,
+              color: Colors.grey,
+            ),
+          ),
+          const SizedBox(height: 8),
+          Text(
+            'Sertifikat untuk prestasi ini belum diupload ke sistem',
+            style: TextStyle(
+              fontSize: 14,
+              color: Colors.grey.shade600,
+            ),
+            textAlign: TextAlign.center,
           ),
         ],
       ),

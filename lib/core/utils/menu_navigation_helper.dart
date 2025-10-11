@@ -8,6 +8,7 @@ import '../../screens/staff_screen.dart';
 import '../../screens/informasi_screen.dart';
 import '../../screens/alumni_screen.dart';
 import '../../screens/prestasi_screen.dart';
+import '../../screens/pelanggaran_screen.dart';
 import '../../models/profile_section.dart';
 import '../../models/lembaga_model.dart';
 import '../../providers/lembaga_provider.dart';
@@ -230,6 +231,18 @@ class MenuNavigationHelper {
         );
         break;
 
+      case 'pelanggaran':
+        Navigator.push(
+          context,
+          MaterialPageRoute(
+            builder: (context) => PelanggaranScreen(
+              title: '${lembaga.nama} - Pelanggaran',
+              lembagaName: lembaga.nama,
+            ),
+          ),
+        );
+        break;
+
       default:
         // Untuk menu lain, gunakan static content dengan banner dari API
         _navigateWithBanner(context, menuItem, lembaga.nama, lembaga.slug);
@@ -382,6 +395,18 @@ class MenuNavigationHelper {
           MaterialPageRoute(
             builder: (context) => AlumniScreen(
               title: '$categoryTitle - Data Alumni',
+              lembagaName: categoryTitle,
+            ),
+          ),
+        );
+        break;
+
+      case 'pelanggaran':
+        Navigator.push(
+          context,
+          MaterialPageRoute(
+            builder: (context) => PelanggaranScreen(
+              title: '$categoryTitle - Pelanggaran',
               lembagaName: categoryTitle,
             ),
           ),

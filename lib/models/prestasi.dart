@@ -12,6 +12,7 @@ class Prestasi {
   final DateTime publishedAt;
   final PrestasiSantriData? santri;
   final PrestasiStaffData? staff;
+  final Map<String, dynamic>? sertifikat;
 
   Prestasi({
     required this.id,
@@ -27,6 +28,7 @@ class Prestasi {
     required this.publishedAt,
     this.santri,
     this.staff,
+    this.sertifikat,
   });
 
   factory Prestasi.fromJson(Map<String, dynamic> json) {
@@ -48,6 +50,7 @@ class Prestasi {
       staff: json['staff'] != null
           ? PrestasiStaffData.fromJson(json['staff'] as Map<String, dynamic>)
           : null,
+      sertifikat: json['sertifikat'] as Map<String, dynamic>?,
     );
   }
 
@@ -66,6 +69,7 @@ class Prestasi {
       'publishedAt': publishedAt.toIso8601String(),
       if (santri != null) 'santri': santri!.toJson(),
       if (staff != null) 'staff': staff!.toJson(),
+      if (sertifikat != null) 'sertifikat': sertifikat,
     };
   }
 

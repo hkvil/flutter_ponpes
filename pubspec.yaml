@@ -34,4 +34,4 @@ flutter:
     - assets/logo.png
     - assets/icons/
     - assets/banners/
-    - .env
+    

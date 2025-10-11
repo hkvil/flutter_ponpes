@@ -24,7 +24,7 @@ jobs:
     - name: Setup Flutter
       uses: subosito/flutter-action@v2
       with:
-        flutter-version: '3.24.0'  # Update to version with Dart 3.7.0+ for flutter_login 6.0.0 compatibility
+        flutter-version: '3.35.3'
         channel: 'stable'
 
     - name: Get dependencies

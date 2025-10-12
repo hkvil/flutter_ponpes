@@ -76,7 +76,7 @@ class _HomeScreenState extends State<HomeScreen> {
     Widget _buildSlider() {
       if (sliderState.isLoading && !sliderState.hasLoaded) {
         return Container(
-          height: 200.0,
+          height: 150.0, // Reduced height to save space
           color: Colors.grey.shade200,
           child: const Center(child: CircularProgressIndicator()),
         );
@@ -84,7 +84,7 @@ class _HomeScreenState extends State<HomeScreen> {
 
       if (sliderState.errorMessage != null && images.isEmpty) {
         return Container(
-          height: 200.0,
+          height: 150.0, // Reduced height to save space
           color: Colors.red.shade100,
           child: Center(
             child: Text('Error: ${sliderState.errorMessage}'),
@@ -94,7 +94,7 @@ class _HomeScreenState extends State<HomeScreen> {
 
       if (images.isEmpty) {
         return Container(
-          height: 200.0,
+          height: 150.0, // Reduced height to save space
           color: Colors.grey.shade100,
           child: const Center(child: Text('No images available')),
         );
@@ -102,7 +102,7 @@ class _HomeScreenState extends State<HomeScreen> {
 
       return CarouselSlider(
         options: CarouselOptions(
-          height: 200.0,
+          height: 150.0, // Reduced height to save space
           autoPlay: true,
           enlargeCenterPage: true,
           viewportFraction: 1.0,
@@ -142,101 +142,111 @@ class _HomeScreenState extends State<HomeScreen> {
           automaticallyImplyLeading: false,
           isHomeScreen: true,
         ),
-        body: ListView(
-          children: [
-            // Carousel dengan Provider
-            _buildSlider(),
-            Padding(
-              padding: const EdgeInsets.symmetric(horizontal: 1, vertical: 1),
-              child: Material(
-                elevation: 12,
-                borderRadius: BorderRadius.circular(12),
-                child: Container(
-                  padding: const EdgeInsets.symmetric(vertical: 24),
-                  child: Column(
-                    crossAxisAlignment: CrossAxisAlignment.center,
-                    children: [
-                      MenuRow(
-                        items: [HomeScreen._menuItems[0]],
-                        buttonSize: 48,
-                        onTap: (title) {
-                          Navigator.pushNamed(
-                            context,
-                            AppRouter.menu,
-                            arguments: MenuScreenArgs(title: title),
-                          );
-                        },
-                      ),
-                      const SizedBox(height: 8),
-                      MenuRow(
-                        items: HomeScreen._menuItems.sublist(1, 4),
-                        buttonSize: 48,
-                        onTap: (title) {
-                          showComingSoonSnackbar(context);
-                        },
-                      ),
-                      const SizedBox(height: 8),
-                      MenuRow(
-                        items: HomeScreen._menuItems.sublist(4, 7),
-                        buttonSize: 48,
-                        onTap: (title) {
-                          showComingSoonSnackbar(context);
-                        },
-                      ),
-                      const SizedBox(height: 8),
-                      MenuRow(
-                        items: HomeScreen._menuItems.sublist(7, 10),
-                        buttonSize: 48,
-                        onTap: (title) {
-                          if (title == 'DONASI') {
-                            Navigator.pushNamed(context, AppRouter.donasi);
-                          } else if (title == 'INFORMASI') {
-                            Navigator.pushNamed(context, AppRouter.informasi);
-                          } else {
+        body: SingleChildScrollView(
+          child: Column(
+            children: [
+              // Carousel dengan Provider
+              _buildSlider(),
+              Padding(
+                padding: const EdgeInsets.symmetric(horizontal: 1, vertical: 1),
+                child: Material(
+                  elevation: 12,
+                  borderRadius: BorderRadius.circular(12),
+                  child: Container(
+                    padding: const EdgeInsets.symmetric(
+                        vertical: 16), // Reduced padding
+                    child: Column(
+                      crossAxisAlignment: CrossAxisAlignment.center,
+                      children: [
+                        MenuRow(
+                          items: [HomeScreen._menuItems[0]],
+                          buttonSize: 40, // Smaller buttons to save space
+                          onTap: (title) {
                             Navigator.pushNamed(
                               context,
                               AppRouter.menu,
                               arguments: MenuScreenArgs(title: title),
                             );
-                          }
-                        },
-                      ),
-                      const SizedBox(height: 8),
-                      MenuRow(
-                        items: [HomeScreen._menuItems[10]],
-                        buttonSize: 48,
-                        alignment: MainAxisAlignment.center,
-                        onTap: (title) {
-                          if (title == 'AKUN') {
-                            Navigator.pushNamed(context, AppRouter.account);
-                          } else {
-                            Navigator.pushNamed(
-                              context,
-                              AppRouter.menu,
-                              arguments: MenuScreenArgs(title: title),
-                            );
-                          }
-                        },
-                      ),
-                    ],
+                          },
+                        ),
+                        const SizedBox(height: 6), // Reduced spacing
+                        MenuRow(
+                          items: HomeScreen._menuItems.sublist(1, 4),
+                          buttonSize: 40, // Smaller buttons to save space
+                          onTap: (title) {
+                            showComingSoonSnackbar(context);
+                          },
+                        ),
+                        const SizedBox(height: 6), // Reduced spacing
+                        MenuRow(
+                          items: HomeScreen._menuItems.sublist(4, 7),
+                          buttonSize: 40, // Smaller buttons to save space
+                          onTap: (title) {
+                            showComingSoonSnackbar(context);
+                          },
+                        ),
+                        const SizedBox(height: 6), // Reduced spacing
+                        MenuRow(
+                          items: HomeScreen._menuItems.sublist(7, 10),
+                          buttonSize: 40, // Smaller buttons to save space
+                          onTap: (title) {
+                            if (title == 'DONASI') {
+                              Navigator.pushNamed(context, AppRouter.donasi);
+                            } else if (title == 'INFORMASI') {
+                              Navigator.pushNamed(context, AppRouter.informasi);
+                            } else {
+                              Navigator.pushNamed(
+                                context,
+                                AppRouter.menu,
+                                arguments: MenuScreenArgs(title: title),
+                              );
+                            }
+                          },
+                        ),
+                        const SizedBox(height: 6), // Reduced spacing
+                        MenuRow(
+                          items: [HomeScreen._menuItems[10]],
+                          buttonSize: 40, // Smaller buttons to save space
+                          alignment: MainAxisAlignment.center,
+                          onTap: (title) {
+                            if (title == 'AKUN') {
+                              Navigator.pushNamed(context, AppRouter.account);
+                            } else {
+                              Navigator.pushNamed(
+                                context,
+                                AppRouter.menu,
+                                arguments: MenuScreenArgs(title: title),
+                              );
+                            }
+                          },
+                        ),
+                      ],
+                    ),
                   ),
                 ),
               ),
-            ),
-            Padding(
-              padding: const EdgeInsets.fromLTRB(16, 8, 16, 6),
-              child: Align(
-                alignment: Alignment.centerLeft,
-                child: SectionHeader(
-                  title: 'Prestasi dan Penghargaan',
-                  backgroundColor: Colors.green.shade700,
-                  textColor: Colors.white,
+              Padding(
+                padding:
+                    const EdgeInsets.fromLTRB(16, 4, 16, 4), // Reduced padding
+                child: Align(
+                  alignment: Alignment.centerLeft,
+                  child: SectionHeader(
+                    title: 'Prestasi dan Penghargaan',
+                    backgroundColor: Colors.green.shade700,
+                    textColor: Colors.white,
+                  ),
                 ),
               ),
-            ),
-            // Achievement section dengan API call
-            const AchievementSection(),
-          ],
+              // Achievement section dengan API call - make it scrollable within fixed height
+              SizedBox(
+                height: 200, // Fixed height to prevent overflow
+                child: SingleChildScrollView(
+                  child: const AchievementSection(),
+                ),
+              ),
+              const SizedBox(height: 16), // Add some bottom spacing
+            ],
+          ),
         ),
         bottomNavigationBar:
             const BottomBanner(assetPath: 'assets/banners/bottom.png'),
@@ -254,23 +264,27 @@ class MenuRow extends StatelessWidget {
       {super.key,
       required this.items,
       required this.onTap,
-      this.buttonSize = 48,
+      this.buttonSize = 40, // Default smaller size
       this.alignment = MainAxisAlignment.spaceEvenly});
 
   @override
   Widget build(BuildContext context) {
-    return Row(
-      mainAxisAlignment: alignment,
-      children: [
-        for (final item in items)
-          MenuButton(
-            title: item.title,
-            iconPath: item.iconPath,
-            iconData: item.iconData,
-            buttonSize: buttonSize,
-            onTap: () => onTap(item.title),
-          ),
-      ],
+    return Padding(
+      padding:
+          const EdgeInsets.symmetric(horizontal: 8), // Add horizontal padding
+      child: Row(
+        mainAxisAlignment: alignment,
+        children: [
+          for (final item in items)
+            MenuButton(
+              title: item.title,
+              iconPath: item.iconPath,
+              iconData: item.iconData,
+              buttonSize: buttonSize,
+              onTap: () => onTap(item.title),
+            ),
+        ],
+      ),
     );
   }
 }

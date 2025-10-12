@@ -5,8 +5,9 @@ import '../models/lembaga_model.dart';
 class DetailLayout extends StatelessWidget {
   // 🎨 Konstanta ukuran gambar - Edit di sini untuk mengubah semua ukuran
   // Rasio 16:9 - Width 96px, Height 54px
-  static const double imageWidth = 96.0 * 2;
-  static const double imageHeight = 54.0 * 2;
+  // Ukuran default, akan di-overwrite di build()
+  static const double defaultImageWidth = 192.0;
+  static const double defaultImageHeight = 108.0;
   static const double borderRadius = 8.0;
   static const double imageSpacing = 8.0; // Jarak antar gambar
   static const int maxImages = 6; // Maksimal gambar yang ditampilkan
@@ -28,6 +29,12 @@ class DetailLayout extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    // Responsif: jika layar < 600, gambar lebih kecil
+    final screenWidth = MediaQuery.of(context).size.width;
+    final isMobile = screenWidth < 600;
+    final imageWidth = isMobile ? 120.0 : defaultImageWidth;
+    final imageHeight = isMobile ? 68.0 : defaultImageHeight;
+
     return Container(
       padding: const EdgeInsets.all(16.0),
       child: Row(
@@ -36,7 +43,7 @@ class DetailLayout extends StatelessWidget {
           // Left side - Images
           Container(
             width: imageWidth + 20, // Tambah padding 20px untuk margin
-            child: _buildImagesList(),
+            child: _buildImagesList(imageWidth, imageHeight),
           ),
           const SizedBox(width: 16),
           // Right side - Menu items
@@ -48,7 +55,7 @@ class DetailLayout extends StatelessWidget {
     );
   }
 
-  Widget _buildImagesList() {
+  Widget _buildImagesList(double imageWidth, double imageHeight) {
     // Gunakan frontImages dari cached lembaga jika ada
     if (cachedLembaga != null && cachedLembaga!.frontImages.isNotEmpty) {
       return Column(

@@ -142,111 +142,109 @@ class _HomeScreenState extends State<HomeScreen> {
           automaticallyImplyLeading: false,
           isHomeScreen: true,
         ),
-        body: SingleChildScrollView(
-          child: Column(
-            children: [
-              // Carousel dengan Provider
-              _buildSlider(),
-              Padding(
-                padding: const EdgeInsets.symmetric(horizontal: 1, vertical: 1),
-                child: Material(
-                  elevation: 12,
-                  borderRadius: BorderRadius.circular(12),
-                  child: Container(
-                    padding: const EdgeInsets.symmetric(
-                        vertical: 16), // Reduced padding
-                    child: Column(
-                      crossAxisAlignment: CrossAxisAlignment.center,
-                      children: [
-                        MenuRow(
-                          items: [HomeScreen._menuItems[0]],
-                          buttonSize: 40, // Smaller buttons to save space
-                          onTap: (title) {
+        body: Column(
+          children: [
+            // Carousel dengan Provider - tidak scrollable
+            _buildSlider(),
+            Padding(
+              padding: const EdgeInsets.symmetric(horizontal: 1, vertical: 1),
+              child: Material(
+                elevation: 12,
+                borderRadius: BorderRadius.circular(12),
+                child: Container(
+                  padding: const EdgeInsets.symmetric(vertical: 16),
+                  child: Column(
+                    crossAxisAlignment: CrossAxisAlignment.center,
+                    children: [
+                      MenuRow(
+                        items: [HomeScreen._menuItems[0]],
+                        buttonSize: 40,
+                        onTap: (title) {
+                          Navigator.pushNamed(
+                            context,
+                            AppRouter.menu,
+                            arguments: MenuScreenArgs(title: title),
+                          );
+                        },
+                      ),
+                      const SizedBox(height: 6),
+                      MenuRow(
+                        items: HomeScreen._menuItems.sublist(1, 4),
+                        buttonSize: 40,
+                        onTap: (title) {
+                          showComingSoonSnackbar(context);
+                        },
+                      ),
+                      const SizedBox(height: 6),
+                      MenuRow(
+                        items: HomeScreen._menuItems.sublist(4, 7),
+                        buttonSize: 40,
+                        onTap: (title) {
+                          showComingSoonSnackbar(context);
+                        },
+                      ),
+                      const SizedBox(height: 6),
+                      MenuRow(
+                        items: HomeScreen._menuItems.sublist(7, 10),
+                        buttonSize: 40,
+                        onTap: (title) {
+                          if (title == 'DONASI') {
+                            Navigator.pushNamed(context, AppRouter.donasi);
+                          } else if (title == 'INFORMASI') {
+                            Navigator.pushNamed(context, AppRouter.informasi);
+                          } else {
                             Navigator.pushNamed(
                               context,
                               AppRouter.menu,
                               arguments: MenuScreenArgs(title: title),
                             );
-                          },
-                        ),
-                        const SizedBox(height: 6), // Reduced spacing
-                        MenuRow(
-                          items: HomeScreen._menuItems.sublist(1, 4),
-                          buttonSize: 40, // Smaller buttons to save space
-                          onTap: (title) {
-                            showComingSoonSnackbar(context);
-                          },
-                        ),
-                        const SizedBox(height: 6), // Reduced spacing
-                        MenuRow(
-                          items: HomeScreen._menuItems.sublist(4, 7),
-                          buttonSize: 40, // Smaller buttons to save space
-                          onTap: (title) {
-                            showComingSoonSnackbar(context);
-                          },
-                        ),
-                        const SizedBox(height: 6), // Reduced spacing
-                        MenuRow(
-                          items: HomeScreen._menuItems.sublist(7, 10),
-                          buttonSize: 40, // Smaller buttons to save space
-                          onTap: (title) {
-                            if (title == 'DONASI') {
-                              Navigator.pushNamed(context, AppRouter.donasi);
-                            } else if (title == 'INFORMASI') {
-                              Navigator.pushNamed(context, AppRouter.informasi);
-                            } else {
-                              Navigator.pushNamed(
-                                context,
-                                AppRouter.menu,
-                                arguments: MenuScreenArgs(title: title),
-                              );
-                            }
-                          },
-                        ),
-                        const SizedBox(height: 6), // Reduced spacing
-                        MenuRow(
-                          items: [HomeScreen._menuItems[10]],
-                          buttonSize: 40, // Smaller buttons to save space
-                          alignment: MainAxisAlignment.center,
-                          onTap: (title) {
-                            if (title == 'AKUN') {
-                              Navigator.pushNamed(context, AppRouter.account);
-                            } else {
-                              Navigator.pushNamed(
-                                context,
-                                AppRouter.menu,
-                                arguments: MenuScreenArgs(title: title),
-                              );
-                            }
-                          },
-                        ),
-                      ],
-                    ),
+                          }
+                        },
+                      ),
+                      const SizedBox(height: 6),
+                      MenuRow(
+                        items: [HomeScreen._menuItems[10]],
+                        buttonSize: 40,
+                        alignment: MainAxisAlignment.center,
+                        onTap: (title) {
+                          if (title == 'AKUN') {
+                            Navigator.pushNamed(context, AppRouter.account);
+                          } else {
+                            Navigator.pushNamed(
+                              context,
+                              AppRouter.menu,
+                              arguments: MenuScreenArgs(title: title),
+                            );
+                          }
+                        },
+                      ),
+                    ],
                   ),
                 ),
               ),
-              Padding(
-                padding:
-                    const EdgeInsets.fromLTRB(16, 4, 16, 4), // Reduced padding
-                child: Align(
-                  alignment: Alignment.centerLeft,
-                  child: SectionHeader(
-                    title: 'Prestasi dan Penghargaan',
-                    backgroundColor: Colors.green.shade700,
-                    textColor: Colors.white,
-                  ),
+            ),
+            // Header untuk prestasi - tidak scrollable
+            Padding(
+              padding: const EdgeInsets.fromLTRB(16, 4, 16, 4),
+              child: Align(
+                alignment: Alignment.centerLeft,
+                child: SectionHeader(
+                  title: 'Prestasi dan Penghargaan',
+                  backgroundColor: Colors.green.shade700,
+                  textColor: Colors.white,
                 ),
               ),
-              // Achievement section dengan API call - make it scrollable within fixed height
-              SizedBox(
-                height: 200, // Fixed height to prevent overflow
-                child: SingleChildScrollView(
-                  child: const AchievementSection(),
+            ),
+            // Achievement section - hanya ini yang scrollable
+            Expanded(
+              child: SingleChildScrollView(
+                child: const Padding(
+                  padding: EdgeInsets.only(bottom: 16),
+                  child: AchievementSection(),
                 ),
               ),
-              const SizedBox(height: 16), // Add some bottom spacing
-            ],
-          ),
+            ),
+          ],
         ),
         bottomNavigationBar:
             const BottomBanner(assetPath: 'assets/banners/bottom.png'),

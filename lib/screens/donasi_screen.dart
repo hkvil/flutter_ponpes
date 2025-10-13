@@ -44,6 +44,10 @@ class _DonationScreenState extends State<DonationScreen> {
 
   @override
   Widget build(BuildContext context) {
+    final isMobile = MediaQuery.of(context).size.width < 600;
+    final padding = isMobile ? 12.0 : 16.0;
+    final largePadding = isMobile ? 32.0 : 50.0;
+
     final donasiProvider = context.watch<DonasiProvider>();
     final List<DonasiModel> donations = donasiProvider.donations;
     final bool isLoading = donasiProvider.isLoading;
@@ -74,10 +78,10 @@ class _DonationScreenState extends State<DonationScreen> {
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
-                // Carousel Slider - only show if we have donations with media and not loading
                 if (!isLoading && sliderImages.isNotEmpty)
                   Container(
-                    margin: const EdgeInsets.only(top: 16, bottom: 24),
+                    margin:
+                        EdgeInsets.only(top: padding, bottom: padding * 1.5),
                     child: CarouselSlider(
                       options: CarouselOptions(
                         height: 250,
@@ -124,7 +128,7 @@ class _DonationScreenState extends State<DonationScreen> {
                                     ),
                                   ),
                                   child: Padding(
-                                    padding: const EdgeInsets.all(16),
+                                    padding: EdgeInsets.all(padding),
                                     child: Column(
                                       mainAxisAlignment: MainAxisAlignment.end,
                                       crossAxisAlignment:
@@ -142,12 +146,10 @@ class _DonationScreenState extends State<DonationScreen> {
                       }).toList(),
                     ),
                   ),
-
-                // Loading, Error, or Data
                 if (isLoading)
-                  const Center(
+                  Center(
                     child: Padding(
-                      padding: EdgeInsets.all(50),
+                      padding: EdgeInsets.all(largePadding),
                       child: CircularProgressIndicator(
                         color: Color(0xFF2E7D32),
                       ),
@@ -156,7 +158,7 @@ class _DonationScreenState extends State<DonationScreen> {
                 else if (errorMessage != null)
                   Center(
                     child: Padding(
-                      padding: const EdgeInsets.all(20),
+                      padding: EdgeInsets.all(largePadding),
                       child: Column(
                         children: [
                           Icon(
@@ -222,11 +224,10 @@ class _DonationScreenState extends State<DonationScreen> {
                     ),
                   )
                 else
-                  // Donations List
                   ListView.builder(
                     shrinkWrap: true,
                     physics: const NeverScrollableScrollPhysics(),
-                    padding: const EdgeInsets.symmetric(horizontal: 16),
+                    padding: EdgeInsets.symmetric(horizontal: padding),
                     itemCount: donations.length,
                     itemBuilder: (context, index) {
                       final donation = donations[index];

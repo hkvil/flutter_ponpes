@@ -11,6 +11,10 @@ class AccountScreen extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final isMobile = MediaQuery.of(context).size.width < 600;
+    final horizontalPadding = isMobile ? 16.0 : 24.0;
+    final verticalPadding = isMobile ? 12.0 : 24.0;
+
     return ResponsiveWrapper(
       child: Consumer<AuthProvider>(
         builder: (context, authProvider, _) {
@@ -18,7 +22,8 @@ class AccountScreen extends StatelessWidget {
 
           // Jika belum login, tampilkan UI untuk guest
           if (!isLoggedIn) {
-            return _buildGuestView(context, authProvider);
+            return _buildGuestView(
+                context, authProvider, horizontalPadding, verticalPadding);
           }
 
           // Jika sudah login, tampilkan UI normal
@@ -27,15 +32,16 @@ class AccountScreen extends StatelessWidget {
           final joinDate =
               DateFormat('d MMMM yyyy').format(authProvider.user!.createdAt);
 
-          return _buildLoggedInView(
-              context, authProvider, username, email, joinDate);
+          return _buildLoggedInView(context, authProvider, username, email,
+              joinDate, horizontalPadding, verticalPadding);
         },
       ),
     );
   }
 
   // Widget untuk tampilan guest (belum login)
-  Widget _buildGuestView(BuildContext context, AuthProvider authProvider) {
+  Widget _buildGuestView(BuildContext context, AuthProvider authProvider,
+      double horizontalPadding, double verticalPadding) {
     return Scaffold(
       appBar: AppBar(
         title: const Text('Akun'),
@@ -45,7 +51,8 @@ class AccountScreen extends StatelessWidget {
       ),
       body: Center(
         child: Padding(
-          padding: const EdgeInsets.all(24.0),
+          padding: EdgeInsets.symmetric(
+              horizontal: horizontalPadding, vertical: verticalPadding),
           child: Column(
             mainAxisAlignment: MainAxisAlignment.center,
             children: [
@@ -79,8 +86,8 @@ class AccountScreen extends StatelessWidget {
                 style: ElevatedButton.styleFrom(
                   backgroundColor: Colors.green.shade700,
                   foregroundColor: Colors.white,
-                  padding:
-                      const EdgeInsets.symmetric(horizontal: 32, vertical: 12),
+                  padding: EdgeInsets.symmetric(
+                      horizontal: horizontalPadding, vertical: 12),
                   shape: RoundedRectangleBorder(
                     borderRadius: BorderRadius.circular(12),
                   ),
@@ -98,8 +105,14 @@ class AccountScreen extends StatelessWidget {
   }
 
   // Widget untuk tampilan user yang sudah login
-  Widget _buildLoggedInView(BuildContext context, AuthProvider authProvider,
-      String username, String email, String joinDate) {
+  Widget _buildLoggedInView(
+      BuildContext context,
+      AuthProvider authProvider,
+      String username,
+      String email,
+      String joinDate,
+      double horizontalPadding,
+      double verticalPadding) {
     return Scaffold(
       appBar: AppBar(
         title: const Text('Akun Saya'),
@@ -108,10 +121,11 @@ class AccountScreen extends StatelessWidget {
         foregroundColor: Colors.green.shade800,
       ),
       body: ListView(
-        padding: const EdgeInsets.all(16.0),
+        padding: EdgeInsets.symmetric(
+            horizontal: horizontalPadding, vertical: verticalPadding),
         children: [
           _buildProfileHeader(context, username, email),
-          const SizedBox(height: 24),
+          SizedBox(height: verticalPadding),
           _buildInfoCard(context, [
             _buildInfoTile(
               icon: Icons.person_outline,
@@ -129,14 +143,14 @@ class AccountScreen extends StatelessWidget {
               subtitle: joinDate,
             ),
           ]),
-          const SizedBox(height: 24),
+          SizedBox(height: verticalPadding),
           ElevatedButton.icon(
             icon: const Icon(Icons.logout),
             label: const Text('Logout'),
             style: ElevatedButton.styleFrom(
               backgroundColor: Colors.green.shade700,
               foregroundColor: Colors.white,
-              padding: const EdgeInsets.symmetric(vertical: 12),
+              padding: EdgeInsets.symmetric(vertical: 12),
               shape: RoundedRectangleBorder(
                 borderRadius: BorderRadius.circular(12),
               ),

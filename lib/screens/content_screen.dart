@@ -28,6 +28,10 @@ class ContentScreen extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final isMobile = MediaQuery.of(context).size.width < 600;
+    final padding = isMobile ? 12.0 : 20.0;
+    final innerPadding = isMobile ? 8.0 : 16.0;
+
     return ResponsiveWrapper(
       child: Scaffold(
         appBar: AppBar(
@@ -35,8 +39,8 @@ class ContentScreen extends StatelessWidget {
           backgroundColor: Colors.green.shade700,
         ),
         body: type == ContentScreenType.minimal
-            ? _buildMinimalLayout()
-            : _buildFullLayout(),
+            ? _buildMinimalLayout(padding)
+            : _buildFullLayout(padding, innerPadding),
         bottomNavigationBar: type == ContentScreenType.full
             ? BottomBanner(assetPath: 'assets/banners/bottom.png')
             : null,
@@ -44,20 +48,17 @@ class ContentScreen extends StatelessWidget {
     );
   }
 
-  Widget _buildFullLayout() {
+  Widget _buildFullLayout(double padding, double innerPadding) {
     return Column(
       children: [
-        // Hapus banner dulu untuk test
         TopBanner(
           assetPath: 'assets/banners/top.png',
           height: 150,
         ),
-        const SizedBox(height: 20),
-
-        // Gunakan Expanded sederhana
+        SizedBox(height: padding),
         Expanded(
           child: Container(
-            padding: const EdgeInsets.all(20.0),
+            padding: EdgeInsets.all(padding),
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
@@ -65,9 +66,7 @@ class ContentScreen extends StatelessWidget {
                   title: title,
                   fontSize: 20,
                 ),
-                const SizedBox(height: 16),
-
-                // Hanya tampilkan content sederhana
+                SizedBox(height: innerPadding),
                 _buildMarkdownWidget(),
               ],
             ),
@@ -77,13 +76,12 @@ class ContentScreen extends StatelessWidget {
     );
   }
 
-  Widget _buildMinimalLayout() {
+  Widget _buildMinimalLayout(double padding) {
     return SingleChildScrollView(
-      padding: const EdgeInsets.all(20.0),
+      padding: EdgeInsets.all(padding),
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          // Hanya render markdown content
           if (markdownContent != null && markdownContent!.isNotEmpty)
             _buildMarkdownWidget()
           else
@@ -99,7 +97,6 @@ class ContentScreen extends StatelessWidget {
   }
 
   Widget _buildMarkdownWidget() {
-    // Use centralized markdown configuration
     return Container(
       padding: const EdgeInsets.all(16.0),
       child: MarkdownBlock(

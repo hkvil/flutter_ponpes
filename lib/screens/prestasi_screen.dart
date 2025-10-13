@@ -145,6 +145,10 @@ class _PrestasiScreenState extends State<PrestasiScreen> {
 
   @override
   Widget build(BuildContext context) {
+    final isMobile = MediaQuery.of(context).size.width < 600;
+    final horizontalPadding = isMobile ? 12.0 : 20.0;
+    final verticalPadding = isMobile ? 8.0 : 12.0;
+
     if (_isLoading) {
       return ResponsiveWrapper(
         child: Scaffold(
@@ -163,13 +167,13 @@ class _PrestasiScreenState extends State<PrestasiScreen> {
             if (_errorMessage != null)
               Container(
                 width: double.infinity,
-                padding: const EdgeInsets.all(12),
+                padding: EdgeInsets.all(horizontalPadding),
                 color: Colors.orange.shade100,
                 child: Row(
                   children: [
                     Icon(Icons.info_outline,
                         color: Colors.orange.shade700, size: 20),
-                    const SizedBox(width: 8),
+                    SizedBox(width: verticalPadding),
                     Expanded(
                       child: Text(
                         _errorMessage!,
@@ -182,7 +186,7 @@ class _PrestasiScreenState extends State<PrestasiScreen> {
                   ],
                 ),
               ),
-            _buildHeader(),
+            _buildHeader(horizontalPadding),
             Expanded(
               child: Container(
                 decoration: const BoxDecoration(
@@ -194,9 +198,11 @@ class _PrestasiScreenState extends State<PrestasiScreen> {
                 ),
                 child: Column(
                   children: [
-                    _buildFilters(),
-                    _buildStats(),
-                    Expanded(child: _buildPrestasiList()),
+                    _buildFilters(horizontalPadding),
+                    _buildStats(horizontalPadding),
+                    Expanded(
+                        child: _buildPrestasiList(
+                            horizontalPadding, verticalPadding)),
                   ],
                 ),
               ),
@@ -207,7 +213,7 @@ class _PrestasiScreenState extends State<PrestasiScreen> {
     );
   }
 
-  Widget _buildHeader() {
+  Widget _buildHeader(double horizontalPadding) {
     return Container(
       width: double.infinity,
       decoration: BoxDecoration(
@@ -232,7 +238,7 @@ class _PrestasiScreenState extends State<PrestasiScreen> {
             ),
           ),
           Padding(
-            padding: const EdgeInsets.all(20),
+            padding: EdgeInsets.all(horizontalPadding),
             child: Row(
               children: [
                 Container(
@@ -287,9 +293,9 @@ class _PrestasiScreenState extends State<PrestasiScreen> {
     );
   }
 
-  Widget _buildFilters() {
+  Widget _buildFilters(double horizontalPadding) {
     return Container(
-      padding: const EdgeInsets.all(20),
+      padding: EdgeInsets.all(horizontalPadding),
       child: Column(
         children: [
           // Search bar
@@ -508,7 +514,7 @@ class _PrestasiScreenState extends State<PrestasiScreen> {
     );
   }
 
-  Widget _buildStats() {
+  Widget _buildStats(double horizontalPadding) {
     final filteredCount = filteredPrestasi.length;
 
     int juara1Count;
@@ -523,7 +529,8 @@ class _PrestasiScreenState extends State<PrestasiScreen> {
         filteredPrestasi.where((p) => (p as Prestasi).isInternasional).length;
 
     return Container(
-      margin: const EdgeInsets.symmetric(horizontal: 20, vertical: 10),
+      margin: EdgeInsets.symmetric(
+          horizontal: horizontalPadding, vertical: horizontalPadding / 2),
       child: Column(
         children: [
           // Baris pertama
@@ -611,9 +618,9 @@ class _PrestasiScreenState extends State<PrestasiScreen> {
     );
   }
 
-  Widget _buildPrestasiList() {
+  Widget _buildPrestasiList(double horizontalPadding, double verticalPadding) {
     return Container(
-      margin: const EdgeInsets.symmetric(horizontal: 20),
+      margin: EdgeInsets.symmetric(horizontal: horizontalPadding),
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
@@ -625,7 +632,7 @@ class _PrestasiScreenState extends State<PrestasiScreen> {
               color: AppColors.primaryGreen,
             ),
           ),
-          const SizedBox(height: 12),
+          SizedBox(height: verticalPadding),
           Expanded(
             child: filteredPrestasi.isEmpty
                 ? _buildEmptyState()
@@ -638,7 +645,8 @@ class _PrestasiScreenState extends State<PrestasiScreen> {
                       itemCount: filteredPrestasi.length,
                       itemBuilder: (context, index) {
                         final prestasi = filteredPrestasi[index];
-                        return _buildPrestasiCard(prestasi, index);
+                        return _buildPrestasiCard(prestasi, index,
+                            horizontalPadding, verticalPadding);
                       },
                     ),
                   ),
@@ -679,7 +687,8 @@ class _PrestasiScreenState extends State<PrestasiScreen> {
     );
   }
 
-  Widget _buildPrestasiCard(dynamic prestasi, int index) {
+  Widget _buildPrestasiCard(dynamic prestasi, int index,
+      double horizontalPadding, double verticalPadding) {
     // Handle both Prestasi model and Map (fallback data)
     String namaLomba,
         bidang,
@@ -727,8 +736,9 @@ class _PrestasiScreenState extends State<PrestasiScreen> {
         border: Border.all(color: Colors.grey.shade200),
       ),
       child: ExpansionTile(
-        tilePadding: const EdgeInsets.symmetric(horizontal: 20, vertical: 5),
-        childrenPadding: const EdgeInsets.all(20),
+        tilePadding: EdgeInsets.symmetric(
+            horizontal: horizontalPadding, vertical: verticalPadding / 2),
+        childrenPadding: EdgeInsets.all(horizontalPadding),
         leading: Container(
           padding: const EdgeInsets.all(8),
           decoration: BoxDecoration(

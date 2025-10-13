@@ -47,6 +47,10 @@ class TopBar extends StatelessWidget implements PreferredSizeWidget {
   @override
   @override
   Widget build(BuildContext context) {
+    final isMobile = MediaQuery.of(context).size.width < 600;
+    final titleFontSize = isMobile ? 12.0 : 14.0;
+    final subtitleFontSize = isMobile ? 8.0 : 10.0;
+
     if (isHomeScreen) {
       // HomeScreen: container putih, logo, jam, subtitle
       return AppBar(
@@ -56,16 +60,17 @@ class TopBar extends StatelessWidget implements PreferredSizeWidget {
         title: null,
         flexibleSpace: SafeArea(
           child: Container(
-            margin: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
+            margin: EdgeInsets.symmetric(
+                horizontal: isMobile ? 8 : 16, vertical: 8),
             decoration: BoxDecoration(
               color: Colors.white,
               borderRadius: BorderRadius.circular(8),
             ),
             child: Row(
               children: [
-                const SizedBox(width: 32),
+                SizedBox(width: isMobile ? 16 : 32),
                 const _Logo(),
-                const SizedBox(width: 14),
+                SizedBox(width: isMobile ? 8 : 14),
                 Expanded(
                   child: Column(
                     crossAxisAlignment: CrossAxisAlignment.start,
@@ -74,7 +79,7 @@ class TopBar extends StatelessWidget implements PreferredSizeWidget {
                       Text(
                         title,
                         style: TextStyle(
-                          fontSize: 14,
+                          fontSize: titleFontSize,
                           fontWeight: FontWeight.bold,
                           color: AppColors.primaryGreen,
                           height: 1.0,
@@ -86,7 +91,7 @@ class TopBar extends StatelessWidget implements PreferredSizeWidget {
                         Text(
                           subtitle!,
                           style: TextStyle(
-                            fontSize: 10,
+                            fontSize: subtitleFontSize,
                             color: AppColors.primaryGreen,
                             fontWeight: FontWeight.bold,
                             height: 1.0,
@@ -98,7 +103,7 @@ class TopBar extends StatelessWidget implements PreferredSizeWidget {
                   ),
                 ),
                 const _Clock(),
-                const SizedBox(width: 12),
+                SizedBox(width: isMobile ? 8 : 12),
               ],
             ),
           ),
@@ -130,6 +135,10 @@ class _Clock extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final isMobile = MediaQuery.of(context).size.width < 600;
+    final timeFontSize = isMobile ? 14.0 : 18.0;
+    final dayFontSize = isMobile ? 8.0 : 10.0;
+
     return StreamBuilder<DateTime>(
       stream:
           Stream.periodic(const Duration(seconds: 1), (_) => DateTime.now()),
@@ -141,7 +150,7 @@ class _Clock extends StatelessWidget {
             Text(
               DateText.currentTime(),
               style: TextStyle(
-                fontSize: 18,
+                fontSize: timeFontSize,
                 fontWeight: FontWeight.bold,
                 color: AppColors.primaryGreen,
               ),
@@ -149,7 +158,7 @@ class _Clock extends StatelessWidget {
             ),
             Text(DateText.currentDay(),
                 style: TextStyle(
-                  fontSize: 10,
+                  fontSize: dayFontSize,
                   fontWeight: FontWeight.bold,
                   color: AppColors.primaryGreen,
                 )),

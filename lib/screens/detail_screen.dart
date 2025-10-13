@@ -57,6 +57,10 @@ class _DetailScreenState extends State<DetailScreen> {
 
   @override
   Widget build(BuildContext context) {
+    final isMobile = MediaQuery.of(context).size.width < 600;
+    final horizontalPadding = isMobile ? 12.0 : 16.0;
+    final verticalPadding = isMobile ? 8.0 : 16.0;
+
     final provider = context.watch<LembagaProvider>();
     final lembagaState =
         _lembagaSlug != null ? provider.lembagaState(_lembagaSlug!) : null;
@@ -87,8 +91,10 @@ class _DetailScreenState extends State<DetailScreen> {
                 children: [
                   if (isLoadingData)
                     Container(
-                      padding: const EdgeInsets.all(12),
-                      margin: const EdgeInsets.symmetric(horizontal: 16),
+                      padding: EdgeInsets.all(horizontalPadding),
+                      margin: EdgeInsets.symmetric(
+                          horizontal: horizontalPadding,
+                          vertical: verticalPadding),
                       decoration: BoxDecoration(
                         color: Colors.blue.shade50,
                         borderRadius: BorderRadius.circular(8),
@@ -96,12 +102,12 @@ class _DetailScreenState extends State<DetailScreen> {
                       ),
                       child: Row(
                         children: [
-                          const SizedBox(
-                            width: 20,
-                            height: 20,
+                          SizedBox(
+                            width: horizontalPadding,
+                            height: horizontalPadding,
                             child: CircularProgressIndicator(strokeWidth: 2),
                           ),
-                          const SizedBox(width: 12),
+                          SizedBox(width: horizontalPadding),
                           Expanded(
                             child: Text(
                               'Memuat data ${widget.title}...',
@@ -117,8 +123,10 @@ class _DetailScreenState extends State<DetailScreen> {
                     ),
                   if (loadingError != null && !isLoadingData)
                     Container(
-                      padding: const EdgeInsets.all(12),
-                      margin: const EdgeInsets.symmetric(horizontal: 16),
+                      padding: EdgeInsets.all(horizontalPadding),
+                      margin: EdgeInsets.symmetric(
+                          horizontal: horizontalPadding,
+                          vertical: verticalPadding),
                       decoration: BoxDecoration(
                         color: Colors.orange.shade50,
                         borderRadius: BorderRadius.circular(8),
@@ -127,7 +135,7 @@ class _DetailScreenState extends State<DetailScreen> {
                       child: Row(
                         children: [
                           Icon(Icons.warning, color: Colors.orange.shade700),
-                          const SizedBox(width: 12),
+                          SizedBox(width: horizontalPadding),
                           Expanded(
                             child: Column(
                               crossAxisAlignment: CrossAxisAlignment.start,
@@ -154,7 +162,7 @@ class _DetailScreenState extends State<DetailScreen> {
                       ),
                     ),
                   Padding(
-                    padding: const EdgeInsets.all(16.0),
+                    padding: EdgeInsets.all(horizontalPadding),
                     child: DetailLayout(
                       title: widget.title,
                       menuItems: widget.menuItems,

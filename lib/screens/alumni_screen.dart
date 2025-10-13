@@ -113,6 +113,10 @@ class _AlumniScreenState extends State<AlumniScreen> {
 
   @override
   Widget build(BuildContext context) {
+    final isMobile = MediaQuery.of(context).size.width < 600;
+    final horizontalPadding = isMobile ? 12.0 : 20.0;
+    final verticalPadding = isMobile ? 8.0 : 16.0;
+
     if (_isLoading) {
       return ResponsiveWrapper(
         child: const Scaffold(
@@ -129,13 +133,13 @@ class _AlumniScreenState extends State<AlumniScreen> {
             if (_errorMessage != null)
               Container(
                 width: double.infinity,
-                padding: const EdgeInsets.all(12),
+                padding: EdgeInsets.all(horizontalPadding),
                 color: Colors.orange.shade100,
                 child: Row(
                   children: [
                     Icon(Icons.info_outline,
                         color: Colors.orange.shade700, size: 20),
-                    const SizedBox(width: 8),
+                    SizedBox(width: horizontalPadding / 2),
                     Expanded(
                       child: Text(
                         _errorMessage!,
@@ -148,7 +152,7 @@ class _AlumniScreenState extends State<AlumniScreen> {
                   ],
                 ),
               ),
-            _buildHeader(),
+            _buildHeader(horizontalPadding, verticalPadding),
             Expanded(
               child: Container(
                 decoration: const BoxDecoration(
@@ -160,9 +164,11 @@ class _AlumniScreenState extends State<AlumniScreen> {
                 ),
                 child: Column(
                   children: [
-                    _buildFilters(),
-                    _buildAlumniCount(),
-                    Expanded(child: _buildAlumniList()),
+                    _buildFilters(horizontalPadding, verticalPadding),
+                    _buildAlumniCount(horizontalPadding, verticalPadding),
+                    Expanded(
+                        child: _buildAlumniList(
+                            horizontalPadding, verticalPadding)),
                   ],
                 ),
               ),
@@ -173,7 +179,7 @@ class _AlumniScreenState extends State<AlumniScreen> {
     );
   }
 
-  Widget _buildHeader() {
+  Widget _buildHeader(double horizontalPadding, double verticalPadding) {
     return Container(
       width: double.infinity,
       decoration: BoxDecoration(
@@ -198,11 +204,11 @@ class _AlumniScreenState extends State<AlumniScreen> {
             ),
           ),
           Padding(
-            padding: const EdgeInsets.all(20),
+            padding: EdgeInsets.all(horizontalPadding),
             child: Row(
               children: [
                 Container(
-                  padding: const EdgeInsets.all(15),
+                  padding: EdgeInsets.all(horizontalPadding),
                   decoration: BoxDecoration(
                     color: Colors.white.withOpacity(0.2),
                     borderRadius: BorderRadius.circular(15),
@@ -221,7 +227,7 @@ class _AlumniScreenState extends State<AlumniScreen> {
                     size: 30,
                   ),
                 ),
-                const SizedBox(width: 15),
+                SizedBox(width: horizontalPadding),
                 const Expanded(
                   child: Column(
                     crossAxisAlignment: CrossAxisAlignment.start,
@@ -253,9 +259,9 @@ class _AlumniScreenState extends State<AlumniScreen> {
     );
   }
 
-  Widget _buildFilters() {
+  Widget _buildFilters(double horizontalPadding, double verticalPadding) {
     return Container(
-      padding: const EdgeInsets.all(20),
+      padding: EdgeInsets.all(horizontalPadding),
       child: Column(
         children: [
           // Search bar
@@ -275,18 +281,18 @@ class _AlumniScreenState extends State<AlumniScreen> {
                         searchQuery = value;
                       });
                     },
-                    decoration: const InputDecoration(
+                    decoration: InputDecoration(
                       hintText: 'Cari nama atau NISN alumni...',
                       prefixIcon: Icon(Icons.search, color: Colors.grey),
                       border: InputBorder.none,
-                      contentPadding: EdgeInsets.all(15),
+                      contentPadding: EdgeInsets.all(horizontalPadding),
                     ),
                   ),
                 ),
               ),
-              const SizedBox(width: 10),
+              SizedBox(width: horizontalPadding / 2),
               Container(
-                padding: const EdgeInsets.all(10),
+                padding: EdgeInsets.all(horizontalPadding / 2),
                 decoration: BoxDecoration(
                   color: searchQuery.isNotEmpty
                       ? Colors.blue.shade100
@@ -303,7 +309,7 @@ class _AlumniScreenState extends State<AlumniScreen> {
               ),
             ],
           ),
-          const SizedBox(height: 15),
+          SizedBox(height: verticalPadding),
           // Year filter
           Row(
             children: [
@@ -315,10 +321,10 @@ class _AlumniScreenState extends State<AlumniScreen> {
                   color: Colors.grey,
                 ),
               ),
-              const SizedBox(width: 15),
+              SizedBox(width: horizontalPadding),
               Expanded(
                 child: Container(
-                  padding: const EdgeInsets.symmetric(horizontal: 15),
+                  padding: EdgeInsets.symmetric(horizontal: horizontalPadding),
                   decoration: BoxDecoration(
                     color: Colors.grey.shade100,
                     borderRadius: BorderRadius.circular(10),
@@ -357,13 +363,14 @@ class _AlumniScreenState extends State<AlumniScreen> {
     );
   }
 
-  Widget _buildAlumniCount() {
+  Widget _buildAlumniCount(double horizontalPadding, double verticalPadding) {
     final count = filteredAlumni.length;
     final totalCount = _alumniList.length;
 
     return Container(
-      margin: const EdgeInsets.symmetric(horizontal: 20, vertical: 10),
-      padding: const EdgeInsets.all(15),
+      margin: EdgeInsets.symmetric(
+          horizontal: horizontalPadding, vertical: verticalPadding),
+      padding: EdgeInsets.all(horizontalPadding),
       decoration: BoxDecoration(
         color: AppColors.primaryGreen,
         borderRadius: BorderRadius.circular(15),
@@ -381,10 +388,11 @@ class _AlumniScreenState extends State<AlumniScreen> {
                   fontSize: 14,
                 ),
               ),
-              const SizedBox(height: 5),
+              SizedBox(height: verticalPadding / 2),
               Container(
-                padding:
-                    const EdgeInsets.symmetric(horizontal: 12, vertical: 8),
+                padding: EdgeInsets.symmetric(
+                    horizontal: horizontalPadding,
+                    vertical: verticalPadding / 2),
                 decoration: BoxDecoration(
                   color: AppColors.primaryGreen,
                   borderRadius: BorderRadius.circular(8),
@@ -411,7 +419,7 @@ class _AlumniScreenState extends State<AlumniScreen> {
                     fontSize: 14,
                   ),
                 ),
-                const SizedBox(height: 5),
+                SizedBox(height: verticalPadding / 2),
                 Text(
                   selectedYear!,
                   style: const TextStyle(
@@ -435,9 +443,9 @@ class _AlumniScreenState extends State<AlumniScreen> {
     );
   }
 
-  Widget _buildAlumniList() {
+  Widget _buildAlumniList(double horizontalPadding, double verticalPadding) {
     return Container(
-      margin: const EdgeInsets.symmetric(horizontal: 20),
+      margin: EdgeInsets.symmetric(horizontal: horizontalPadding),
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
@@ -449,7 +457,7 @@ class _AlumniScreenState extends State<AlumniScreen> {
               color: AppColors.primaryGreen,
             ),
           ),
-          const SizedBox(height: 12),
+          SizedBox(height: verticalPadding),
           Expanded(
             child: filteredAlumni.isEmpty
                 ? _buildEmptyState()
@@ -459,7 +467,8 @@ class _AlumniScreenState extends State<AlumniScreen> {
                       itemCount: filteredAlumni.length,
                       itemBuilder: (context, index) {
                         final alumni = filteredAlumni[index];
-                        return _buildAlumniCard(alumni, index);
+                        return _buildAlumniCard(
+                            alumni, index, horizontalPadding, verticalPadding);
                       },
                     ),
                   ),
@@ -500,7 +509,8 @@ class _AlumniScreenState extends State<AlumniScreen> {
     );
   }
 
-  Widget _buildAlumniCard(Santri alumni, int index) {
+  Widget _buildAlumniCard(Santri alumni, int index, double horizontalPadding,
+      double verticalPadding) {
     // Using API Santri model only
     final String nama = alumni.nama;
     final String? nisn = alumni.nisn;
@@ -571,7 +581,7 @@ class _AlumniScreenState extends State<AlumniScreen> {
         );
       },
       child: Container(
-        margin: const EdgeInsets.only(bottom: 15),
+        margin: EdgeInsets.only(bottom: verticalPadding),
         decoration: BoxDecoration(
           color: Colors.white,
           borderRadius: BorderRadius.circular(15),
@@ -586,7 +596,7 @@ class _AlumniScreenState extends State<AlumniScreen> {
           border: Border.all(color: Colors.grey.shade200),
         ),
         child: Padding(
-          padding: const EdgeInsets.all(15),
+          padding: EdgeInsets.all(horizontalPadding),
           child: Row(
             children: [
               CircleAvatar(
@@ -601,7 +611,7 @@ class _AlumniScreenState extends State<AlumniScreen> {
                   ),
                 ),
               ),
-              const SizedBox(width: 15),
+              SizedBox(width: horizontalPadding),
               Expanded(
                 child: Column(
                   crossAxisAlignment: CrossAxisAlignment.start,
@@ -615,7 +625,7 @@ class _AlumniScreenState extends State<AlumniScreen> {
                       maxLines: 2,
                       overflow: TextOverflow.ellipsis,
                     ),
-                    const SizedBox(height: 5),
+                    SizedBox(height: verticalPadding / 2),
                     Text(
                       'NISN: ${nisn ?? '-'}',
                       style: const TextStyle(
@@ -623,12 +633,13 @@ class _AlumniScreenState extends State<AlumniScreen> {
                         fontSize: 12,
                       ),
                     ),
-                    const SizedBox(height: 8),
+                    SizedBox(height: verticalPadding / 2),
                     Row(
                       children: [
                         Container(
-                          padding: const EdgeInsets.symmetric(
-                              horizontal: 8, vertical: 4),
+                          padding: EdgeInsets.symmetric(
+                              horizontal: horizontalPadding / 2,
+                              vertical: verticalPadding / 4),
                           decoration: BoxDecoration(
                             color: Colors.blue.shade50,
                             borderRadius: BorderRadius.circular(8),
@@ -638,7 +649,7 @@ class _AlumniScreenState extends State<AlumniScreen> {
                             children: [
                               Icon(Icons.school,
                                   size: 12, color: Colors.blue.shade700),
-                              const SizedBox(width: 4),
+                              SizedBox(width: horizontalPadding / 4),
                               Text(
                                 'Angkatan $tahunMasuk',
                                 style: TextStyle(
@@ -651,10 +662,11 @@ class _AlumniScreenState extends State<AlumniScreen> {
                           ),
                         ),
                         if (tahunLulus != null) ...[
-                          const SizedBox(width: 8),
+                          SizedBox(width: horizontalPadding / 2),
                           Container(
-                            padding: const EdgeInsets.symmetric(
-                                horizontal: 8, vertical: 4),
+                            padding: EdgeInsets.symmetric(
+                                horizontal: horizontalPadding / 2,
+                                vertical: verticalPadding / 4),
                             decoration: BoxDecoration(
                               color: AppColors.lightGreen.withOpacity(0.3),
                               borderRadius: BorderRadius.circular(8),

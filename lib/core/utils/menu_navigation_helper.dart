@@ -14,6 +14,7 @@ import '../../models/lembaga_model.dart';
 import '../../providers/lembaga_provider.dart';
 import 'banner_manager.dart';
 import '../constants/profil.dart';
+import '../../providers/auth_provider.dart';
 
 class MenuNavigationHelper {
   static final BannerManager _bannerManager = BannerManager();
@@ -111,11 +112,24 @@ class MenuNavigationHelper {
 
   /// Navigate menggunakan cached data (INSTANT NAVIGATION - no loading!)
   static void _navigateWithCachedData(
-      BuildContext context, String menuItem, Lembaga lembaga) {
+      BuildContext context, String menuItem, Lembaga lembaga) async {
     print('🚀 [CACHED_NAV] Navigating to: $menuItem for ${lembaga.nama}');
     print('🚀 [CACHED_NAV] Using banner from lembaga: ${lembaga.slug}');
 
-    switch (menuItem.toLowerCase()) {
+    // Gatekeep untuk menu yang butuh login
+    final lowerMenu = menuItem.toLowerCase();
+    if ({
+      'santri',
+      'sdm',
+      'guru',
+      'prestasi',
+      'pelanggaran',
+      'alumni',
+    }.contains(lowerMenu)) {
+      if (!await _requireLogin(context)) return;
+    }
+
+    switch (lowerMenu) {
       case 'profil':
         _navigateWithContentAndBanner(
           context,
@@ -251,13 +265,37 @@ class MenuNavigationHelper {
 
   /// Navigate menggunakan static content (fallback)
   static void _navigateWithStaticContent(
-      BuildContext context, String menuItem, String categoryTitle) {
+      BuildContext context, String menuItem, String categoryTitle) async {
+    // Gatekeep untuk menu yang butuh login
+    final lowerMenu = menuItem.toLowerCase();
+    if ({
+      'santri',
+      'sdm',
+      'guru',
+      'prestasi',
+      'pelanggaran',
+      'alumni',
+    }.contains(lowerMenu)) {
+      if (!await _requireLogin(context)) return;
+    }
     _navigateWithBanner(context, menuItem, categoryTitle, null);
   }
 
   /// Navigate dengan support banner
   static void _navigateWithBanner(BuildContext context, String menuItem,
       String categoryTitle, String? lembagaSlug) async {
+    // Gatekeep untuk menu yang butuh login
+    final lowerMenu = menuItem.toLowerCase();
+    if ({
+      'santri',
+      'sdm',
+      'guru',
+      'prestasi',
+      'pelanggaran',
+      'alumni',
+    }.contains(lowerMenu)) {
+      if (!await _requireLogin(context)) return;
+    }
     // Get banner config
     final bannerConfig = await _bannerManager.getBannerConfig(
       context,
@@ -527,5 +565,20 @@ class MenuNavigationHelper {
         backgroundColor: Colors.orange.shade700,
       ),
     );
+  }
+
+  // Helper untuk cek login dan tampilkan snackbar jika belum login
+  static Future<bool> _requireLogin(BuildContext context) async {
+    final authProvider = Provider.of<AuthProvider>(context, listen: false);
+    if (!authProvider.isLoggedIn) {
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(
+          content: const Text('Silakan login terlebih dahulu.'),
+          backgroundColor: Colors.orange.shade700,
+        ),
+      );
+      return false;
+    }
+    return true;
   }
 }

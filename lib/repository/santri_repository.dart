@@ -1,33 +1,34 @@
 import 'package:dio/dio.dart';
 
 import '../models/santri.dart';
+import '../models/pagination.dart';
 import 'base_repository.dart';
 
 class SantriRepository extends BaseRepository {
   SantriRepository({Dio? dio}) : super(dio: dio);
 
   /// Get santri by lembaga slug (active tahun ajaran only)
-  Future<List<Santri>> getSantriByLembaga(
+  Future<PaginatedResponse<Santri>> getSantriByLembaga(
     String lembagaSlug, {
-    int? page,
-    int? pageSize,
+    int page = 1,
+    int pageSize = 20,
   }) {
     return _fetchSantri(
       'lembaga:$lembagaSlug',
       {
         'filters[lembaga][slug][\$eq]': lembagaSlug,
         'filters[riwayatKelas][tahunAjaran][aktif][\$eq]': true,
-        if (pageSize != null) 'pagination[pageSize]': pageSize,
-        if (page != null) 'pagination[page]': page,
+        'pagination[pageSize]': pageSize,
+        'pagination[page]': page,
       },
     );
   }
 
   /// Get alumni by lembaga slug
-  Future<List<Santri>> getAlumniByLembaga(
+  Future<PaginatedResponse<Santri>> getAlumniByLembaga(
     String lembagaSlug, {
-    int? page,
-    int? pageSize,
+    int page = 1,
+    int pageSize = 20,
     String? tahunMasuk,
   }) {
     return _fetchSantri(
@@ -37,44 +38,45 @@ class SantriRepository extends BaseRepository {
         'filters[isAlumni][\$eq]': true,
         if (tahunMasuk != null) 'filters[tahunMasuk][\$eq]': tahunMasuk,
         'sort': 'tahunMasuk:desc,nama:asc',
-        'pagination[pageSize]': pageSize ?? 100,
-        if (page != null) 'pagination[page]': page,
+        'pagination[pageSize]': pageSize,
+        'pagination[page]': page,
       },
     );
   }
 
   /// Get all santri by lembaga slug (including alumni)
-  Future<List<Santri>> getAllSantriByLembaga(
+  Future<PaginatedResponse<Santri>> getAllSantriByLembaga(
     String lembagaSlug, {
-    int? page,
-    int? pageSize,
+    int page = 1,
+    int pageSize = 25,
   }) {
     return _fetchSantri(
       'all:$lembagaSlug',
       {
         'filters[lembaga][slug][\$eq]': lembagaSlug,
-        'pagination[pageSize]': pageSize ?? 25,
-        if (page != null) 'pagination[page]': page,
+        'pagination[pageSize]': pageSize,
+        'pagination[page]': page,
         'populate': 'deep',
       },
     );
   }
 
   /// Get santri by lembaga and kelas (active tahun ajaran)
-  Future<List<Santri>> getSantriByLembagaAndKelas(
+  Future<PaginatedResponse<Santri>> getSantriByLembagaAndKelas(
     String lembagaSlug,
     String kelasName, {
-    int? page,
-    int? pageSize,
+    int page = 1,
+    int pageSize = 25,
   }) {
+    print('kelasName LOG:$kelasName');
     return _fetchSantri(
       'kelas:$kelasName',
       {
         'filters[lembaga][slug][\$eq]': lembagaSlug,
         'filters[riwayatKelas][tahunAjaran][aktif][\$eq]': true,
-        'filters[riwayatKelas][kelas][namaKelas][\$eq]': kelasName,
-        'pagination[pageSize]': pageSize ?? 25,
-        if (page != null) 'pagination[page]': page,
+        'filters[kelasAktif]': kelasName,
+        'pagination[pageSize]': pageSize,
+        'pagination[page]': page,
         'populate': 'deep',
       },
     );
@@ -106,7 +108,7 @@ class SantriRepository extends BaseRepository {
     }
   }
 
-  Future<List<Santri>> _fetchSantri(
+  Future<PaginatedResponse<Santri>> _fetchSantri(
     String context,
     Map<String, dynamic> queryParameters,
   ) async {
@@ -120,15 +122,19 @@ class SantriRepository extends BaseRepository {
 
       final body = ensureMap(response.data);
       final dataList = (body['data'] as List<dynamic>?) ?? const [];
+      final meta = body['meta'] as Map<String, dynamic>? ?? {};
 
-      if (dataList.isEmpty) {
-        return [];
-      }
-
-      return dataList
+      final santriList = dataList
           .whereType<Map<String, dynamic>>()
           .map(Santri.fromJson)
           .toList();
+
+      final paginationMeta = PaginationMeta.fromJson(meta);
+
+      return PaginatedResponse<Santri>(
+        data: santriList,
+        meta: paginationMeta,
+      );
     } on DioException catch (e) {
       final message = mapDioError(e);
       print('Error fetching santri ($context): $message');

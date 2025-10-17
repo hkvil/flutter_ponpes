@@ -105,14 +105,33 @@ class _DaftarSantriTabState extends State<DaftarSantriTab> {
 
   // State management untuk API
   bool _isLoading = false;
+  bool _isLoadingMore = false;
   String? _errorMessage;
   List<Santri> _santriList = [];
+
+  // Track pagination per kelas
+  final Map<String, bool> _kelasHasMorePages = {};
+  final Map<String, int> _kelasCurrentPage = {};
 
   // State untuk kelas dari API
   List<String> kelasList = ['Semua Kelas'];
 
   List<Santri> get filteredSantri {
-    // Use API data only
+    // Jika filter kelas aktif (bukan "Semua Kelas"), data sudah difilter dari API
+    if (selectedKelas != 'Semua Kelas') {
+      // Hanya filter berdasarkan search query
+      return _santriList.where((santri) {
+        bool matchesSearch = searchQuery.isEmpty ||
+            santri.nama.toLowerCase().contains(searchQuery.toLowerCase()) ||
+            (santri.alamatLengkap
+                .toLowerCase()
+                .contains(searchQuery.toLowerCase()));
+
+        return matchesSearch;
+      }).toList();
+    }
+
+    // Untuk "Semua Kelas", filter berdasarkan kelas dan search query
     var filtered = _santriList.where((santri) {
       // Filter by kelas name
       bool matchesKelas = selectedKelas == 'Semua Kelas' ||
@@ -170,7 +189,8 @@ class _DaftarSantriTabState extends State<DaftarSantriTab> {
     }
   }
 
-  Future<void> _fetchSantriData() async {
+  Future<void> _fetchSantriData(
+      {String? kelasFilter, bool forceRefresh = false}) async {
     setState(() {
       _isLoading = true;
       _errorMessage = null;
@@ -185,24 +205,99 @@ class _DaftarSantriTabState extends State<DaftarSantriTab> {
       }
 
       final provider = context.read<SantriProvider>();
-      final santriList = await provider.fetchSantriByLembaga(
-        lembagaSlug,
-        forceRefresh: true,
-      );
-      final state = provider.santriState(lembagaSlug);
 
-      setState(() {
-        _santriList = santriList;
-        _isLoading = false;
-        _errorMessage = state.errorMessage;
-        _updateJumlahSantri();
-      });
+      // Jika filter kelas dipilih, gunakan method khusus untuk filter kelas
+      if (kelasFilter != null && kelasFilter != 'Semua Kelas') {
+        final response = await provider.getSantriByLembagaAndKelas(
+          lembagaSlug,
+          kelasFilter,
+          page: 1,
+          pageSize: 20,
+        );
+
+        setState(() {
+          _santriList = response.data;
+          _kelasCurrentPage[kelasFilter] = 1;
+          _kelasHasMorePages[kelasFilter] =
+              response.meta.page < response.meta.pageCount;
+          _isLoading = false;
+        });
+      } else {
+        // Load semua santri untuk "Semua Kelas"
+        final santriList = await provider.fetchSantriByLembaga(
+          lembagaSlug,
+          forceRefresh: forceRefresh,
+        );
+        final state = provider.santriState(lembagaSlug);
+
+        setState(() {
+          _santriList = santriList;
+          _isLoading = false;
+          _errorMessage = state.errorMessage;
+          _updateJumlahSantri();
+        });
+      }
     } catch (e) {
       print('Error fetching santri data: $e');
       setState(() {
         _isLoading = false;
         _errorMessage = 'Gagal memuat data santri';
         _updateJumlahSantri();
+      });
+    }
+  }
+
+  Future<void> _loadMoreSantri() async {
+    if (_isLoadingMore) return;
+
+    final lembagaSlug = _getLembagaSlug();
+    if (lembagaSlug.isEmpty) return;
+
+    final provider = context.read<SantriProvider>();
+    setState(() {
+      _isLoadingMore = true;
+    });
+
+    try {
+      // Jika filter kelas aktif, load more untuk kelas tersebut
+      if (selectedKelas != 'Semua Kelas') {
+        final currentPage = _kelasCurrentPage[selectedKelas] ?? 1;
+        if (!(_kelasHasMorePages[selectedKelas] ?? true)) return;
+
+        final response = await provider.getSantriByLembagaAndKelas(
+          lembagaSlug,
+          selectedKelas,
+          page: currentPage + 1,
+          pageSize: 20,
+        );
+
+        setState(() {
+          _santriList.addAll(response.data);
+          _kelasCurrentPage[selectedKelas] = response.meta.page;
+          _kelasHasMorePages[selectedKelas] =
+              response.meta.page < response.meta.pageCount;
+        });
+      } else {
+        // Load more untuk semua kelas
+        if (!provider.santriHasMorePages(lembagaSlug)) return;
+
+        await provider.loadMoreSantri(lembagaSlug);
+        final state = provider.santriState(lembagaSlug);
+
+        setState(() {
+          _santriList = state.data ?? [];
+          _errorMessage = state.errorMessage;
+          _updateJumlahSantri();
+        });
+      }
+    } catch (e) {
+      print('Error loading more santri: $e');
+      setState(() {
+        _errorMessage = 'Gagal memuat lebih banyak data santri';
+      });
+    } finally {
+      setState(() {
+        _isLoadingMore = false;
       });
     }
   }
@@ -532,11 +627,13 @@ class _DaftarSantriTabState extends State<DaftarSantriTab> {
                               );
                             }).toList(),
                             onChanged: (String? newValue) {
-                              if (newValue != null) {
+                              if (newValue != null &&
+                                  newValue != selectedKelas) {
                                 setState(() {
                                   selectedKelas = newValue;
-                                  _updateJumlahSantri();
                                 });
+                                // Fetch data untuk kelas yang dipilih
+                                _fetchSantriData(kelasFilter: newValue);
                               }
                             },
                           ),
@@ -664,14 +761,41 @@ class _DaftarSantriTabState extends State<DaftarSantriTab> {
                                 ),
                               )
                             : RefreshIndicator(
-                                onRefresh: _fetchSantriData,
-                                child: ListView.builder(
-                                  padding: const EdgeInsets.all(20),
-                                  itemCount: filteredSantri.length,
-                                  itemBuilder: (context, index) {
-                                    final santri = filteredSantri[index];
-                                    return _buildSantriCard(santri, index);
+                                onRefresh: () => _fetchSantriData(
+                                  kelasFilter: selectedKelas != 'Semua Kelas'
+                                      ? selectedKelas
+                                      : null,
+                                  forceRefresh: true,
+                                ),
+                                child: NotificationListener<ScrollNotification>(
+                                  onNotification:
+                                      (ScrollNotification scrollInfo) {
+                                    if (scrollInfo.metrics.pixels ==
+                                            scrollInfo
+                                                .metrics.maxScrollExtent &&
+                                        !_isLoadingMore) {
+                                      _loadMoreSantri();
+                                    }
+                                    return false;
                                   },
+                                  child: ListView.builder(
+                                    padding: const EdgeInsets.all(20),
+                                    itemCount: filteredSantri.length +
+                                        (_isLoadingMore ? 1 : 0),
+                                    itemBuilder: (context, index) {
+                                      if (index == filteredSantri.length) {
+                                        // Loading indicator at the bottom
+                                        return const Center(
+                                          child: Padding(
+                                            padding: EdgeInsets.all(16.0),
+                                            child: CircularProgressIndicator(),
+                                          ),
+                                        );
+                                      }
+                                      final santri = filteredSantri[index];
+                                      return _buildSantriCard(santri, index);
+                                    },
+                                  ),
                                 ),
                               ),
                       ),

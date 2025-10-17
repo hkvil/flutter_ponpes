@@ -77,7 +77,6 @@ class SantriRepository extends BaseRepository {
         'filters[kelasAktif]': kelasName,
         'pagination[pageSize]': pageSize,
         'pagination[page]': page,
-        'populate': 'deep',
       },
     );
   }

@@ -39,8 +39,8 @@ class ContentScreen extends StatelessWidget {
           backgroundColor: Colors.green.shade700,
         ),
         body: type == ContentScreenType.minimal
-            ? _buildMinimalLayout(padding)
-            : _buildFullLayout(padding, innerPadding),
+            ? _buildMinimalLayout(context, padding)
+            : _buildFullLayout(context, padding, innerPadding),
         bottomNavigationBar: type == ContentScreenType.full
             ? BottomBanner(assetPath: 'assets/banners/bottom.png')
             : null,
@@ -48,7 +48,8 @@ class ContentScreen extends StatelessWidget {
     );
   }
 
-  Widget _buildFullLayout(double padding, double innerPadding) {
+  Widget _buildFullLayout(
+      BuildContext context, double padding, double innerPadding) {
     return Column(
       children: [
         TopBanner(
@@ -67,7 +68,7 @@ class ContentScreen extends StatelessWidget {
                   fontSize: 20,
                 ),
                 SizedBox(height: innerPadding),
-                _buildMarkdownWidget(),
+                _buildMarkdownWidget(context),
               ],
             ),
           ),
@@ -76,14 +77,14 @@ class ContentScreen extends StatelessWidget {
     );
   }
 
-  Widget _buildMinimalLayout(double padding) {
+  Widget _buildMinimalLayout(BuildContext context, double padding) {
     return SingleChildScrollView(
       padding: EdgeInsets.all(padding),
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
           if (markdownContent != null && markdownContent!.isNotEmpty)
-            _buildMarkdownWidget()
+            _buildMarkdownWidget(context)
           else
             const Center(
               child: Text(
@@ -96,12 +97,12 @@ class ContentScreen extends StatelessWidget {
     );
   }
 
-  Widget _buildMarkdownWidget() {
+  Widget _buildMarkdownWidget(BuildContext context) {
     return Container(
       padding: const EdgeInsets.all(16.0),
       child: MarkdownBlock(
         data: markdownContent ?? '',
-        config: AppMarkdownConfig.defaultConfig,
+        config: AppMarkdownConfig.responsiveConfig(context),
       ),
     );
   }

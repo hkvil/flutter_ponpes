@@ -13,6 +13,7 @@ class MenuButton extends StatelessWidget {
   final IconData? iconData;
   final VoidCallback onTap;
   final double buttonSize;
+  final double labelFontSize;
 
   const MenuButton({
     super.key,
@@ -21,6 +22,7 @@ class MenuButton extends StatelessWidget {
     this.iconData,
     required this.onTap,
     this.buttonSize = 48,
+    this.labelFontSize = 9,
   })  : assert(iconPath != null || iconData != null,
             'Either iconPath or iconData must be provided.'),
         assert(iconPath == null || iconData == null,
@@ -63,10 +65,11 @@ class MenuButton extends StatelessWidget {
             Text(
               title,
               textAlign: TextAlign.center,
-              style: const TextStyle(
-                  fontSize: 9,
-                  fontWeight: FontWeight.bold,
-                  color: AppColors.primaryGreen),
+              style: TextStyle(
+                fontSize: labelFontSize,
+                fontWeight: FontWeight.bold,
+                color: AppColors.primaryGreen,
+              ),
               maxLines: 2,
               overflow: TextOverflow.ellipsis,
             ),

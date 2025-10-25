@@ -74,7 +74,7 @@ class BanneredDetailScreen extends StatelessWidget {
                               const SizedBox(height: 12),
                             ],
                             // Render content as markdown if it contains markdown syntax
-                            _renderSectionContent(section.content),
+                            _renderSectionContent(context, section.content),
                           ],
                         ),
                       ),
@@ -90,7 +90,7 @@ class BanneredDetailScreen extends StatelessWidget {
   }
 
   /// Render section content - detect if it's markdown and render appropriately
-  Widget _renderSectionContent(String content) {
+  Widget _renderSectionContent(BuildContext context, String content) {
     // Check if content contains markdown syntax
     bool isMarkdown = content.contains('#') ||
         content.contains('**') ||
@@ -102,7 +102,7 @@ class BanneredDetailScreen extends StatelessWidget {
       // Render as markdown with centralized configuration
       return MarkdownBlock(
         data: content,
-        config: AppMarkdownConfig.defaultConfig,
+        config: AppMarkdownConfig.responsiveConfig(context),
       );
     } else {
       // Render as plain text

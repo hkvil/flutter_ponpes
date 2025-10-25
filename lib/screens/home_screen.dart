@@ -1,3 +1,5 @@
+import 'dart:math' as math;
+
 import 'package:flutter/material.dart';
 import 'package:carousel_slider/carousel_slider.dart';
 import 'package:provider/provider.dart';
@@ -72,11 +74,32 @@ class _HomeScreenState extends State<HomeScreen> {
     final sliderProvider = context.watch<SliderProvider>();
     final sliderState = sliderProvider.sliderState;
     final images = sliderProvider.imageUrls;
+    final mediaQuery = MediaQuery.of(context);
+    final screenWidth = mediaQuery.size.width;
+    final screenHeight = mediaQuery.size.height;
+    final isCompactWidth = screenWidth < 360;
+    final isCompactHeight = screenHeight < 640;
+    final sliderHeight = isCompactHeight
+        ? 120.0
+        : (isCompactWidth
+            ? 135.0
+            : 150.0); // Reduce slider height on compact displays
+    final menuButtonSize = isCompactWidth
+        ? 34.0
+        : (isCompactHeight ? 36.0 : 40.0); // Button size tuned for small screens
+    final menuLabelFontSize = isCompactWidth
+        ? 7.5
+        : (isCompactHeight ? 8.0 : 9.0); // Smaller labels for compact devices
+    final menuVerticalPadding = isCompactHeight ? 12.0 : 16.0;
+    final menuRowSpacing = (isCompactWidth || isCompactHeight) ? 4.0 : 6.0;
+    final horizontalMenuPadding = isCompactWidth ? 4.0 : 8.0;
+    final minItemWidth = isCompactWidth ? 60.0 : 64.0;
+    final maxItemWidth = isCompactWidth ? 88.0 : 96.0;
 
-    Widget _buildSlider() {
+    Widget buildSlider() {
       if (sliderState.isLoading && !sliderState.hasLoaded) {
         return Container(
-          height: 150.0, // Reduced height to save space
+          height: sliderHeight,
           color: Colors.grey.shade200,
           child: const Center(child: CircularProgressIndicator()),
         );
@@ -84,7 +107,7 @@ class _HomeScreenState extends State<HomeScreen> {
 
       if (sliderState.errorMessage != null && images.isEmpty) {
         return Container(
-          height: 150.0, // Reduced height to save space
+          height: sliderHeight,
           color: Colors.red.shade100,
           child: Center(
             child: Text('Error: ${sliderState.errorMessage}'),
@@ -94,7 +117,7 @@ class _HomeScreenState extends State<HomeScreen> {
 
       if (images.isEmpty) {
         return Container(
-          height: 150.0, // Reduced height to save space
+          height: sliderHeight,
           color: Colors.grey.shade100,
           child: const Center(child: Text('No images available')),
         );
@@ -102,7 +125,7 @@ class _HomeScreenState extends State<HomeScreen> {
 
       return CarouselSlider(
         options: CarouselOptions(
-          height: 150.0, // Reduced height to save space
+          height: sliderHeight,
           autoPlay: true,
           enlargeCenterPage: true,
           viewportFraction: 1.0,
@@ -145,20 +168,27 @@ class _HomeScreenState extends State<HomeScreen> {
         body: Column(
           children: [
             // Carousel dengan Provider - tidak scrollable
-            _buildSlider(),
+            buildSlider(),
             Padding(
               padding: const EdgeInsets.symmetric(horizontal: 1, vertical: 1),
               child: Material(
                 elevation: 12,
                 borderRadius: BorderRadius.circular(12),
                 child: Container(
-                  padding: const EdgeInsets.symmetric(vertical: 16),
+                  padding: EdgeInsets.symmetric(
+                    vertical: menuVerticalPadding,
+                    horizontal: horizontalMenuPadding,
+                  ),
                   child: Column(
                     crossAxisAlignment: CrossAxisAlignment.center,
                     children: [
                       MenuRow(
                         items: [HomeScreen._menuItems[0]],
-                        buttonSize: 40,
+                        buttonSize: menuButtonSize,
+                        labelFontSize: menuLabelFontSize,
+                        horizontalPadding: 0,
+                        minItemWidth: minItemWidth,
+                        maxItemWidth: maxItemWidth,
                         onTap: (title) {
                           Navigator.pushNamed(
                             context,
@@ -167,26 +197,38 @@ class _HomeScreenState extends State<HomeScreen> {
                           );
                         },
                       ),
-                      const SizedBox(height: 6),
+                      SizedBox(height: menuRowSpacing),
                       MenuRow(
                         items: HomeScreen._menuItems.sublist(1, 4),
-                        buttonSize: 40,
+                        buttonSize: menuButtonSize,
+                        labelFontSize: menuLabelFontSize,
+                        horizontalPadding: 0,
+                        minItemWidth: minItemWidth,
+                        maxItemWidth: maxItemWidth,
                         onTap: (title) {
                           showComingSoonSnackbar(context);
                         },
                       ),
-                      const SizedBox(height: 6),
+                      SizedBox(height: menuRowSpacing),
                       MenuRow(
                         items: HomeScreen._menuItems.sublist(4, 7),
-                        buttonSize: 40,
+                        buttonSize: menuButtonSize,
+                        labelFontSize: menuLabelFontSize,
+                        horizontalPadding: 0,
+                        minItemWidth: minItemWidth,
+                        maxItemWidth: maxItemWidth,
                         onTap: (title) {
                           showComingSoonSnackbar(context);
                         },
                       ),
-                      const SizedBox(height: 6),
+                      SizedBox(height: menuRowSpacing),
                       MenuRow(
                         items: HomeScreen._menuItems.sublist(7, 10),
-                        buttonSize: 40,
+                        buttonSize: menuButtonSize,
+                        labelFontSize: menuLabelFontSize,
+                        horizontalPadding: 0,
+                        minItemWidth: minItemWidth,
+                        maxItemWidth: maxItemWidth,
                         onTap: (title) {
                           if (title == 'DONASI') {
                             Navigator.pushNamed(context, AppRouter.donasi);
@@ -201,10 +243,14 @@ class _HomeScreenState extends State<HomeScreen> {
                           }
                         },
                       ),
-                      const SizedBox(height: 6),
+                      SizedBox(height: menuRowSpacing),
                       MenuRow(
                         items: [HomeScreen._menuItems[10]],
-                        buttonSize: 40,
+                        buttonSize: menuButtonSize,
+                        labelFontSize: menuLabelFontSize,
+                        horizontalPadding: 0,
+                        minItemWidth: minItemWidth,
+                        maxItemWidth: maxItemWidth,
                         alignment: MainAxisAlignment.center,
                         onTap: (title) {
                           if (title == 'AKUN') {
@@ -258,30 +304,54 @@ class MenuRow extends StatelessWidget {
   final void Function(String title) onTap;
   final double buttonSize;
   final MainAxisAlignment alignment;
+  final double labelFontSize;
+  final double horizontalPadding;
+  final double minItemWidth;
+  final double maxItemWidth;
   const MenuRow(
       {super.key,
       required this.items,
       required this.onTap,
       this.buttonSize = 40, // Default smaller size
-      this.alignment = MainAxisAlignment.spaceEvenly});
+      this.alignment = MainAxisAlignment.spaceEvenly,
+      this.labelFontSize = 9,
+      this.horizontalPadding = 8,
+      this.minItemWidth = 64,
+      this.maxItemWidth = 96});
 
   @override
   Widget build(BuildContext context) {
     return Padding(
-      padding:
-          const EdgeInsets.symmetric(horizontal: 8), // Add horizontal padding
-      child: Row(
-        mainAxisAlignment: alignment,
-        children: [
-          for (final item in items)
-            MenuButton(
-              title: item.title,
-              iconPath: item.iconPath,
-              iconData: item.iconData,
-              buttonSize: buttonSize,
-              onTap: () => onTap(item.title),
-            ),
-        ],
+      padding: EdgeInsets.symmetric(horizontal: horizontalPadding),
+      child: LayoutBuilder(
+        builder: (context, constraints) {
+          final availableWidth = constraints.maxWidth;
+          final itemCount = items.length;
+          if (itemCount == 0) {
+            return const SizedBox.shrink();
+          }
+          final baseWidth = availableWidth / itemCount;
+          final itemWidth = baseWidth.clamp(minItemWidth, maxItemWidth);
+          final adjustedButtonSize = math.min(buttonSize, itemWidth * 0.78);
+
+          return Row(
+            mainAxisAlignment: alignment,
+            children: [
+              for (final item in items)
+                SizedBox(
+                  width: itemWidth,
+                  child: MenuButton(
+                    title: item.title,
+                    iconPath: item.iconPath,
+                    iconData: item.iconData,
+                    buttonSize: adjustedButtonSize,
+                    labelFontSize: labelFontSize,
+                    onTap: () => onTap(item.title),
+                  ),
+                ),
+            ],
+          );
+        },
       ),
     );
   }

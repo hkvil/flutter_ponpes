@@ -335,7 +335,7 @@ class _ProfilScreen extends StatelessWidget {
                     // Display markdown content from API with proper formatting
                     MarkdownBlock(
                       data: profilMd,
-                      config: AppMarkdownConfig.defaultConfig,
+                      config: AppMarkdownConfig.responsiveConfig(context),
                     ),
                     const SizedBox(height: 16),
                   ],

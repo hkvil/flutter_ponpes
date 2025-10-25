@@ -3,82 +3,64 @@ import 'package:markdown_widget/markdown_widget.dart';
 
 /// Centralized Markdown configuration for consistent styling across the app
 class AppMarkdownConfig {
-  /// Default markdown configuration used throughout the application
-  static MarkdownConfig get defaultConfig => MarkdownConfig(configs: [
-        // Heading 1 configuration
-        H1Config(
-          style: const TextStyle(
-            fontSize: 24,
-            fontWeight: FontWeight.bold,
-            color: Colors.black,
-          ),
-        ),
+  static MarkdownConfig get defaultConfig => _buildConfig(compact: false);
 
-        // Heading 2 configuration
-        H2Config(
-          style: const TextStyle(
-            fontSize: 20,
-            fontWeight: FontWeight.bold,
-            color: Colors.black87,
-          ),
-        ),
+  static MarkdownConfig get compactConfig => _buildConfig(compact: true);
 
-        // Heading 3 configuration
-        H3Config(
-          style: const TextStyle(
-            fontSize: 18,
-            fontWeight: FontWeight.bold,
-            color: Colors.black87,
-          ),
-        ),
+  /// Returns a markdown configuration adapted to the current screen size.
+  ///
+  /// Small devices (shortest side under 360dp) or devices with a large
+  /// text scale factor automatically use the compact configuration to keep
+  /// text — especially inside tables — readable without overflowing.
+  static MarkdownConfig responsiveConfig(BuildContext context) {
+    final mediaQuery = MediaQuery.of(context);
+    final shortestSide = mediaQuery.size.shortestSide;
+    final isTextScaledUp = mediaQuery.textScaleFactor > 1.1;
+    final bool useCompact = shortestSide < 360 || isTextScaledUp;
+    return useCompact ? compactConfig : defaultConfig;
+  }
 
-        // Paragraph configuration
-        PConfig(
-          textStyle: const TextStyle(
-            fontSize: 16,
-            height: 1.5,
-            color: Colors.black87,
-          ),
-        ),
+  static MarkdownConfig _buildConfig({required bool compact}) {
+    final double h1Size = compact ? 20 : 22;
+    final double h2Size = compact ? 18 : 20;
+    final double h3Size = compact ? 16 : 18;
+    final double paragraphSize = compact ? 13 : 15;
 
-        // Link configuration
-        LinkConfig(
-          style: const TextStyle(
-            color: Color(0xFF2E7D32),
-            decoration: TextDecoration.underline,
-          ),
+    return MarkdownConfig(configs: [
+      H1Config(
+        style: TextStyle(
+          fontSize: h1Size,
+          fontWeight: FontWeight.bold,
+          color: Colors.black,
         ),
-      ]);
-
-  /// Compact markdown configuration for smaller spaces
-  static MarkdownConfig get compactConfig => MarkdownConfig(configs: [
-        H1Config(
-          style: const TextStyle(
-            fontSize: 20,
-            fontWeight: FontWeight.bold,
-            color: Colors.black,
-          ),
+      ),
+      H2Config(
+        style: TextStyle(
+          fontSize: h2Size,
+          fontWeight: FontWeight.bold,
+          color: Colors.black87,
         ),
-        H2Config(
-          style: const TextStyle(
-            fontSize: 18,
-            fontWeight: FontWeight.bold,
-            color: Colors.black87,
-          ),
+      ),
+      H3Config(
+        style: TextStyle(
+          fontSize: h3Size,
+          fontWeight: FontWeight.bold,
+          color: Colors.black87,
         ),
-        H3Config(
-          style: const TextStyle(
-            fontSize: 16,
-            fontWeight: FontWeight.bold,
-            color: Colors.black87,
-          ),
+      ),
+      PConfig(
+        textStyle: TextStyle(
+          fontSize: paragraphSize,
+          height: 1.45,
+          color: Colors.black87,
         ),
-        PConfig(
-          textStyle: const TextStyle(
-            fontSize: 14,
-            height: 1.4,
-            color: Colors.black87,
-          ),
+      ),
+      LinkConfig(
+        style: const TextStyle(
+          color: Color(0xFF2E7D32),
+          decoration: TextDecoration.underline,
         ),
-      ]);
+      ),
+    ]);
+  }
 }

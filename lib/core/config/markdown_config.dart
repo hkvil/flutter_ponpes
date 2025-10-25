@@ -61,6 +61,12 @@ class AppMarkdownConfig {
           decoration: TextDecoration.underline,
         ),
       ),
+      TableConfig(
+        wrapper: (table) => SingleChildScrollView(
+          scrollDirection: Axis.horizontal,
+          child: table,
+        ),
+      ),
     ]);
   }
 }
